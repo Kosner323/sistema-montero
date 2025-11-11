@@ -56,7 +56,9 @@ jobs:
         coverage report --fail-under=50
     
     - name: 📋 Upload test results
-      uses: actions/upload-artifact@v3
+      # ***** INICIO DE LA CORRECCIÓN *****
+      uses: actions/upload-artifact@v4
+      # ***** FIN DE LA CORRECCIÓN *****
       if: always()
       with:
         name: test-results-${{ matrix.python-version }}
