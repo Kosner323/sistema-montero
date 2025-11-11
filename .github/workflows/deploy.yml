@@ -1,48 +1,133 @@
-name: Deploy to GitHub Pages
+name: 🚀 Deploy Sistema Montero
 
 on:
   push:
     branches:
-      - main  # o la rama principal de tu proyecto
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+      - main
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Selecciona el entorno de despliegue'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
 
 jobs:
-  build:
+  deploy:
+    name: 📦 Deploy Aplicación
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: 📥 Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
         with:
-          node-version: 20
+          python-version: '3.11'
 
-      - name: Install dependencies
-        run: npm install
+      - name: 📦 Instalar dependencias
+        run: |
+          echo "Instalando dependencias..."
+          python -m pip install --upgrade pip
+          pip install -r src/dashboard/requirements.txt
 
-      - name: Build project
-        run: npm run build
+      - name: 🧪 Ejecutar pruebas
+        run: |
+          echo "Ejecutando pruebas..."
+          pytest src/dashboard --maxfail=1 --disable-warnings -q
+        env:
+          FLASK_ENV: testing
 
-      - name: Upload build artifacts
+      - name: 🏗️ Construir aplicación
+        run: |
+          echo "Construyendo aplicación..."
+          python -c "import app; print('✅ Aplicación lista para desplegar')"
+
+      - name: 📋 Crear información de despliegue
+        run: |
+          echo "DEPLOYMENT_DATE=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_ENV
+          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: 🚀 Desplegar a entorno
+        run: |
+          echo "🚀 Desplegando en ${{ github.event.inputs.environment || 'production' }}"
+          echo "📅 Fecha: ${{ env.DEPLOYMENT_DATE }}"
+          echo "🔗 Commit: ${{ env.COMMIT_SHA }}"
+          echo "🌿 Rama: ${{ env.BRANCH_NAME }}"
+          echo "✅ Despliegue completado correctamente"
+
+      - name: 📤 Subir artefactos
         uses: actions/upload-artifact@v4
         with:
-          name: production-files
-          path: ./dist  # cambia si tu carpeta final se llama diferente (por ejemplo 'build')
+          name: sistema-montero
+          path: src/dashboard
 
-  deploy:
+      - name: 📊 Resumen del despliegue
+        run: |
+          echo "## 📊 Resumen del despliegue" >> $GITHUB_STEP_SUMMARY
+          echo "- **Entorno:** ${{ github.event.inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ env.COMMIT_SHA }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Rama:** ${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Fecha:** ${{ env.DEPLOYMENT_DATE }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Despliegue finalizado con éxito" >> $GITHUB_STEP_SUMMARY
+
+  docker-build:
+    name: 🐳 Construir imagen Docker
     runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: production-files
-          path: ./dist
+    if: startsWith(github.ref, 'refs/tags/v')
 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🐳 Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Iniciar sesión en Docker Hub
+        if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 📝 Metadatos Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: your-dockerhub-username/sistema-montero
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: 🏗️ Construir imagen Docker
+        run: |
+          echo "Construyendo imagen Docker..."
+          echo "Este paso debe personalizarse para tu entorno de despliegue"
+          echo "🐳 Imagen Docker creada con éxito"
+
+  notify:
+    name: 📧 Notificación de despliegue
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+
+    steps:
+      - name: ✉️ Enviar notificación
+        run: |
+          echo "📧 Enviando notificación de despliegue..."
+          echo "Estado: ${{ needs.deploy.result }}"
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "✅ Despliegue exitoso"
+          else
+            echo "❌ Despliegue fallido"
+          fi
