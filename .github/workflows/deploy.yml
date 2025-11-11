@@ -60,11 +60,6 @@ jobs:
         echo "🌿 Branch: ${{ env.BRANCH_NAME }}"
         
         # Here you would add your actual deployment commands
-        # Examples:
-        # - SSH to server and pull changes
-        # - Upload to cloud provider (AWS, Azure, GCP)
-        # - Deploy to container registry
-        # - Update Kubernetes manifests
         
         echo "✅ Deployment completed successfully"
     
@@ -96,10 +91,8 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # ***** INICIO DE LA CORRECCIÓN *****
-      # Se quitaron los ${{ }} de la condición if
+      # Corrección: Quitar ${{ }} de la condición if:
       if: secrets.DOCKERHUB_USERNAME != ''
-      # ***** FIN DE LA CORRECCIÓN *****
     
     - name: 📝 Extract metadata
       id: meta
@@ -117,9 +110,6 @@ jobs:
       run: |
         echo "Building Docker image..."
         echo "This is a placeholder - configure with your Docker registry"
-        
-        # Uncomment when ready to use:
-        # docker build -t sistema-montero:${{ github.ref_name }} .
     
     - name: ✅ Docker Build Complete
       run: |
@@ -138,11 +128,7 @@ jobs:
         echo "📧 Sending deployment notification..."
         echo "Status: ${{ needs.deploy.result }}"
         
-        # Here you would add notification logic:
-        # - Slack webhook
-        # - Discord webhook
-        # - Email notification
-        # - Teams webhook
+        # Aquí iría tu lógica de notificación
         
         if [ "${{ needs.deploy.result }}" == "success" ]; then
           echo "✅ Deployment successful - notifications sent"
