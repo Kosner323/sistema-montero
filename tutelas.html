@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Gestión de Tutelas | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Sistema de gestión de tutelas jurídicas - Portal Montero y Negocio" />
+    <meta
+      name="keywords"
+      content="tutelas, gestión jurídica, Portal Montero, casos legales, Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard"
+    />
+    <meta name="author" content="Portal Montero" />
+
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/x-icon" />
+
+     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="../assets/fonts/feather.css" />
+    <link rel="stylesheet" href="../assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="../assets/fonts/material.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" id="main-style-link" />
+    <style>
+      #agregarTutelaModal .modal-dialog {
+          margin-left: 300px; 
+          margin-right: auto;
+          transform: none; 
+          margin-top: 50px; 
+          margin-bottom: 50px;
+      }
+      /* Estilo para spinner de carga */
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, .1);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border-left-color: #09f;
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+    <nav class="pc-sidebar">
+      <div class="navbar-wrapper">
+        <div class="m-header flex items-center py-4 px-6 h-header-height">
+          <a href="index.html" class="b-brand flex items-center gap-3">
+            <img src="../assets/images/logo-white.svg" class="img-fluid logo logo-lg" alt="logo" />
+            <img src="../assets/images/favicon.svg" class="img-fluid logo logo-sm" alt="logo" />
+          </a>
+        </div>
+        <div class="navbar-content h-[calc(100vh_-_80px)] py-2.5 overflow-y-auto">
+          <ul class="pc-navbar">
+            <li class="pc-item pc-caption">
+              <label>NAVIGATION</label>
+            </li>
+            <li class="pc-item">
+              <a href="index.html" class="pc-link"> <span class="pc-micon">
+                  <i data-feather="home"></i>
+                </span>
+                <span class="pc-mtext">DASHBOARD</span>
+              </a>
+            </li>
+    
+            <li class="pc-item pc-caption">
+              <label>ADMINISTRACIÓN Y FINANZAS</label>
+              <i data-feather="settings"></i>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="database"></i></span>
+                    <span class="pc-mtext">BASE DE DATOS</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a class="pc-link" href="base-datos-usuarios.html">USUARIOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="ingresar_empresa.html">EMPRESAS</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="book-open"></i></span>
+                    <span class="pc-mtext">CONTABILIDAD</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a class="pc-link" href="pagos.html">PAGOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="tabla.html">TABLA</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="pago-planillas.html">PAGO DE PLANILLAS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="enviar-planillas.html">ENVIAR PLANILLAS</a>
+                    </li>
+                </ul>
+            </li>
+    
+            <li class="pc-item pc-caption">
+              <label>GESTIÓN OPERATIVA</label>
+              <i data-feather="bar-chart-2"></i>
+            </li>
+            <li class="pc-item">
+                <a href="novedades.html" class="pc-link"><span class="pc-micon"><i data-feather="bell"></i></span><span class="pc-mtext">NOVEDADES</span></a>
+            </li>
+            <li class="pc-item">
+                <a href="formularios.html" class="pc-link"> <span class="pc-micon"> <i data-feather="align-justify"></i></span>
+                <span class="pc-mtext">FORMULARIOS</span>
+              </a>
+            </li>
+            <li class="pc-item pc-hasmenu active pc-trigger">
+                <a href="#!" class="pc-link is-active">
+                    <span class="pc-micon"><i data-feather="gavel"></i></span>
+                    <span class="pc-mtext">GESTIÓN JURÍDICA</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu" style="display: block;">
+                    <li class="pc-item">
+                        <a class="pc-link" href="incapacidades.html">INCAPACIDADES</a>
+                    </li>
+                    <li class="pc-item active">
+                        <a class="pc-link is-active" href="tutelas.html">TUTELAS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="depuraciones.html">DEPURACIONES</a>
+                    </li>
+                </ul>
+            </li>
+            
+            <li class="pc-item pc-caption">
+              <label>DOCUMENTACIÓN Y SERVICIO</label>
+              <i data-feather="file-text"></i>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="file-text"></i></span>
+                    <span class="pc-mtext">INFORMACIÓN</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a href="informacion-clientes.html" class="pc-link">INFORMACIÓN PARA CLIENTES</a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="informacion-empleados.html" class="pc-link">INFORMACIÓN PARA EMPLEADOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="cotizaciones.html" class="pc-link">COTIZACIONES</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="pago-impuestos.html">PAGO DE IMPUESTOS</a>
+                    </li>
+                </ul>
+            </li>
+    
+            <li class="pc-item pc-caption">
+              <label>GUÍAS Y ACCESO</label>
+              <i data-feather="lock"></i>
+            </li>
+            <li class="pc-item">
+                <a href="usuarios-y-contrasenas.html" class="pc-link"><span class="pc-micon"><i data-feather="key"></i></span><span class="pc-mtext">USUARIOS Y CONTRASEÑA</span></a>
+            </li>
+            <li class="pc-item">
+                <a href="#" class="pc-link"><span class="pc-micon"><i data-feather="plus-circle"></i></span><span class="pc-mtext">GUÍA CREACIÓN EMPRESA</span></a>
+            </li>
+            <li class="pc-item">
+                <a href="#" class="pc-link"><span class="pc-micon"><i data-feather="x-circle"></i></span><span class="pc-mtext">GUÍA DE CERRAR EMPRESAS</span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header class="pc-header">
+      <div class="header-wrapper flex max-sm:px-[15px] px-[25px] grow"><div class="me-auto pc-mob-drp">
+      <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
+        <li class="pc-h-item pc-sidebar-collapse max-lg:hidden lg:inline-flex">
+          <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="sidebar-hide">
+            <i data-feather="menu"></i>
+          </a>
+        </li>
+        <li class="pc-h-item pc-sidebar-popup lg:hidden">
+          <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="mobile-collapse">
+            <i data-feather="menu"></i>
+          </a>
+        </li>
+        <li class="dropdown pc-h-item">
+          <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button"
+            aria-haspopup="false" aria-expanded="false">
+            <i data-feather="search"></i>
+          </a>
+          <div class="dropdown-menu pc-h-dropdown drp-search">
+            <form class="px-2 py-1">
+              <input type="search" class="form-control !border-0 !shadow-none" placeholder="Search here. . ." />
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="ms-auto">
+      <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
+        <li class="dropdown pc-h-item">
+          <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button"
+            aria-haspopup="false" aria-expanded="false">
+            <i data-feather="sun"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+            <a href="#!" class="dropdown-item" onclick="layout_change('dark')">
+              <i data-feather="moon"></i>
+              <span>Dark</span>
+            </a>
+            <a href="#!" class="dropdown-item" onclick="layout_change('light')">
+              <i data-feather="sun"></i>
+              <span>Light</span>
+            </a>
+            <a href="#!" class="dropdown-item" onclick="layout_change_default()">
+              <i data-feather="settings"></i>
+              <span>Default</span>
+            </a>
+          </div>
+        </li>
+        <li class="dropdown pc-h-item">
+          <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button"
+            aria-haspopup="false" aria-expanded="false">
+            <i data-feather="settings"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+            <a href="#!" class="dropdown-item">
+              <i class="ti ti-user"></i>
+              <span>My Account</span>
+            </a>
+            <a href="#!" class="dropdown-item">
+              <i class="ti ti-settings"></i>
+              <span>Settings</span>
+            </a>
+            <a href="#!" class="dropdown-item">
+              <i class="ti ti-headset"></i>
+              <span>Support</span>
+            </a>
+            <a href="#!" class="dropdown-item">
+              <i class="ti ti-lock"></i>
+              <span>Lock Screen</span>
+            </a>
+            <a href="#!" class="dropdown-item">
+              <i class="ti ti-power"></i>
+              <span>Logout</span>
+            </a>
+          </div>
+        </li>
+        <li class="dropdown pc-h-item">
+          <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button"
+            aria-haspopup="false" aria-expanded="false">
+            <i data-feather="bell"></i>
+            <span class="badge bg-success-500 text-white rounded-full z-10 absolute right-0 top-0">3</span>
+          </a>
+          <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown p-2">
+            <div class="dropdown-header flex items-center justify-between py-4 px-5">
+              <h5 class="m-0">Notifications</h5>
+              <a href="#!" class="btn btn-link btn-sm">Mark all read</a>
+            </div>
+            <div class="dropdown-body header-notification-scroll relative py-4 px-5"
+              style="max-height: calc(100vh - 215px)">
+              <p class="text-span mb-3">Today</p>
+              <div class="card mb-2">
+                <div class="card-body">
+                  <div class="flex gap-4">
+                    <div class="shrink-0">
+                      <img class="img-radius w-12 h-12 rounded-0" src="../assets/images/user/avatar-1.jpg" alt="Generic placeholder image" />
+                    </div>
+                    <div class="grow">
+                      <span class="float-end text-sm text-muted">2 min ago</span>
+                      <h5 class="text-body mb-2">UI/UX Design</h5>
+                      <p class="mb-0">
+                        Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown
+                        printer took a galley of
+                        type and scrambled it to make a type
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center py-2">
+              <a href="#!" class="text-danger-500 hover:text-danger-600 focus:text-danger-600 active:text-danger-600">
+                Clear all Notifications
+              </a>
+            </div>
+          </div>
+        </li>
+        <li class="dropdown pc-h-item header-user-profile">
+          <a class="pc-head-link dropdown-toggle arrow-none me-0" data-pc-toggle="dropdown" href="#" role="button"
+            aria-haspopup="false" data-pc-auto-close="outside" aria-expanded="false">
+            <i data-feather="user"></i>
+          </a>
+          <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown p-2 overflow-hidden">
+            <div class="dropdown-header flex items-center justify-between py-4 px-5 bg-primary-500">
+              <div class="flex mb-1 items-center">
+                <div class="shrink-0">
+                  <img src="../assets/images/user/avatar-2.jpg" alt="user-image" class="w-10 rounded-full" />
+                </div>
+                <div class="grow ms-3">
+                  <h6 class="mb-1 text-white">Carson Darrin 👋</h6>
+                  <span class="text-white">carson.darrin@company.io</span>
+                </div>
+              </div>
+            </div>
+            <div class="dropdown-body py-4 px-5">
+              <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
+                <a href="#" class="dropdown-item">
+                  <span>
+                    <svg class="pc-icon text-muted me-2 inline-block">
+                      <use xlink:href="#custom-setting-outline"></use>
+                    </svg>
+                    <span>Settings</span>
+                  </span>
+                </a>
+                <div class="grid my-3">
+                  <button class="btn btn-primary flex items-center justify-center">
+                    <svg class="pc-icon me-2 w-[22px] h-[22px]">
+                      <use xlink:href="#custom-logout-1-outline"></use>
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div></div>
+    </header>
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="page-header-title">
+              <h5 class="mb-0 font-medium">Gestión de Tutelas</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Jurídica</a></li>
+              <li class="breadcrumb-item" aria-current="page">Tutelas</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12">
+            <div class="card">
+              <div class="card-header flex justify-between items-center">
+                <h5>Filtros de Búsqueda y Acciones</h5>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#agregarTutelaModal">
+                    <i data-feather="plus" class="me-1"></i>
+                    AGREGAR TUTELA
+                </button>
+              </div>
+              <div class="card-body">
+                <form id="formFiltros">
+                    <h6 class="mb-3">Filtros</h6>
+                    <div class="grid grid-cols-12 gap-x-6 gap-y-4 mb-4">
+                        
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEmpresa" class="form-label">Empresa:</label>
+                            <select class="form-select" id="filtroEmpresa">
+                                <option value="">Todas las Empresas</option>
+                            </select>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroTipoID" class="form-label">Tipo de ID Usuario:</label>
+                            <select class="form-select" id="filtroTipoID">
+                                <option value="">Todos</option>
+                                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroIDUsuario" class="form-label">ID Usuario:</label>
+                            <input type="text" class="form-control" id="filtroIDUsuario" placeholder="Número de Cédula/ID">
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEstado" class="form-label">Estado:</label>
+                            <select class="form-select" id="filtroEstado">
+                                <option value="">Todos los Estados</option>
+                                <option value="En Proceso">En Proceso</option>
+                                <option value="Finalizada">Finalizada</option>
+                                <option value="Anulada">Anulada</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 mt-4">
+                        <div class="col-span-12 flex justify-end">
+                             <button type="button" id="btnLimpiarFiltros" class="btn btn-outline-secondary me-2">Limpiar Filtros</button>
+                             <button type="button" id="btnAplicarFiltros" class="btn btn-secondary">
+                                <span id="filtroSpinner" class="spinner" style="display: none; width: 16px; height: 16px; border-width: 2px; margin-right: 5px;"></span>
+                                APLICAR FILTROS
+                             </button>
+                        </div>
+                    </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Tutelas Registradas</h5>
+                    <p class="text-muted m-0">Detalle de las tutelas del sistema.</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tablaTutelas">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Empresa</th>
+                                    <th>Usuario (C.C.)</th>
+                                    <th>Motivo</th>
+                                    <th>Fecha Radicación</th>
+                                    <th>Estado</th>
+                                    <th>Archivos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTutelasBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+    
+    <footer class="pc-footer">
+      <div class="footer-wrapper container-fluid mx-10">
+        <div class="grid grid-cols-12 gap-1.5">
+          <div class="col-span-12 sm:col-span-6 my-1">
+            <p class="m-0">
+              <a href="https://codedthemes.com/" class="text-theme-bodycolor dark:text-themedark-bodycolor hover:text-primary-500 dark:hover:text-primary-500" target="_blank">CodedThemes</a>
+              , Built with ♥ for a smoother web presence.
+            </p>
+          </div>
+          <div class="col-span-12 sm:col-span-6 my-1 justify-self-end">
+             <p class="inline-block max-sm:mr-3 sm:ml-2">Distributed by <a href="https://themewagon.com" target="_blank">Themewagon</a></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+<div class="modal fade" id="agregarTutelaModal" tabindex="-1" aria-labelledby="agregarTutelaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="agregarTutelaModalLabel">Registrar Nueva Tutela</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formTutela">
+          <div class="mb-3">
+            <label for="empresa" class="form-label">Empresa</label>
+            <select class="form-select" id="empresa" name="empresa" required>
+                <option selected disabled value="">Cargando empresas...</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="modalTipoId" class="form-label">Tipo de Identificación</label>
+            <select class="form-select" id="modalTipoId" name="tipoId" required>
+                <option value="" selected disabled>Seleccione el Tipo de ID</option>
+                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                <option value="Pasaporte">Pasaporte</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="numeroCedula" class="form-label">Número ID de Usuario</label>
+            <input type="text" class="form-control" id="numeroCedula" name="numeroCedula" placeholder="Ingrese el Número de Cédula/ID" required>
+            <div class="form-text text-danger" id="userValidationFeedback" style="display: none;">Número ID no encontrado en la base de datos de usuarios.</div>
+          </div>
+          
+          <div class="grid grid-cols-12 gap-x-3">
+            <div class="col-span-6 mb-3">
+                <label for="usuarioNombre" class="form-label">Nombre(s) del Usuario</label>
+                <input type="text" class="form-control" id="usuarioNombre" name="usuarioNombre" placeholder="Nombre(s) autocompletado" readonly>
+            </div>
+            <div class="col-span-6 mb-3">
+                <label for="usuarioApellido" class="form-label">Apellido(s) del Usuario</label>
+                <input type="text" class="form-control" id="usuarioApellido" name="usuarioApellido" placeholder="Apellido(s) autocompletado" readonly>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="motivo" class="form-label">Motivo de la Tutela</label>
+            <input type="text" class="form-control" id="motivo" name="motivo" placeholder="Ej: Negación de servicios de salud" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="fechaRadicacion" class="form-label">Fecha de Radicación</label>
+            <input type="date" class="form-control" id="fechaRadicacion" name="fechaRadicacion" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="archivosPDF" class="form-label">Anexar Documentos (PDF)</label>
+            <input class="form-control" type="file" id="archivosPDF" name="archivosPDF" accept=".pdf" multiple>
+            <div class="form-text">Adjunte la tutela, soportes, etc.</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="btnRegistrar">
+            <span id="registroSpinner" class="spinner" style="display: none; width: 16px; height: 16px; border-width: 2px; margin-right: 5px;"></span>
+            Registrar Tutela
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="detalleTutelaModal" tabindex="-1" aria-labelledby="detalleTutelaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleTutelaModalLabel">Detalle de la Tutela</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="detalleTutelaBody">
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+</div>
+
+<script src="../assets/js/plugins/simplebar.min.js"></script>
+    <script src="../assets/js/plugins/popper.min.js"></script>
+    <script src="../assets/js/icon/custom-icon.js"></script>
+    <script src="../assets/js/plugins/feather.min.js"></script>
+    <script src="../assets/js/component.js"></script>
+    <script src="../assets/js/theme.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- REFERENCIAS A ELEMENTOS DEL DOM ---
+            const form = document.getElementById('formTutela');
+            const tbody = document.getElementById('tablaTutelasBody');
+            const filtroEmpresaSelect = document.getElementById('filtroEmpresa');
+            const modalEmpresaSelect = document.getElementById('empresa');
+            // Referencias a los nuevos/modificados campos:
+            const modalTipoIdSelect = document.getElementById('modalTipoId'); 
+            const modalNumeroIdInput = document.getElementById('numeroCedula'); 
+            const modalUsuarioNombreInput = document.getElementById('usuarioNombre');
+            const modalUsuarioApellidoInput = document.getElementById('usuarioApellido');
+            const userValidationFeedback = document.getElementById('userValidationFeedback');
+            // --- FIN DE REFERENCIAS ---
+
+            const btnRegistrar = document.getElementById('btnRegistrar');
+            const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+            const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+            
+            const registroSpinner = document.getElementById('registroSpinner');
+            const filtroSpinner = document.getElementById('filtroSpinner');
+            
+            const agregarModalEl = document.getElementById('agregarTutelaModal');
+            const agregarModal = new bootstrap.Modal(agregarModalEl);
+            const detalleModalEl = document.getElementById('detalleTutelaModal');
+            const detalleModal = new bootstrap.Modal(detalleModalEl);
+
+            // Variable para almacenar los datos actuales de la tabla
+            let tutelasData = [];
+
+            // --- FUNCIONES DE RENDERIZADO Y UTILIDAD ---
+
+            /**
+             * Muestra un toast de alerta (requiere que tengas el componente Toast de Bootstrap en tu HTML)
+             * Por ahora, usaremos alert() simple.
+             */
+            function showAlert(message, type = 'success') {
+                // Implementación simple. Puedes mejorar esto con un componente de toast.
+                console.log(`Alerta (${type}): ${message}`);
+                alert(message);
+            }
+
+            /**
+             * Activa/desactiva el spinner en un botón
+             */
+            function toggleSpinner(spinner, button, show) {
+                if (show) {
+                    spinner.style.display = 'inline-block';
+                    button.disabled = true;
+                } else {
+                    spinner.style.display = 'none';
+                    button.disabled = false;
+                }
+            }
+            
+            /**
+             * Limpia los campos de autocompletado del usuario.
+             */
+            function clearUserFields() {
+                modalUsuarioNombreInput.value = '';
+                modalUsuarioApellidoInput.value = '';
+                userValidationFeedback.style.display = 'none';
+            }
+            
+            /**
+             * Busca el usuario globalmente (sin vínculo a la empresa) y autocompleta los campos.
+             */
+            async function buscarUsuarioPorId() {
+                clearUserFields();
+                const id = modalNumeroIdInput.value.trim();
+                
+                if (!id) return;
+                
+                try {
+                    // LLAMADA AL NUEVO ENDPOINT GLOBAL
+                    const response = await fetch(`/api/tutelas/usuario_global/${id}`);
+                    
+                    if (!response.ok) {
+                        userValidationFeedback.style.display = 'block';
+                        modalNumeroIdInput.classList.add('is-invalid');
+                        return;
+                    }
+                    
+                    const usuario = await response.json();
+                    
+                    modalUsuarioNombreInput.value = usuario.primerNombre || '';
+                    modalUsuarioApellidoInput.value = usuario.primerApellido || ''; 
+                    
+                    userValidationFeedback.style.display = 'none';
+                    modalNumeroIdInput.classList.remove('is-invalid');
+
+                } catch (error) {
+                    console.error("Error buscando usuario:", error);
+                    userValidationFeedback.style.display = 'block';
+                    modalNumeroIdInput.classList.add('is-invalid');
+                }
+            }
+
+
+            /**
+             * Dibuja la tabla de tutelas con los datos proporcionados.
+             */
+            function renderTable(data) {
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron tutelas.</td></tr>';
+                    return;
+                }
+                data.forEach(tutela => {
+                    const badgeClass = tutela.estado === 'Finalizada' ? 'bg-success' : (tutela.estado === 'Anulada' ? 'bg-danger' : 'bg-warning');
+                    const row = `
+                        <tr data-id="${tutela.id}">
+                            <td>${tutela.id}</td>
+                            <td>${tutela.empresa_nombre || 'N/A'}</td>
+                            <td>${tutela.usuario_nombre || 'N/A'} (${tutela.usuario_id})</td>
+                            <td>${tutela.motivo}</td>
+                            <td>${tutela.fecha_radicacion}</td>
+                            <td><span class="badge ${badgeClass}">${tutela.estado}</span></td>
+                            <td>${tutela.archivosCount}</td>
+                            <td>
+                                <button class="btn btn-sm btn-icon btn-outline-info btn-view" title="Ver Detalle" data-id="${tutela.id}"><i data-feather="eye"></i></button>
+                                ${tutela.estado !== 'Anulada' ? `<button class="btn btn-sm btn-icon btn-outline-danger btn-cancel" title="Anular" data-id="${tutela.id}"><i data-feather="x-circle"></i></button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                feather.replace(); // Actualizar los iconos de Feather
+            }
+            
+            /**
+             * Rellena un <select> con opciones.
+             */
+            function populateSelect(selectEl, data, defaultOptionText) {
+                 selectEl.innerHTML = `<option value="">${defaultOptionText}</option>`;
+                 data.forEach(item => {
+                    // Asumimos que item tiene 'nit'/'id' y 'nombre'
+                    const value = item.nit || item.id;
+                    selectEl.add(new Option(item.nombre, value));
+                 });
+                 selectEl.disabled = false;
+            }
+
+            // --- FUNCIONES DE API (FETCH) ---
+
+            /**
+             * Carga la lista de empresas desde la API.
+             */
+            async function cargarEmpresas() {
+                try {
+                    const response = await fetch('/api/tutelas/empresas_list');
+                    if (!response.ok) throw new Error('Error al cargar empresas');
+                    const empresas = await response.json();
+                    
+                    populateSelect(filtroEmpresaSelect, empresas, 'Todas las Empresas');
+                    populateSelect(modalEmpresaSelect, empresas, 'Seleccione la Empresa');
+                    
+                } catch (error) {
+                    console.error(error);
+                    showAlert('No se pudieron cargar las empresas. Revise la consola.', 'danger');
+                    modalEmpresaSelect.innerHTML = '<option value="">Error al cargar</option>';
+                }
+            }
+            
+            /**
+             * Carga las tutelas desde la API según los filtros.
+             */
+            async function cargarTutelas(params = {}) {
+                toggleSpinner(filtroSpinner, btnAplicarFiltros, true);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner mx-auto"></div></td></tr>';
+                
+                try {
+                    const urlParams = new URLSearchParams(params);
+                    const response = await fetch(`/api/tutelas?${urlParams.toString()}`);
+                    
+                    if (response.status === 401) {
+                        // Si no está autorizado, redirigir al login
+                        window.location.href = '/ingresoportal.html';
+                        return;
+                    }
+                    if (!response.ok) throw new Error('Error al cargar la lista de tutelas');
+                    
+                    tutelasData = await response.json();
+                    renderTable(tutelasData);
+
+                } catch (error) {
+                    console.error(error);
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error al cargar datos: ${error.message}</td></tr>`;
+                } finally {
+                    toggleSpinner(filtroSpinner, btnAplicarFiltros, false);
+                }
+            }
+            
+            /**
+             * Registra una nueva tutela enviando los datos a la API.
+             */
+            async function registrarTutela() {
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                
+                // Validación adicional: Asegurar que se buscó el usuario, o que al menos los campos tienen datos.
+                if (modalNumeroIdInput.value.trim() !== '' && (modalUsuarioNombreInput.value === '' && modalUsuarioApellidoInput.value === '')) {
+                    showAlert('Por favor, ingrese un número ID válido y presione [Tab] o haga clic fuera para autocompletar el nombre.', 'warning');
+                    modalNumeroIdInput.focus();
+                    userValidationFeedback.style.display = 'block';
+                    return;
+                }
+                
+                toggleSpinner(registroSpinner, btnRegistrar, true);
+                
+                // Usamos FormData para enviar archivos y texto
+                const formData = new FormData(form); // Captura todos los campos con atributo name
+                
+                // Nota: Los campos usuarioNombre y usuarioApellido se usan para el autocompletado,
+                // pero el backend DEBE ser modificado para usarlos si el usuario no existe en la BD.
+                // Ya ajustamos tutelas.py para manejar la nueva lógica.
+                
+                try {
+                    const response = await fetch('/api/tutelas', {
+                        method: 'POST',
+                        body: formData // No se pone 'Content-Type', el navegador lo hace solo
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error desconocido al registrar');
+                    }
+                    
+                    let successMessage = `Tutela ${result.id} registrada con éxito.`;
+                    if (result.mensaje_advertencia) {
+                        successMessage += ` Advertencia: ${result.mensaje_advertencia}`;
+                    }
+
+                    showAlert(successMessage, 'success');
+                    agregarModal.hide();
+                    form.reset();
+                    clearUserFields(); // Limpiar campos de usuario
+                    
+                    // Recargar la tabla (o añadir la fila nueva al inicio)
+                    cargarTutelas(); // Forma más simple de recargar
+
+                } catch (error) {
+                    console.error(error);
+                    showAlert(`Error al registrar: ${error.message}`, 'danger');
+                } finally {
+                    toggleSpinner(registroSpinner, btnRegistrar, false);
+                }
+            }
+            
+            /**
+             * Anula una tutela
+             */
+            async function anularTutela(id) {
+                 if (!confirm(`¿Está seguro de que desea anular la tutela ${id}?`)) {
+                    return;
+                 }
+                 
+                 try {
+                    const response = await fetch(`/api/tutelas/${id}/anular`, {
+                        method: 'PUT',
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error al anular');
+                    }
+                    
+                    showAlert(`Tutela ${id} ha sido anulada.`, 'success');
+                    
+                    // Actualizar la fila en la tabla localmente
+                    const index = tutelasData.findIndex(t => t.id == id);
+                    if (index !== -1) {
+                        tutelasData[index] = result; // Reemplazar con datos actualizados
+                        renderTable(tutelasData);
+                    } else {
+                        cargarTutelas(); // Recargar si no se encontró
+                    }
+
+                 } catch (error) {
+                     console.error(error);
+                     showAlert(`Error: ${error.message}`, 'danger');
+                 }
+            }
+
+
+            // --- EVENT LISTENERS ---
+
+            // Listener para autocompletar nombre/apellido al salir del campo Número ID
+            modalNumeroIdInput.addEventListener('blur', buscarUsuarioPorId);
+            modalNumeroIdInput.addEventListener('change', buscarUsuarioPorId); // Por si se selecciona con teclado
+
+            // Registrar tutela
+            btnRegistrar.addEventListener('click', registrarTutela);
+
+            // Aplicar filtros
+            btnAplicarFiltros.addEventListener('click', () => {
+                const params = {
+                    empresa_nit: document.getElementById('filtroEmpresa').value,
+                    tipo_id: document.getElementById('filtroTipoID').value,
+                    usuario_id: document.getElementById('filtroIDUsuario').value.trim(),
+                    estado: document.getElementById('filtroEstado').value
+                };
+                
+                // Limpiar parámetros vacíos
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '') {
+                        delete params[key];
+                    }
+                });
+                
+                cargarTutelas(params);
+            });
+            
+            // Limpiar filtros
+            btnLimpiarFiltros.addEventListener('click', () => {
+                 document.getElementById('formFiltros').reset();
+                 cargarTutelas(); // Cargar todos
+            });
+
+            // Listeners en la tabla para botones 'Ver' y 'Anular' (delegación de eventos)
+            tbody.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const id = target.dataset.id;
+                if (!id) return;
+
+                const tutela = tutelasData.find(t => t.id == id); // Usar == por si acaso (id puede ser string o number)
+                if (!tutela) return;
+
+                if (target.classList.contains('btn-view')) {
+                    // Mostrar detalle en el modal
+                    const body = document.getElementById('detalleTutelaBody');
+                    body.innerHTML = `
+                        <p><strong>ID:</strong> ${tutela.id}</p>
+                        <p><strong>Empresa:</strong> ${tutela.empresa_nombre} (NIT: ${tutela.empresa_nit})</p>
+                        <p><strong>Usuario:</strong> ${tutela.usuario_nombre} (ID: ${tutela.usuario_id})</p>
+                        <p><strong>Motivo:</strong> ${tutela.motivo}</p>
+                        <p><strong>Fecha Radicación:</strong> ${tutela.fecha_radicacion}</p>
+                        <p><strong>Estado:</strong> ${tutela.estado}</p>
+                        <p><strong>Archivos Adjuntos:</strong> ${tutela.archivosCount}</p>
+                        `;
+                    detalleModal.show();
+                    
+                } else if (target.classList.contains('btn-cancel')) {
+                    anularTutela(id);
+                }
+            });
+            
+            // --- CARGA INICIAL ---
+            function init() {
+                // Cargar los selects de empresas
+                cargarEmpresas();
+                
+                // Cargar la tabla inicial (sin filtros)
+                cargarTutelas();
+                
+                // Scripts de configuración de tema (sin cambios)
+                feather.replace(); 
+                layout_change('false');
+                layout_theme_sidebar_change('dark');
+                change_box_container('false');
+                layout_caption_change('true');
+                layout_rtl_change('false');
+                preset_change('preset-1');
+                main_layout_change('vertical');
+            }
+            
+            init();
+        });
+    </script>
+    
+  </body>
+</html>
+}
+siguiente gem

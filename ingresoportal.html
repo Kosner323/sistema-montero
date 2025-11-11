@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Ingreso | Portal Montero</title> <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="description"
+      content="Página de ingreso al portal de Montero y Negocio." />
+    <meta name="author" content="Montero y Negocio" /> 
+    
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+      /* Estilos opcionales para mensajes (igual que en registro) */
+      #messageContainer .alert {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      #messageContainer .alert-success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+      }
+      #messageContainer .alert-danger {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      
+      /* Estilos para el captcha moderno */
+      .captcha-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+      
+      .captcha-question {
+        color: white;
+        font-size: 1.1em;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      
+      .captcha-input {
+        background: white;
+        border: 2px solid rgba(255,255,255,0.3);
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #667eea;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s ease;
+      }
+      
+      .captcha-input:focus {
+        border-color: #764ba2;
+        box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.2);
+        outline: none;
+      }
+      
+      .captcha-refresh {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        margin-top: 10px;
+      }
+      
+      .captcha-refresh:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+      }
+    </style>
+
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+    <div class="auth-main relative">
+      <div class="auth-wrapper v1 flex items-center w-full h-full min-h-screen">
+        <div class="auth-form flex items-center justify-center grow flex-col min-h-screen relative p-6 ">
+          <div class="w-full max-w-[350px] relative">
+            <div class="auth-bg ">
+              <span class="absolute top-[-100px] right-[-100px] w-[300px] h-[300px] block rounded-full bg-theme-bg-1 animate-[floating_7s_infinite]"></span>
+              <span class="absolute top-[150px] right-[-150px] w-5 h-5 block rounded-full bg-primary-500 animate-[floating_9s_infinite]"></span>
+              <span class="absolute left-[-150px] bottom-[150px] w-5 h-5 block rounded-full bg-theme-bg-1 animate-[floating_7s_infinite]"></span>
+              <span class="absolute left-[-100px] bottom-[-100px] w-[300px] h-[300px] block rounded-full bg-theme-bg-2 animate-[floating_9s_infinite]"></span>
+            </div>
+            <div class="card sm:my-12  w-full shadow-none">
+              <div class="card-body !p-10">
+                <div class="text-center mb-8">
+                  <a href="#"><img src="/assets/images/logo-dark.svg" alt="img" class="mx-auto auth-logo"/></a>
+                </div>
+                <h4 class="text-center font-medium mb-4">Ingresar</h4>
+
+                <div id="messageContainer"></div>
+
+                <form id="loginForm"> <div class="mb-3">
+                    <input type="email" class="form-control" id="email" placeholder="Correo Electrónico" required />
+                  </div>
+                  <div class="mb-3">
+                    <input type="password" class="form-control" id="password" placeholder="Contraseña" required />
+                  </div>
+                  
+                  <div class="captcha-container">
+                    <div class="captcha-question" id="captchaQuestion">¿Cuánto es 5 + 3?</div>
+                    <input type="number" class="form-control captcha-input" id="captchaInput" placeholder="?" required />
+                    <div class="text-center">
+                      <button type="button" class="captcha-refresh" id="refreshCaptcha">🔄 Nuevo captcha</button>
+                    </div>
+                  </div>
+                  
+                  <div class="flex mt-1 justify-between items-center flex-wrap">
+                    <div class="form-check">
+                      <input class="form-check-input input-primary" type="checkbox" id="rememberMe" checked="" />
+                      <label class="form-check-label text-muted" for="rememberMe">¿Recordarme?</label>
+                    </div>
+                    </div>
+                  <div class="mt-4 text-center">
+                    <button type="submit" id="loginButton" class="btn btn-primary mx-auto shadow-2xl">Ingresar</button>
+                  </div>
+                </form> <div class="flex justify-between items-end flex-wrap mt-4">
+                  <h6 class="font-medium mb-0">¿No tienes una cuenta?</h6>
+                  <a href="registroportal.html" class="text-primary-500">Crear Cuenta</a> </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets.js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/script.js"></script>
+
+    <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+    </div>
+
+    <script> layout_change('false'); </script>
+    <script> layout_theme_sidebar_change('dark'); </script>
+    <script> change_box_container('false'); </script>
+    <script> layout_caption_change('true'); </script>
+    <script> layout_rtl_change('false'); </script>
+    <script> preset_change('preset-1'); </script>
+    <script> main_layout_change('vertical'); </script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const loginButton = document.getElementById('loginButton');
+        const messageContainer = document.getElementById('messageContainer');
+        
+        let captchaAnswer = 0;
+        
+        function generateCaptcha() {
+          const num1 = Math.floor(Math.random() * 10) + 1;
+          const num2 = Math.floor(Math.random() * 10) + 1;
+          const operations = ['+', '-', '×'];
+          const operation = operations[Math.floor(Math.random() * operations.length)];
+          
+          let question = '';
+          switch(operation) {
+            case '+':
+              captchaAnswer = num1 + num2;
+              question = `¿Cuánto es ${num1} + ${num2}?`;
+              break;
+            case '-':
+              captchaAnswer = num1 - num2;
+              question = `¿Cuánto es ${num1} - ${num2}?`;
+              break;
+            case '×':
+              captchaAnswer = num1 * num2;
+              question = `¿Cuánto es ${num1} × ${num2}?`;
+              break;
+          }
+          
+          document.getElementById('captchaQuestion').textContent = question;
+          document.getElementById('captchaInput').value = '';
+        }
+        
+        generateCaptcha();
+        
+        document.getElementById('refreshCaptcha').addEventListener('click', function() {
+          generateCaptcha();
+        });
+        
+        loginForm.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          messageContainer.innerHTML = '';
+          
+          const captchaInput = parseInt(document.getElementById('captchaInput').value);
+          if (captchaInput !== captchaAnswer) {
+            showMessage('❌ Captcha incorrecto. Por favor intenta de nuevo.', 'danger');
+            generateCaptcha();
+            return;
+          }
+          
+          loginButton.disabled = true;
+          loginButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Ingresando...';
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          if (!email || !password) {
+            // CODIFICACIÓN CORREGIDA
+            showMessage('Correo electrónico y contraseña son obligatorios.', 'danger');
+            loginButton.disabled = false;
+            loginButton.textContent = 'Ingresar';
+            generateCaptcha();
+            return;
+          }
+          const loginData = { email: email, password: password };
+          try {
+            console.log('🔑 Intentando login...');
+            const response = await fetch('/api/login', { 
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(loginData),
+              credentials: 'include' 
+            });
+            console.log('📡 Respuesta login:', response.status);
+            const result = await response.json();
+            console.log('📦 Resultado:', result);
+            if (response.ok) {
+              // CODIFICACIÓN CORREGIDA
+              showMessage(result.message || 'Inicio de sesión exitoso. Redirigiendo...', 'success');
+              setTimeout(() => {
+                window.location.href = 'index.html'; 
+              }, 1500);
+            } else {
+              // CODIFICACIÓN CORREGIDA
+              showMessage(result.error || 'Error al iniciar sesión. Verifique sus credenciales.', 'danger');
+              loginButton.disabled = false;
+              loginButton.textContent = 'Ingresar';
+              generateCaptcha(); 
+            }
+          } catch (error) {
+            console.error('❌ Error en login:', error);
+            // CODIFICACIÓN CORREGIDA
+            showMessage('No se pudo conectar con el servidor. Inténtalo más tarde.', 'danger');
+            loginButton.disabled = false;
+            loginButton.textContent = 'Ingresar';
+            generateCaptcha(); 
+          }
+        });
+        function showMessage(message, type) {
+          messageContainer.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+        }
+      });
+    </script>
+    </body>
+  </html>

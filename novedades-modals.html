@@ -1,0 +1,317 @@
+﻿<div class="modal fade" id="importCaseModal" tabindex="-1" aria-labelledby="importCaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importCaseModalLabel">Importar Novedades desde Archivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="importCaseForm">
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Seleccionar Archivo (.csv, .xlsx)</label>
+                        <input class="form-control" type="file" id="importFile" name="importFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+                        <div class="form-text">Asegúrese de que el archivo siga el formato especificado.</div>
+                    </div>
+                    <div id="importFeedbackMessage" class="mt-3"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="importCaseForm" class="btn btn-success" id="startImportButton">
+                     <i class="ti ti-upload me-1"></i> Iniciar Importación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newCaseModal" tabindex="-1" aria-labelledby="newCaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dashboard-wide modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newCaseModalLabel">Registrar Nueva Novedad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="newCaseFeedbackMessage"></div>
+                <form id="newCaseForm">
+                    <input type="hidden" id="editCaseIndex" value="">
+
+                    <div class="mb-3 row" style="display: none;">
+                        <label class="col-sm-3 col-form-label fw-bold"># Caso:</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-plaintext" id="caseIdDisplay"></p>
+                        </div>
+                    </div>
+
+                    <h6 class="form-section-header">Información Básica del Caso</h6>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="client" class="form-label">Empresa / Cliente (*)</label>
+                            <input type="text" class="form-control" id="client" name="client" list="empresasDataList" placeholder="Escriba o seleccione la empresa" required>
+                            <datalist id="empresasDataList">
+                                </datalist>
+                             <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="col-md-4">
+                             <label for="clientNit" class="form-label">NIT (Opcional)</label>
+                             <input type="text" class="form-control" id="clientNit" name="clientNit" placeholder="NIT (si aplica)">
+                        </div>
+                        <div class="col-md-12">
+                            <label for="subject" class="form-label">Asunto / Tipo Novedad (*)</label>
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Ej: Error en pago, Solicitud afiliación" required>
+                            <div class="invalid-feedback">Este campo es obligatorio.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="priority" class="form-label">Prioridad (*)</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="baja" selected>Baja</option>
+                                <option value="media">Media</option>
+                                <option value="alta">Alta</option>
+                                <option value="critica">Crítica</option>
+                            </select>
+                            <div class="invalid-feedback">Seleccione una prioridad.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="status" class="form-label">Estado (*)</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Nuevo" selected>Nuevo</option>
+                                <option value="En Progreso">En Progreso</option>
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Resuelto">Resuelto</option>
+                            </select>
+                             <div class="invalid-feedback">Seleccione un estado.</div>
+                        </div>
+                        <div class="col-12">
+                            <label for="description" class="form-label">Descripción Detallada (*)</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" placeholder="Describa la novedad o solicitud..." required minlength="10" maxlength="5000"></textarea>
+                            <div class="invalid-feedback">Este campo es obligatorio (mínimo 10 caracteres).</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="radicado" class="form-label">Número Radicado (Opcional)</label>
+                            <input type="text" class="form-control" id="radicado" name="radicado" placeholder="Si aplica">
+                        </div>
+                         <div class="col-md-6">
+                            <label for="assignedTo" class="form-label">Asignado A</label>
+                            <input type="text" class="form-control" id="assignedTo" name="assignedTo" value="Sistema">
+                        </div>
+                    </div>
+
+                    <h6 class="form-section-header">Datos del Usuario Afectado (Opcional)</h6>
+                    <div class="row g-3">
+                         <div class="col-md-4">
+                            <label for="idType" class="form-label">Tipo ID</label>
+                            <select class="form-select" id="idType" name="idType">
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula Ciudadanía</option>
+                                <option value="CE">Cédula Extranjería</option>
+                                <option value="PA">Pasaporte</option>
+                                <option value="TI">Tarjeta Identidad</option>
+                                <option value="PT">Permiso Temporal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8">
+                            <label for="idNumber" class="form-label">Número ID (Presione Enter/Tab)</label>
+                            <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="Buscará y autocompletará datos">
+                             <div class="invalid-feedback">Usuario no encontrado.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="firstName" class="form-label">Nombres</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="lastName" class="form-label">Apellidos</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" readonly>
+                        </div>
+                         <div class="col-md-4">
+                            <label for="nationality" class="form-label">Nacionalidad</label>
+                            <input type="text" class="form-control" id="nationality" name="nationality" readonly>
+                        </div>
+                         <div class="col-md-4">
+                            <label for="gender" class="form-label">Género</label>
+                            <input type="text" class="form-control" id="gender" name="gender" readonly>
+                        </div>
+                         <div class="col-md-4">
+                            <label for="birthDate" class="form-label">Fecha Nacimiento</label>
+                            <input type="date" class="form-control" id="birthDate" name="birthDate" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" readonly>
+                        </div>
+                         <div class="col-md-4">
+                            <label for="department" class="form-label">Departamento</label>
+                            <input type="text" class="form-control" id="department" name="department" readonly>
+                        </div>
+                         <div class="col-md-4">
+                            <label for="city" class="form-label">Ciudad</label>
+                            <input type="text" class="form-control" id="city" name="city" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="address" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="address" name="address" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="neighborhood" class="form-label">Barrio</label>
+                            <input type="text" class="form-control" id="neighborhood" name="neighborhood" readonly>
+                        </div>
+                    </div>
+
+                    <h6 class="form-section-header">Datos de Afiliación (Opcional)</h6>
+                     <div class="row g-3">
+                         <div class="col-md-6">
+                            <label for="eps" class="form-label">EPS</label>
+                            <input type="text" class="form-control" id="eps" name="eps" readonly>
+                         </div>
+                         <div class="col-md-4">
+                            <label for="arl" class="form-label">ARL</label>
+                            <input type="text" class="form-control" id="arl" name="arl" readonly>
+                         </div>
+                         <div class="col-md-2">
+                             <label for="arlClass" class="form-label">Riesgo</label>
+                             <input type="text" class="form-control" id="arlClass" name="arlClass" readonly>
+                         </div>
+                         <div class="col-md-6">
+                             <label for="pensionFund" class="form-label">Fondo de Pensión</label>
+                             <input type="text" class="form-control" id="pensionFund" name="pensionFund" readonly>
+                         </div>
+                         <div class="col-md-3">
+                             <label for="ccf" class="form-label">Caja Comp.</label>
+                             <input type="text" class="form-control" id="ccf" name="ccf" readonly>
+                         </div>
+                         <div class="col-md-3">
+                             <label for="ibc" class="form-label">IBC</label>
+                             <input type="number" class="form-control" id="ibc" name="ibc" readonly>
+                         </div>
+                     </div>
+
+                    <h6 class="form-section-header">Beneficiarios (Opcional)</h6>
+                    <div id="beneficiariesContainer">
+                        </div>
+                    <button type="button" class="btn btn-sm btn-outline-success mt-2" id="addBeneficiaryButton">
+                        <i class="ti ti-plus me-1"></i> Agregar Beneficiario
+                    </button>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info me-auto" id="simulateDataButton">Simular Datos</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="newCaseForm" class="btn btn-primary" id="saveCaseButton">
+                    <i class="ti ti-device-floppy me-1"></i> Guardar Novedad
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewCaseModal" tabindex="-1" aria-labelledby="viewCaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dashboard-wide modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewCaseModalLabel">Detalle de Novedad #<span id="viewCaseId"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-7 border-end">
+                        <h6 class="text-primary-600 mb-3">Información del Caso</h6>
+                        <dl class="row mb-4">
+                            <dt class="col-sm-4">Cliente/Empresa:</dt>
+                            <dd class="col-sm-8" id="viewClient"></dd>
+
+                            <dt class="col-sm-4">Asunto:</dt>
+                            <dd class="col-sm-8" id="viewSubject"></dd>
+
+                            <dt class="col-sm-4">Prioridad:</dt>
+                            <dd class="col-sm-8" id="viewPriority"></dd>
+
+                            <dt class="col-sm-4">Estado:</dt>
+                            <dd class="col-sm-8" id="viewStatus"></dd>
+
+                            <dt class="col-sm-4">Asignado a:</dt>
+                            <dd class="col-sm-8" id="viewAssignedTo"></dd>
+
+                            <dt class="col-sm-4">Fecha Creación:</dt>
+                            <dd class_clase="col-sm-8" id="viewCreationDate"></dd>
+
+                            <dt class="col-sm-4">Últ. Actualización:</dt>
+                            <dd class="col-sm-8" id="viewUpdateDate"></dd>
+
+                            <dt class="col-sm-4">Radicado:</dt>
+                            <dd class="col-sm-8" id="viewRadicado"></dd>
+                        </dl>
+
+                        <h6 class="text-primary-600 mb-2">Descripción</h6>
+                        <p class="text-muted bg-light p-3 rounded mb-4" id="viewDescription"></p>
+
+                        <h6 class="text-primary-600 mb-2">Solución Aplicada</h6>
+                        <p class="text-muted bg-light p-3 rounded mb-4" id="viewSolutionDescription"></p>
+
+                        <h6 class="text-primary-600 mb-3">Historial del Caso</h6>
+                        <div class="history-timeline mb-4" id="viewHistoryTimeline">
+                            </div>
+
+                        <h6 class="text-primary-600 mb-2">Agregar Comentario</h6>
+                        <textarea class="form-control mb-2" id="newCommentText" rows="3" placeholder="Escriba un nuevo comentario o actualización..."></textarea>
+                        <button type="button" class="btn btn-sm btn-success" id="addCommentButton">
+                            <i class="ti ti-message-plus me-1"></i> Agregar Comentario
+                        </button>
+
+                    </div>
+
+                    <div class="col-md-5">
+                        <h6 class="text-info-600 mb-3">Datos del Usuario</h6>
+                        <dl class="row text-sm">
+                            <dt class="col-sm-5">Nombre Completo:</dt>
+                            <dd class="col-sm-7" id="viewFullName"></dd>
+                            <dt class="col-sm-5">Identificación:</dt>
+                            <dd class="col-sm-7"><span id="viewIdType"></span> <span id="viewIdNumber"></span></dd>
+                            <dt class="col-sm-5">Nacionalidad:</dt>
+                            <dd class="col-sm-7" id="viewNationality"></dd>
+                            <dt class="col-sm-5">Género:</dt>
+                            <dd class="col-sm-7" id="viewGender"></dd>
+                            <dt class="col-sm-5">Fecha Nacimiento:</dt>
+                            <dd class="col-sm-7" id="viewBirthDate"></dd>
+                            <dt class="col-sm-5">Teléfono:</dt>
+                            <dd class="col-sm-7" id="viewPhone"></dd>
+                            <dt class="col-sm-5">Email:</dt>
+                            <dd class="col-sm-7" id="viewEmail"></dd>
+                            <dt class="col-sm-5">Ubicación:</dt>
+                            <dd class="col-sm-7"><span id="viewCity"></span>, <span id="viewDepartment"></span></dd>
+                            <dt class="col-sm-5">Dirección:</dt>
+                            <dd class="col-sm-7" id="viewAddress"></dd>
+                            <dt class="col-sm-5">Barrio:</dt>
+                            <dd class="col-sm-7" id="viewNeighborhood"></dd>
+                        </dl>
+
+                        <h6 class="text-info-600 mb-3 mt-4">Datos de Afiliación</h6>
+                        <dl class="row text-sm">
+                             <dt class="col-sm-5">EPS:</dt>
+                             <dd class="col-sm-7" id="viewEps"></dd>
+                             <dt class="col-sm-5">ARL (Riesgo):</dt>
+                             <dd class="col-sm-7" id="viewArl"></dd>
+                             <dt class="col-sm-5">Caja Comp.:</dt>
+                             <dd class="col-sm-7" id="viewCcf"></dd>
+                             <dt class="col-sm-5">Fondo Pensión:</dt>
+                             <dd class="col-sm-7" id="viewPensionFund"></dd>
+                             <dt class="col-sm-5">IBC:</dt>
+                             <dd class="col-sm-7" id="viewIbc"></dd>
+                        </dl>
+
+                        <h6 class="text-info-600 mb-3 mt-4">Beneficiarios</h6>
+                        <ul class="list-unstyled text-sm" id="viewBeneficiariesList">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+        </div>
+    </div>
+</div>

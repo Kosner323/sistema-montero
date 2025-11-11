@@ -1,0 +1,571 @@
+# -*- coding: utf-8 -*-
+"""
+test_auth.py
+====================================================
+Suite de tests con pytest para el módulo de autenticación
+(Versión fusionada con pruebas de Flask)
+"""
+
+import pytest
+import sys
+import os
+from pathlib import Path
+from datetime import datetime, timedelta
+from werkzeug.security import generate_password_hash
+
+# Agregar el directorio raíz al path (El comentario está bien, no agregues código aquí)
+
+from routes.auth import (
+    is_valid_email,
+    check_rate_limit,
+    register_failed_attempt as record_failed_login,
+    MIN_PASSWORD_LENGTH,
+    MAX_LOGIN_ATTEMPTS,
+    LOCKOUT_TIME,
+    LOGIN_ATTEMPTS,
+)
+
+# --- Importación de la app para pruebas de Flask ---
+# (Asumiendo que 'app.py' está en el directorio raíz)
+try:
+    from app import app as flask_app
+except ImportError:
+    # Si app.py está en un nivel superior o diferente, ajusta esto
+    # Esta es una configuración común si 'tests' está al mismo nivel que 'src'
+    # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    # from src.app import app as flask_app
+    print("Error: No se pudo importar 'flask_app' desde 'app'. Asegúrate de que app.py esté en el PYTHONPATH.")
+    flask_app = None
+
+
+# ==============================================================================
+# FIXTURES DE PYTEST (para pruebas de Flask)
+# ==============================================================================
+
+@pytest.fixture
+def app():
+    """Crea una instancia de la app para testing."""
+    if flask_app is None:
+        pytest.fail("No se pudo cargar la aplicación Flask (flask_app).")
+        
+    flask_app.config.update({
+        "TESTING": True,
+        "WTF_CSRF_ENABLED": False,
+        "SECRET_KEY": "test_secret_key"
+    })
+    yield flask_app
+
+@pytest.fixture
+def client(app):
+    """Crea un "cliente" falso que actúa como un navegador."""
+    return app.test_client()
+
+# ==============================================================================
+# TESTS DE VALIDACIÓN DE EMAIL (Tus 18 tests originales)
+# ==============================================================================
+
+
+class TestEmailValidation:
+    """Tests de validación de formato de email."""
+
+    @pytest.mark.parametrize(
+        "email",
+        [
+            "usuario@ejemplo.com",
+            "nombre.apellido@empresa.co",
+            "test123@test.com",
+            "admin@sub.dominio.com",
+            "user+tag@example.org",
+            "123@456.com",
+        ],
+    )
+    def test_valid_emails(self, email):
+        """Test con emails válidos."""
+        assert is_valid_email(email) is True
+
+    @pytest.mark.parametrize(
+        "email",
+        [
+            "",  # Vacío
+            "invalido",  # Sin @
+            "@ejemplo.com",  # Sin usuario
+            "usuario@",  # Sin dominio
+            "usuario@.com",  # Dominio inválido
+            "usuario @ejemplo.com",  # Espacio
+            "usuario@@ejemplo.com",  # Doble @
+            None,  # None
+            123,  # No es string
+            "usuario@ejemplo",  # Sin TLD
+        ],
+    )
+    def test_invalid_emails(self, email):
+        """Test con emails inválidos."""
+        assert is_valid_email(email) is False
+
+    def test_email_case_sensitivity(self):
+        """Test de sensibilidad a mayúsculas/minúsculas."""
+        # El formato debe validarse independiente de mayúsculas
+        assert is_valid_email("Usuario@Ejemplo.COM") is True
+        assert is_valid_email("ADMIN@TEST.COM") is True
+
+    def test_email_with_special_characters(self):
+        """Test con caracteres especiales permitidos."""
+        assert is_valid_email("user.name+tag@example.com") is True
+        assert is_valid_email("user_name@example.com") is True
+        assert is_valid_email("user-name@example.com") is True
+
+
+# ==============================================================================
+# TESTS DE RATE LIMITING (Tus 10 tests originales)
+# ==============================================================================
+
+
+class TestRateLimiting:
+    """Tests del sistema de rate limiting."""
+
+    def setup_method(self):
+        """Limpiar intentos antes de cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def teardown_method(self):
+        """Limpiar intentos después de cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def test_first_login_attempt_allowed(self):
+        """El primer intento de login debe estar permitido."""
+        email = "test@example.com"
+        allowed, message = check_rate_limit(email)
+
+        assert allowed is True
+        assert message is None
+
+    def test_multiple_attempts_within_limit(self):
+        """Múltiples intentos dentro del límite deben estar permitidos."""
+        email = "test@example.com"
+
+        # Hacer MAX_LOGIN_ATTEMPTS - 1 intentos
+        for _ in range(MAX_LOGIN_ATTEMPTS - 1):
+            record_failed_login(email)
+            allowed, message = check_rate_limit(email)
+            assert allowed is True
+
+    def test_exceeding_rate_limit(self):
+        """Exceder el límite debe bloquear al usuario."""
+        email = "test@example.com"
+
+        # Hacer MAX_LOGIN_ATTEMPTS intentos fallidos
+        for _ in range(MAX_LOGIN_ATTEMPTS):
+            record_failed_login(email)
+
+        # El siguiente intento debe estar bloqueado
+        allowed, message = check_rate_limit(email)
+
+        assert allowed is False
+        assert message is not None
+        assert "15 minutos" in message or "minutos" in message
+
+    def test_lockout_message_contains_time(self):
+        """El mensaje de bloqueo debe contener información de tiempo."""
+        email = "test@example.com"
+
+        # Bloquear usuario
+        for _ in range(MAX_LOGIN_ATTEMPTS):
+            record_failed_login(email)
+
+        allowed, message = check_rate_limit(email)
+
+        assert "minutos" in message.lower()
+
+    def test_old_attempts_cleaned_up(self):
+        """Los intentos antiguos deben ser limpiados automáticamente."""
+        email = "test@example.com"
+
+        # Simular intentos antiguos (fuera de la ventana de tiempo)
+        old_time = datetime.now() - LOCKOUT_TIME - timedelta(minutes=1)
+        LOGIN_ATTEMPTS[email] = [old_time] * 3
+
+        # Verificar que el usuario no está bloqueado
+        allowed, message = check_rate_limit(email)
+
+        assert allowed is True
+        assert message is None
+
+    def test_different_users_independent_limits(self):
+        """Los límites de diferentes usuarios deben ser independientes."""
+        email1 = "user1@example.com"
+        email2 = "user2@example.com"
+
+        # Bloquear user1
+        for _ in range(MAX_LOGIN_ATTEMPTS):
+            record_failed_login(email1)
+
+        # user1 debe estar bloqueado
+        allowed1, _ = check_rate_limit(email1)
+        assert allowed1 is False
+
+        # user2 no debe estar bloqueado
+        allowed2, _ = check_rate_limit(email2)
+        assert allowed2 is True
+
+    @pytest.mark.parametrize("num_attempts", [1, 2, 3, 4])
+    def test_various_attempt_counts(self, num_attempts):
+        """Test con diferentes números de intentos."""
+        email = "test@example.com"
+
+        for _ in range(num_attempts):
+            record_failed_login(email)
+
+        # Mientras no se exceda MAX_LOGIN_ATTEMPTS, debe estar permitido
+        if num_attempts < MAX_LOGIN_ATTEMPTS:
+            allowed, _ = check_rate_limit(email)
+            assert allowed is True
+
+
+# ==============================================================================
+# TESTS DE VALIDACIÓN DE CONTRASEÑA (Tus 5 tests originales)
+# ==============================================================================
+
+
+class TestPasswordValidation:
+    """Tests de validación de contraseñas."""
+
+    def test_password_minimum_length_constant(self):
+        """Verifica que la constante MIN_PASSWORD_LENGTH esté definida."""
+        assert MIN_PASSWORD_LENGTH >= 6
+
+    @pytest.mark.parametrize(
+        "password,should_be_valid",
+        [
+            ("123456", True),  # Mínimo 6 caracteres
+            ("abcdef", True),
+            ("Pass1!", True),
+            ("12345", False),  # Muy corta
+            ("", False),  # Vacía
+        ],
+    )
+    def test_password_length_validation(self, password, should_be_valid):
+        """Test de validación de longitud de contraseña."""
+        is_valid = len(password) >= MIN_PASSWORD_LENGTH
+        assert is_valid == should_be_valid
+
+
+# ==============================================================================
+# TESTS DE REGISTRO DE INTENTOS FALLIDOS (Tus 3 tests originales)
+# ==============================================================================
+
+
+class TestFailedLoginRecording:
+    """Tests del registro de intentos fallidos."""
+
+    def setup_method(self):
+        """Limpiar intentos antes de cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def teardown_method(self):
+        """Limpiar intentos después de cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def test_record_first_failed_login(self):
+        """Registrar el primer intento fallido."""
+        email = "test@example.com"
+
+        record_failed_login(email)
+
+        assert email in LOGIN_ATTEMPTS
+        assert len(LOGIN_ATTEMPTS[email]) == 1
+
+    def test_record_multiple_failed_logins(self):
+        """Registrar múltiples intentos fallidos."""
+        email = "test@example.com"
+
+        for _ in range(3):
+            record_failed_login(email)
+
+        assert len(LOGIN_ATTEMPTS[email]) == 3
+
+    def test_failed_login_timestamps_recent(self):
+        """Los timestamps deben ser recientes."""
+        email = "test@example.com"
+        before = datetime.now()
+
+        record_failed_login(email)
+
+        after = datetime.now()
+        timestamp = LOGIN_ATTEMPTS[email][0]
+
+        assert before <= timestamp <= after
+
+
+# ==============================================================================
+# TESTS DE INTEGRACIÓN DEL FLUJO (Tus 3 tests originales)
+# ==============================================================================
+
+
+@pytest.mark.integration
+class TestAuthenticationFlow:
+    """Tests de integración del flujo de autenticación."""
+
+    def setup_method(self):
+        """Preparar para cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def teardown_method(self):
+        """Limpiar después de cada test."""
+        LOGIN_ATTEMPTS.clear()
+
+    def test_successful_login_flow(self):
+        """Test del flujo completo de login exitoso."""
+        email = "user@example.com"
+
+        # 1. Verificar rate limit (debe estar permitido)
+        allowed, message = check_rate_limit(email)
+        assert allowed is True
+
+        # 2. Validar email
+        assert is_valid_email(email) is True
+
+    def test_failed_login_flow(self):
+        """Test del flujo de login fallido."""
+        email = "user@example.com"
+
+        # 1. Verificar rate limit
+        allowed, _ = check_rate_limit(email)
+        assert allowed is True
+
+        # 2. Simular fallo de autenticación
+        record_failed_login(email)
+
+        # 3. El usuario aún debe poder intentar de nuevo
+        allowed, _ = check_rate_limit(email)
+        assert allowed is True
+
+    def test_brute_force_protection_flow(self):
+        """Test de protección contra fuerza bruta."""
+        email = "attacker@example.com"
+
+        # Simular ataque de fuerza bruta
+        for attempt in range(MAX_LOGIN_ATTEMPTS + 2):
+            allowed, message = check_rate_limit(email)
+
+            if attempt < MAX_LOGIN_ATTEMPTS:
+                # Primeros intentos deben estar permitidos
+                assert allowed is True
+                record_failed_login(email)
+            else:
+                # Después de exceder el límite, debe estar bloqueado
+                assert allowed is False
+                assert message is not None
+
+
+# ==============================================================================
+# TESTS DE SEGURIDAD (Tus 4 tests originales)
+# ==============================================================================
+
+
+@pytest.mark.security
+class TestAuthSecurity:
+    """Tests de seguridad del módulo de autenticación."""
+
+    def test_email_validation_prevents_injection(self):
+        """La validación de email debe prevenir inyecciones."""
+        malicious_emails = [
+            "'; DROP TABLE users; --",
+            "<script>alert('xss')</script>@example.com",
+            "../../../etc/passwd",
+            "admin'--@example.com",
+        ]
+
+        for email in malicious_emails:
+            # Estos emails no deben pasar la validación
+            assert is_valid_email(email) is False
+
+    def test_rate_limiting_uses_email_as_key(self):
+        """El rate limiting debe usar el email como clave."""
+        email = "test@example.com"
+
+        record_failed_login(email)
+
+        # La clave en LOGIN_ATTEMPTS debe ser el email
+        assert email in LOGIN_ATTEMPTS
+
+    def test_lockout_time_is_reasonable(self):
+        """El tiempo de bloqueo debe ser razonable (no muy corto ni muy largo)."""
+        # El LOCKOUT_TIME debe estar entre 5 y 60 minutos
+        assert timedelta(minutes=5) <= LOCKOUT_TIME <= timedelta(minutes=60)
+
+    def test_max_attempts_is_reasonable(self):
+        """El máximo de intentos debe ser razonable."""
+        # Entre 3 y 10 intentos
+        assert 3 <= MAX_LOGIN_ATTEMPTS <= 10
+
+
+# ==============================================================================
+# TESTS DE CASOS EDGE (Tus 5 tests originales)
+# ==============================================================================
+
+
+class TestEdgeCases:
+    """Tests de casos extremos y especiales."""
+
+    def setup_method(self):
+        LOGIN_ATTEMPTS.clear()
+
+    def teardown_method(self):
+        LOGIN_ATTEMPTS.clear()
+
+    def test_empty_email_validation(self):
+        """Email vacío debe ser inválido."""
+        assert is_valid_email("") is False
+        assert is_valid_email(None) is False
+
+    def test_very_long_email(self):
+        """Email muy largo debe manejarse correctamente."""
+        long_email = "a" * 100 + "@" + "b" * 100 + ".com"
+        # Debe validarse (aunque sea poco práctico)
+        result = is_valid_email(long_email)
+        assert isinstance(result, bool)
+
+    def test_unicode_in_email(self):
+        """Email con caracteres Unicode."""
+        unicode_emails = [
+            "usuario@exañple.com",  # ñ en dominio
+            "usuário@example.com",  # á en usuario
+        ]
+
+        for email in unicode_emails:
+            # Dependiendo de la implementación, pueden ser válidos o no
+            result = is_valid_email(email)
+            assert isinstance(result, bool)
+
+    def test_rate_limit_with_none_email(self):
+        """Rate limit con email None debe manejarse."""
+        try:
+            allowed, message = check_rate_limit(None)
+            # Si no lanza error, debe retornar un booleano
+            assert isinstance(allowed, bool)
+        except (TypeError, AttributeError):
+            # Es aceptable que lance error con None
+            pass
+
+    def test_concurrent_failed_logins_same_user(self):
+        """Múltiples fallos simultáneos del mismo usuario."""
+        email = "test@example.com"
+
+        # Registrar varios fallos "simultáneos"
+        for _ in range(10):
+            record_failed_login(email)
+
+        # Debe haber registrado todos los intentos
+        assert len(LOGIN_ATTEMPTS[email]) == 10
+
+        # Y el usuario debe estar bloqueado
+        allowed, _ = check_rate_limit(email)
+        assert allowed is False
+
+
+# ==============================================================================
+# TESTS DE CONSTANTES Y CONFIGURACIÓN (Tus 2 tests originales)
+# ==============================================================================
+
+
+class TestConfiguration:
+    """Tests de configuración y constantes."""
+
+    def test_constants_are_defined(self):
+        """Verificar que las constantes estén definidas."""
+        assert MIN_PASSWORD_LENGTH is not None
+        assert MAX_LOGIN_ATTEMPTS is not None
+        assert LOCKOUT_TIME is not None
+
+    def test_constants_have_reasonable_values(self):
+        """Verificar que las constantes tengan valores razonables."""
+        assert isinstance(MIN_PASSWORD_LENGTH, int)
+        assert isinstance(MAX_LOGIN_ATTEMPTS, int)
+        assert isinstance(LOCKOUT_TIME, timedelta)
+
+        assert MIN_PASSWORD_LENGTH > 0
+        assert MAX_LOGIN_ATTEMPTS > 0
+        assert LOCKOUT_TIME.total_seconds() > 0
+
+
+# ==============================================================================
+# FIXTURES PERSONALIZADAS (Tus 2 tests/fixtures originales)
+# ==============================================================================
+
+
+@pytest.fixture
+def clean_login_attempts():
+    """Fixture que limpia LOGIN_ATTEMPTS antes y después del test."""
+    LOGIN_ATTEMPTS.clear()
+    yield LOGIN_ATTEMPTS
+    LOGIN_ATTEMPTS.clear()
+
+
+@pytest.fixture
+def locked_out_user(clean_login_attempts):
+    """Fixture que proporciona un usuario bloqueado."""
+    email = "locked@example.com"
+
+    # Bloquear al usuario
+    for _ in range(MAX_LOGIN_ATTEMPTS):
+        record_failed_login(email)
+
+    return email
+
+
+def test_locked_user_fixture(locked_out_user):
+    """Test usando la fixture de usuario bloqueado."""
+    allowed, message = check_rate_limit(locked_out_user)
+
+    assert allowed is False
+    assert message is not None
+
+# ==============================================================================
+# --- INICIO DE NUEVOS TESTS FUSIONADOS ---
+# (Estos son los 3 tests que creamos para las páginas HTML)
+# ==============================================================================
+
+def test_login_page_loads(client):
+    """
+    PRUEBA 49: ¿La página de login carga correctamente?
+    """
+    # 1. (Act) El cliente "visita" la página de login
+    response = client.get('/ingresoportal.html')
+    
+    # 2. (Assert) Verificamos que la página respondió con "200 OK"
+    assert response.status_code == 200
+    
+    # 3. (Assert) Verificamos que el texto "Ingresar" esté en la página
+    # (Usamos b'' para bytes, que es como Flask envía los datos)
+    assert b"Ingresar" in response.data
+    assert b"Crear Cuenta" in response.data
+
+def test_register_page_loads(client):
+    """
+    PRUEBA 50: ¿La página de registro carga correctamente?
+    """
+    # 1. (Act) El cliente "visita" la página de registro
+    response = client.get('/registroportal.html') # Usando el nombre corregido
+    
+    # 2. (Assert) Verificamos que la página respondió con "200 OK"
+    assert response.status_code == 200
+    
+    # 3. (Assert) Verificamos que el texto "Registrar" esté en la página
+    assert b"Registrar" in response.data
+    assert b"Ya tienes una cuenta?" in response.data
+
+def test_failed_login_api(client):
+    """
+    PRUEBA 51: ¿La API de login rechaza un mal usuario?
+    """
+    # 1. (Act) El cliente "envía" datos JSON a la API de login
+    response = client.post('/api/login', json={
+        "email": "usuario-que-no-existe@error.com",
+        "password": "password_incorrecto"
+    })
+    
+    # 2. (Assert) Verificamos que la API respondió con "401 No Autorizado"
+    assert response.status_code == 401
+    
+    # 3. (Assert) Verificamos que el JSON de respuesta contenga el error
+    assert b"Email o contrase" in response.data # Buscamos "Email o contraseña incorrectos"

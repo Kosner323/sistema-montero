@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Gestión de Depuraciones | Montero y Negocio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="description"
+      content="Sistema de gestión de depuraciones de Montero y Negocio"
+    />
+    <meta name="author" content="Montero y Negocio" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        .step-container {
+            display: none;
+        }
+        .step-container.active {
+            display: block;
+        }
+        .spinner {
+            display: none;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: .2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Estilos para las tarjetas de preguntas */
+        .question-card .form-check {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+  </head>
+  
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+    <nav class="pc-sidebar">
+      <div class="navbar-wrapper">
+        <div class="m-header flex items-center py-4 px-6 h-header-height">
+          <a href="index.html" class="b-brand flex items-center gap-3">
+            <img src="/assets/images/logo-white.svg" class="img-fluid logo logo-lg" alt="logo" />
+            <img src="/assets/images/favicon.svg" class="img-fluid logo logo-sm" alt="logo" />
+          </a>
+        </div>
+        <div class="navbar-content h-[calc(100vh_-_80px)] py-2.5 overflow-y-auto">
+          <ul class="pc-navbar">
+            <li class="pc-item pc-caption">
+              <label>NAVIGATION</label>
+            </li>
+            <li class="pc-item">
+              <a href="index.html" class="pc-link"> <span class="pc-micon">
+                  <i data-feather="home"></i>
+                </span>
+                <span class="pc-mtext">DASHBOARD</span>
+              </a>
+            </li>
+
+            <li class="pc-item pc-caption">
+              <label>ADMINISTRACIÓN Y FINANZAS</label>
+              <i data-feather="settings"></i>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="database"></i></span>
+                    <span class="pc-mtext">BASE DE DATOS</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a class="pc-link" href="base-datos-usuarios.html">USUARIOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="ingresar_empresa.html">EMPRESAS</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="book-open"></i></span>
+                    <span class="pc-mtext">CONTABILIDAD</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a class="pc-link" href="pagos.html">PAGOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="tabla.html">TABLA</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="pago-planillas.html">PAGO DE PLANILLAS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="enviar-planillas.html">ENVIAR PLANILLAS</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="pc-item pc-caption">
+              <label>GESTIÓN OPERATIVA</label>
+              <i data-feather="bar-chart-2"></i>
+            </li>
+            <li class="pc-item">
+                <a href="novedades.html" class="pc-link"><span class="pc-micon"><i data-feather="bell"></i></span><span class="pc-mtext">NOVEDADES</span></a>
+            </li>
+            <li class="pc-item"> 
+                <a href="formularios.html" class="pc-link"> <span class="pc-micon"> <i data-feather="align-justify"></i></span>
+                <span class="pc-mtext">FORMULARIOS</span>
+              </a>
+            </li>
+            
+            <li class="pc-item pc-hasmenu pc-trigger active">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="gavel"></i></span>
+                    <span class="pc-mtext">GESTIÓN JURÍDICA</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a class="pc-link" href="incapacidades.html">INCAPACIDADES</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="tutelas.html">TUTELAS</a>
+                    </li>
+                    <li class="pc-item active">
+                        <a class="pc-link" href="depuraciones.html">DEPURACIONES</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="pc-item pc-caption">
+              <label>DOCUMENTACIÓN Y SERVICIO</label>
+              <i data-feather="file-text"></i>
+            </li>
+            <li class="pc-item pc-hasmenu">
+                <a href="#!" class="pc-link">
+                    <span class="pc-micon"><i data-feather="file-text"></i></span>
+                    <span class="pc-mtext">INFORMACIÓN</span>
+                    <span class="pc-arrow"><i class="ti ti-chevron-right"></i></span>
+                </a>
+                <ul class="pc-submenu">
+                    <li class="pc-item">
+                        <a href="informacion-clientes.html" class="pc-link">INFORMACIÓN PARA CLIENTES</a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="informacion-empleados.html" class="pc-link">INFORMACIÓN PARA EMPLEADOS</a>
+                    </li>
+                    <li class="pc-item">
+                        <a href="cotizaciones.html" class="pc-link">COTIZACIONES</a>
+                    </li>
+                    <li class="pc-item">
+                        <a class="pc-link" href="pago-impuestos.html">PAGO DE IMPUESTOS</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="pc-item pc-caption">
+              <label>GUÍAS Y ACCESO</label>
+              <i data-feather="lock"></i>
+            </li>
+            <li class="pc-item">
+                <a href="usuarios-y-contrasenas.html" class="pc-link"><span class="pc-micon"><i data-feather="key"></i></span><span class="pc-mtext">USUARIOS Y CONTRASEÑA</span></a>
+            </li>
+            <li class="pc-item">
+                <a href="#" class="pc-link"><span class="pc-micon"><i data-feather="plus-circle"></i></span><span class="pc-mtext">GUÍA CREACIÓN EMPRESA</span></a>
+            </li>
+            <li class="pc-item">
+                <a href="#" class="pc-link"><span class="pc-micon"><i data-feather="x-circle"></i></span><span class="pc-mtext">GUÍA DE CERRAR EMPRESAS</span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <header class="pc-header">
+      <div class="header-wrapper flex max-sm:px-[15px] px-[25px] grow">
+        <div class="me-auto pc-mob-drp">
+          <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
+            <li class="pc-h-item pc-sidebar-collapse max-lg:hidden lg:inline-flex">
+              <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="sidebar-hide">
+                <i data-feather="menu"></i>
+              </a>
+            </li>
+            <li class="pc-h-item pc-sidebar-popup lg:hidden">
+              <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="mobile-collapse">
+                <i data-feather="menu"></i>
+              </a>
+            </li>
+            <li class="dropdown pc-h-item">
+              <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                <i data-feather="search"></i>
+              </a>
+              <div class="dropdown-menu pc-h-dropdown drp-search">
+                <form class="px-2 py-1">
+                  <input type="search" class="form-control !border-0 !shadow-none" placeholder="Search here. . ." />
+                </form>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="ms-auto">
+          <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
+            <li class="dropdown pc-h-item">
+              <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                <i data-feather="sun"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+                <a href="#!" class="dropdown-item" onclick="layout_change('dark')">
+                  <i data-feather="moon"></i> <span>Oscuro</span>
+                </a>
+                <a href="#!" class="dropdown-item" onclick="layout_change('light')">
+                  <i data-feather="sun"></i> <span>Claro</span>
+                </a>
+                <a href="#!" class="dropdown-item" onclick="layout_change_default()">
+                  <i data-feather="settings"></i> <span>Por Defecto</span>
+                </a>
+              </div>
+            </li>
+            <li class="dropdown pc-h-item">
+              <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                <i data-feather="settings"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-user"></i> <span>Mi Cuenta</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-settings"></i> <span>Configuración</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-headset"></i> <span>Soporte</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-lock"></i> <span>Bloquear Pantalla</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-power"></i> <span>Cerrar Sesión</span>
+                </a>
+              </div>
+            </li>
+            <li class="dropdown pc-h-item">
+              <a class="pc-head-link dropdown-toggle me-0" data-pc-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                <i data-feather="bell"></i>
+                <span class="badge bg-success-500 text-white rounded-full z-10 absolute right-0 top-0">5</span>
+              </a>
+              <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown p-2">
+                <div class="card my-2">
+                  <div class="card-header flex items-center justify-between pb-0">
+                    <h5 class="mb-0">Notificaciones</h5>
+                    <div class="dropdown">
+                      <a class="avtar avtar-xs btn-link-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="false" aria-expanded="false">
+                        <i class="ti ti-dots-vertical"></i>
+                      </a>
+                      <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="#">Limpiar Todo</a>
+                        <a class="dropdown-item" href="#">Marcar como leído</a>
+                        <a class="dropdown-item" href="#">Ajustar configuración</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="flex items-start">
+                      <div class="flex-shrink-0">
+                        <i class="ti ti-bell bg-primary-500 text-white rounded-md p-2 me-2"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-0">Añadir Campo de Notas al Formulario</h6>
+                        <p class="mb-0 text-sm">Empieza a trabajar en la tarea asignada para la semana.</p>
+                        <span class="text-xs text-muted">2 min ago</span>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <a class="text-muted" href="#"><i class="ti ti-x-circle"></i></a>
+                      </div>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="flex items-start">
+                      <div class="flex-shrink-0">
+                        <i class="ti ti-user bg-info-500 text-white rounded-md p-2 me-2"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-0">Problema con la Carga de Beneficiarios</h6>
+                        <p class="mb-0 text-sm">Revisa el archivo de logs. Posible fallo en la estructura JSON.</p>
+                        <span class="text-xs text-muted">10 min ago</span>
+                      </div>
+                      <div class="flex-shrink-0">
+                        <a class="text-muted" href="#"><i class="ti ti-x-circle"></i></a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-footer bg-transparent py-3 text-center">
+                    <a href="#" class="text-primary-500 text-sm">Ver Todas las Notificaciones</a>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="dropdown pc-h-item">
+              <a href="#" class="pc-head-link dropdown-toggle arrow-none me-0" data-pc-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <img src="/assets/images/user/avatar-2.jpg" alt="user-image" class="user-avtar rounded-circle md:h-10 md:w-10 h-8 w-8" />
+              </a>
+              <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-user"></i> <span>Mi Cuenta</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-settings"></i> <span>Configuración</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-headset"></i> <span>Soporte</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-lock"></i> <span>Bloquear Pantalla</span>
+                </a>
+                <a href="#!" class="dropdown-item">
+                  <i class="ti ti-power"></i> <span>Cerrar Sesión</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header" id="pageHeaderBlock">
+          <div class="page-block">
+            <div class="row align-items-center">
+              <div class="col-md-12">
+                <ul class="breadcrumb mb-3">
+                  <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                  <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Jurídica</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Depuraciones</li>
+                </ul>
+              </div>
+              <div class="col-md-12">
+                <div class="page-header-title">
+                  <h2 class="mb-0" id="main-title">Gestión de Depuraciones</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="alertsContainer" class="mb-4"></div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <button type="button" class="btn btn-primary" id="btnIniciarDepuracion">
+                    <i data-feather="plus" class="me-2"></i> Iniciar Depuración
+                </button>
+                <button type="button" class="btn btn-info" id="btnVerPendientes">
+                    <i data-feather="refresh-cw" class="me-2"></i> Ver Pendientes
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Depuraciones Pendientes</h5>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Entidad</th>
+                                    <th>Causa</th>
+                                    <th>Fecha Sugerida</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaDepuraciones">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Cargando datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalIniciarDepuracion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Iniciar Proceso de Depuración</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          
+          <div class="modal-body p-4 p-md-5">
+            
+            <div id="step1" class="step-container active">
+              
+              <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">📑 Preguntas Iniciales - Documentos Disponibles</h5>
+                    <div class="alert alert-info">
+                        <strong>⚠️ Nota:</strong> Verificar que los documentos contengan el número de identificación y el nombre de la empresa, así como el tipo y número de identificación, nombre y apellido del usuario, y que toda la información coincida.
+                    </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                
+                <div class="col-md-6">
+                    <div class="card mb-3 question-card">
+                        <div class="card-body">
+                            <label class="form-label fw-bold">1. ¿Existe cédula del usuario a depurar?</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_cedula" id="cedula_si" value="si">
+                              <label class="form-check-label" for="cedula_si">✅ Sí</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_cedula" id="cedula_no" value="no" checked>
+                              <label class="form-check-label" for="cedula_no">❌ No</label>
+                            </div>
+                            <div id="cedula_file_container" class="mt-2 hidden">
+                              <label class="form-label">Adjuntar Cédula (PDF):</label>
+                              <input type="file" class="form-control" id="file_cedula" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3 question-card">
+                        <div class="card-body">
+                            <label class="form-label fw-bold">3. ¿Existe una planilla con novedades de ingreso?</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_ingreso" id="ingreso_si" value="si">
+                              <label class="form-check-label" for="ingreso_si">✅ Sí</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_ingreso" id="ingreso_no" value="no" checked>
+                              <label class="form-check-label" for="ingreso_no">❌ No</label>
+                            </div>
+                            <div id="ingreso_file_container" class="mt-2 hidden">
+                              <label class="form-label">Adjuntar Planilla de Ingreso (PDF):</label>
+                              <input type="file" class="form-control" id="file_ingreso" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card mb-3 question-card">
+                        <div class="card-body">
+                            <label class="form-label fw-bold">2. ¿Existe un formulario de novedades de afiliación?</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_afiliacion" id="afiliacion_si" value="si">
+                              <label class="form-check-label" for="afiliacion_si">✅ Sí</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_afiliacion" id="afiliacion_no" value="no" checked>
+                              <label class="form-check-label" for="afiliacion_no">❌ No</label>
+                            </div>
+                            <div id="afiliacion_file_container" class="mt-2 hidden">
+                              <label class="form-label">Adjuntar Formulario de Afiliación (PDF):</label>
+                              <input type="file" class="form-control" id="file_afiliacion" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3 question-card">
+                        <div class="card-body">
+                            <label class="form-label fw-bold">4. ¿Existe una planilla con novedades de retiro?</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_retiro" id="retiro_si" value="si">
+                              <label class="form-check-label" for="retiro_si">✅ Sí</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_retiro" id="retiro_no" value="no" checked>
+                              <label class="form-check-label" for="retiro_no">❌ No</label>
+                            </div>
+                            <div id="retiro_file_container" class="mt-2 hidden">
+                              <label class="form-label">Adjuntar Planilla de Retiro (PDF):</label>
+                              <input type="file" class="form-control" id="file_retiro" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card mb-3 question-card border-warning">
+                        <div class="card-body bg-light-warning">
+                            <label class="form-label fw-bold">5. ¿Existe el estado de cuenta de la empresa? (Obligatorio)</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_estado_cuenta" id="estado_si" value="si">
+                              <label class="form-check-label" for="estado_si">✅ Sí</label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input" type="radio" name="tiene_estado_cuenta" id="estado_no" value="no" checked>
+                              <label class="form-check-label" for="estado_no">❌ No</label>
+                            </div>
+                            
+                            <div id="estado_cuenta_file_container" class="mt-2 hidden">
+                              <label class="form-label">Adjuntar Estado de Cuenta (PDF):</label>
+                              <input type="file" class="form-control" id="file_estado_cuenta" accept=".pdf">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+    
+            <div id="step2" class="step-container">
+              <h5 class="mb-3">📍 Datos de la Empresa y Usuario</h5>
+    
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header"><h6 class="text-primary mb-0">🏢 Datos de la Empresa</h6></div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Tipo de Identificación Empresa *</label>
+                        <select class="form-select" id="empresa_tipo_id" required>
+                          <option value="">Seleccione...</option>
+                          <option value="NIT">NIT</option>
+                          <option value="RUT">RUT</option>
+                        </select>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Número de Identificación Empresa *</label>
+                        <div class="input-group">
+                          <input type="text" class="form-control" id="empresa_numero_id" placeholder="Ej: 900123456-7" required>
+                          <button type="button" class="btn btn-outline-secondary" id="btnBuscarEmpresa">
+                            <i data-feather="search"></i>
+                          </button>
+                        </div>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Nombre de la Empresa</label>
+                        <input type="text" class="form-control" id="empresa_nombre" readonly>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Número de Planilla *</label>
+                        <input type="text" class="form-control" id="numero_planilla" placeholder="Ej: 12345" required>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+    
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header"><h6 class="text-success mb-0">👤 Datos del Usuario</h6></div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Tipo de Identificación Usuario *</label>
+                        
+                        <select class="form-select" id="usuario_tipo_id" required>
+                          <option value="">Seleccione...</option>
+                          <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                          <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                          <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                          <option value="Pasaporte">Pasaporte</option>
+                          <option value="Permiso Temporal">Permiso Temporal</option>
+                          <option value="Otro">Otro</option>
+                        </select>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Número de Identificación Usuario *</label>
+                        <div class="input-group">
+                          <input type="text" class="form-control" id="usuario_numero_id" placeholder="Ej: 1010123456" required>
+                           <button type="button" class="btn btn-outline-secondary" id="btnBuscarUsuario">
+                            <i data-feather="search"></i>
+                          </button>
+                        </div>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Nombres y Apellidos Completos</label>
+                        <input type="text" class="form-control" id="usuario_nombre_completo" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+    
+              <hr class="my-4">
+    
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header"><h6 class="text-warning mb-0">🧑‍💼 Datos del Representante Legal</h6></div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Nombres y Apellidos</label>
+                        <input type="text" class="form-control" id="rep_legal_nombre" readonly>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Cargo *</label>
+                        <input type="text" class="form-control" id="rep_legal_cargo" placeholder="Ej: Gerente General" required>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Celular *</label>
+                        <input type="tel" class="form-control" id="rep_legal_celular" placeholder="Ej: 3001234567" required>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="rep_legal_direccion" readonly>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="rep_legal_correo" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+    
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header"><h6 class="text-danger mb-0">✉️ Datos de la Carta</h6></div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Ciudad *</label>
+                        <input type="text" class="form-control" id="ciudad" placeholder="Ej: Armenia" required>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <label class="form-label">Señores (Entidad Destino) *</label>
+                        <input type="text" class="form-control" id="senores" placeholder="Ej: EPS SURA" required>
+                        <small class="text-muted">Ejemplo: EPS SURA, POSITIVA ARL, etc.</small>
+                      </div>
+        
+                      <div class="mb-3">
+                        <label class="form-label">Departamento (Entidad) *</label>
+                        <input type="text" class="form-control" id="departamento_entidad" placeholder="Ej: DEPARTAMENTO DE CARTERA" required>
+                      </div>
+                      
+                      <label class="form-label">Periodo Laboral *</label>
+                      <div class="row g-3">
+                        <div class="col-6">
+                           <label class="form-label">Fecha Inicio *</label>
+                           <input type="date" class="form-control" id="fecha_inicio" required>
+                        </div>
+                        <div class="col-6">
+                           <label class="form-label">Fecha Fin *</label>
+                           <input type="date" class="form-control" id="fecha_fin" required>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+    
+            <div id="step3" class="step-container">
+              <h5 class="mb-3">👀 Vista Previa de la Carta</h5>
+              
+              <div class="alert alert-warning">
+                <strong>⚠️ Atención:</strong> Revise cuidadosamente la carta antes de aceptar. Al presionar "Aceptar", se generará el PDF final.
+              </div>
+              
+              <div class="row">
+                <div class="col-lg-8">
+                  <div id="cartaPreview" class="border p-4 bg-light" style="min-height: 400px; max-height: 70vh; overflow-y: auto;">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">📎 Documentos que se adjuntarán</h6>
+                    </div>
+                    <div class="card-body">
+                      <div id="listaDocumentosAdjuntos" class="mt-2">
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="btnCancelar">
+              <i data-feather="x" class="me-2"></i> Cancelar
+            </button>
+            <button type="button" class="btn btn-outline-primary hidden" id="btnAnterior">
+              <i data-feather="arrow-left" class="me-2"></i> Anterior
+            </button>
+            <button type="button" class="btn btn-primary" id="btnSiguiente">
+              Siguiente <i data-feather="arrow-right" class="ms-2"></i>
+            </button>
+            <button type="button" class="btn btn-success hidden" id="btnAceptar">
+              <i data-feather="check" class="me-2"></i> Aceptar y Generar PDF
+              <span class="spinner ms-2" id="generarPdfSpinner"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="pc-footer">
+      <div class="footer-wrapper container-fluid mx-10">
+        <div class="grid grid-cols-12 gap-1.5">
+          <div class="col-span-12 sm:col-span-6 my-1">
+            <p class="m-0">
+              <a href="https://codedthemes.com/" class="text-theme-bodycolor dark:text-themedark-bodycolor hover:text-primary-500 dark:hover:text-primary-500" target="_blank">CodedThemes</a>
+              , Built with ♥ for a smoother web presence.
+            </p>
+          </div>
+          <div class="col-span-12 sm:col-span-6 my-1 justify-self-end">
+            <p class="inline-block max-sm:mr-3 sm:ml-2">Distributed by <a href="https://themewagon.com" target="_blank">Themewagon</a></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+    </div>
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/script.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // ==================== VARIABLES GLOBALES ====================
+      let currentStep = 1;
+      let depuracionesData = [];
+      let documentosSeleccionados = {};
+      let tipoEscenario = null;
+    
+      // ==================== ELEMENTOS DEL DOM ====================
+      const modalEl = document.getElementById('modalIniciarDepuracion');
+      const modal = new bootstrap.Modal(modalEl);
+      
+      const btnIniciarDepuracion = document.getElementById('btnIniciarDepuracion');
+      const btnSiguiente = document.getElementById('btnSiguiente');
+      const btnAnterior = document.getElementById('btnAnterior');
+      const btnAceptar = document.getElementById('btnAceptar');
+      const btnCancelar = document.getElementById('btnCancelar');
+      const btnBuscarEmpresa = document.getElementById('btnBuscarEmpresa');
+      const btnBuscarUsuario = document.getElementById('btnBuscarUsuario');
+      const btnVerPendientes = document.getElementById('btnVerPendientes');
+    
+      // ==================== EVENT LISTENERS ====================
+      
+      // Mostrar/ocultar campos de archivo según respuesta
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const name = this.name;
+          const value = this.value;
+          const fileContainer = document.getElementById(name.replace('tiene_', '') + '_file_container');
+          
+          if (fileContainer) {
+            if (value === 'si') {
+              fileContainer.classList.remove('hidden');
+            } else {
+              fileContainer.classList.add('hidden');
+              const fileInput = fileContainer.querySelector('input[type="file"]');
+              if (fileInput) fileInput.value = '';
+            }
+          }
+        });
+      });
+    
+      // Navegación: Siguiente
+      btnSiguiente.addEventListener('click', function() {
+        if (currentStep === 1) {
+          if (!validarPaso1()) return;
+          determinarEscenario();
+          currentStep = 2;
+          mostrarPaso(2);
+        } else if (currentStep === 2) {
+          if (!validarPaso2()) return;
+          generarVistaPrevia();
+          currentStep = 3;
+          mostrarPaso(3);
+        }
+      });
+    
+      // Navegación: Anterior
+      btnAnterior.addEventListener('click', function() {
+        if (currentStep > 1) {
+          currentStep--;
+          mostrarPaso(currentStep);
+        }
+      });
+    
+      // Cancelar
+      btnCancelar.addEventListener('click', function() {
+        if (confirm('¿Está seguro de cancelar? Se perderán todos los datos ingresados.')) {
+          resetearModal();
+          modal.hide();
+        }
+      });
+    
+      // Iniciar Depuración
+      btnIniciarDepuracion.addEventListener('click', function() {
+        resetearModal();
+        modal.show();
+      });
+      
+      // Refrescar iconos CADA VEZ que el modal se muestre
+      modalEl.addEventListener('shown.bs.modal', () => {
+          feather.replace();
+      });
+    
+      // Aceptar y Generar PDF
+      btnAceptar.addEventListener('click', generarYGuardarPDF);
+    
+      // Buscar Empresa
+      btnBuscarEmpresa.addEventListener('click', async function() {
+        const tipoId = document.getElementById('empresa_tipo_id').value;
+        const numeroId = document.getElementById('empresa_numero_id').value;
+    
+        if (!tipoId || !numeroId) {
+          showAlert('Por favor ingrese tipo y número de identificación de la empresa', 'warning', 'step2');
+          return;
+        }
+        
+        this.disabled = true;
+    
+        try {
+          const response = await fetch(`/api/depuraciones/buscar-empresa?tipo=${tipoId}&numero=${numeroId}`, {
+            credentials: 'include'
+          });
+    
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Empresa no encontrada');
+          }
+    
+          const empresa = await response.json();
+          document.getElementById('empresa_nombre').value = empresa.nombre_empresa || '';
+          document.getElementById('rep_legal_nombre').value = empresa.rep_legal_nombre || '';
+          document.getElementById('rep_legal_direccion').value = empresa.direccion_empresa || '';
+          document.getElementById('rep_legal_correo').value = empresa.correo_empresa || '';
+          document.getElementById('ciudad').value = empresa.ciudad_empresa || '';
+          
+          showAlert('✅ Empresa encontrada correctamente', 'success', 'step2');
+        } catch (error) {
+          showAlert('❌ ' + error.message, 'danger', 'step2');
+        } finally {
+            this.disabled = false;
+        }
+      });
+    
+      // Buscar Usuario
+      btnBuscarUsuario.addEventListener('click', async function() {
+        const tipoId = document.getElementById('usuario_tipo_id').value;
+        const numeroId = document.getElementById('usuario_numero_id').value;
+    
+        if (!tipoId || !numeroId) {
+          showAlert('Por favor ingrese tipo y número de identificación del usuario', 'warning', 'step2');
+          return;
+        }
+        
+        this.disabled = true;
+    
+        try {
+          const response = await fetch(`/api/depuraciones/buscar-usuario?tipo=${tipoId}&numero=${numeroId}`, {
+            credentials: 'include'
+          });
+    
+          if (!response.ok) {
+             const errorData = await response.json();
+            throw new Error(errorData.error || 'Usuario no encontrado');
+          }
+    
+          const usuario = await response.json();
+          const nombreCompleto = `${usuario.primerNombre || ''} ${usuario.segundoNombre || ''} ${usuario.primerApellido || ''} ${usuario.segundoApellido || ''}`.trim().replace(/\s+/g, ' ');
+          document.getElementById('usuario_nombre_completo').value = nombreCompleto;
+          
+          showAlert('✅ Usuario encontrado correctamente', 'success', 'step2');
+        } catch (error) {
+          showAlert('❌ ' + error.message, 'danger', 'step2');
+        } finally {
+            this.disabled = false;
+        }
+      });
+    
+      // Actualizar lista de pendientes
+      btnVerPendientes.addEventListener('click', cargarPendientes);
+    
+      // ==================== FUNCIONES PRINCIPALES ====================
+      
+      function mostrarPaso(paso) {
+        document.querySelectorAll('.step-container').forEach(step => {
+          step.classList.remove('active');
+        });
+        
+        const activeStep = document.getElementById(`step${paso}`);
+        if (activeStep) {
+            activeStep.classList.add('active');
+        }
+    
+        // Controlar botones
+        btnAnterior.classList.toggle('hidden', paso === 1);
+        btnSiguiente.classList.toggle('hidden', paso === 3);
+        btnAceptar.classList.toggle('hidden', paso !== 3);
+        
+        // Refrescar iconos
+        setTimeout(feather.replace, 50); 
+      }
+    
+      function validarPaso1() {
+        const preguntas = ['tiene_cedula', 'tiene_afiliacion', 'tiene_ingreso', 'tiene_retiro', 'tiene_estado_cuenta'];
+        
+        for (let pregunta of preguntas) {
+          const respuesta = document.querySelector(`input[name="${pregunta}"]:checked`);
+          if (!respuesta) {
+            showAlert(`Por favor responda todas las preguntas`, 'warning', 'step1');
+            return false;
+          }
+    
+          // Validar que si dijo "sí", adjuntó el archivo
+          if (respuesta.value === 'si') {
+            const fileInput = document.getElementById(`file_${pregunta.replace('tiene_', '')}`);
+            if (fileInput && !fileInput.files[0]) {
+              showAlert(`Por favor adjunte el archivo para: ${pregunta.replace('tiene_', '').replace('_', ' ')}`, 'warning', 'step1');
+              return false;
+            }
+          }
+        }
+        
+        // Validar que al menos exista el estado de cuenta
+        const estadoCuenta = document.querySelector('input[name="tiene_estado_cuenta"]:checked');
+        if (!estadoCuenta || estadoCuenta.value !== 'si') {
+            showAlert('El "Estado de Cuenta" es obligatorio para iniciar una depuración.', 'warning', 'step1');
+            return false;
+        }
+    
+    
+        // Guardar documentos seleccionados
+        documentosSeleccionados = {
+          cedula: getFileInfo('file_cedula', 'tiene_cedula'),
+          afiliacion: getFileInfo('file_afiliacion', 'tiene_afiliacion'),
+          ingreso: getFileInfo('file_ingreso', 'tiene_ingreso'),
+          retiro: getFileInfo('file_retiro', 'tiene_retiro'),
+          estado_cuenta: getFileInfo('file_estado_cuenta', 'tiene_estado_cuenta')
+        };
+    
+        return true;
+      }
+    
+      function getFileInfo(fileInputId, radioName) {
+        const respuesta = document.querySelector(`input[name="${radioName}"]:checked`);
+        if (respuesta && respuesta.value === 'si') {
+          const fileInput = document.getElementById(fileInputId);
+          if (fileInput && fileInput.files[0]) {
+            return {
+              existe: true,
+              archivo: fileInput.files[0]
+            };
+          }
+        }
+        return { existe: false, archivo: null };
+      }
+    
+      function determinarEscenario() {
+        const tiene = (doc) => documentosSeleccionados[doc] && documentosSeleccionados[doc].existe;
+    
+        const tieneAfiliacion = tiene('afiliacion');
+        const tieneIngreso = tiene('ingreso');
+        const tieneRetiro = tiene('retiro');
+    
+        if (!tieneAfiliacion && !tieneIngreso && !tieneRetiro) {
+            tipoEscenario = 'BASICO';
+        } else if (tieneAfiliacion && tieneIngreso && !tieneRetiro) {
+            tipoEscenario = 'SIN_RETIRO';
+        } else {
+            tipoEscenario = 'COMPLETO'; 
+        }
+    
+        console.log('📑 Escenario determinado:', tipoEscenario);
+      }
+    
+      function validarPaso2() {
+        const campos = [
+          'empresa_tipo_id', 'empresa_numero_id', 'empresa_nombre',
+          'usuario_tipo_id', 'usuario_numero_id', 'usuario_nombre_completo',
+          'numero_planilla', 'rep_legal_cargo', 'rep_legal_celular',
+          'ciudad', 'senores', 'departamento_entidad', 'fecha_inicio', 'fecha_fin'
+        ];
+        
+        let isValid = true;
+    
+        for (let campoId of campos) {
+          const campo = document.getElementById(campoId);
+          if (campo && !campo.value.trim()) {
+            showAlert(`Por favor complete el campo obligatorio: ${campoId.replace(/_/g, ' ')}`, 'warning', 'step2');
+            campo.focus();
+            isValid = false;
+            break; 
+          }
+        }
+    
+        return isValid;
+      }
+    
+      function generarVistaPrevia() {
+        const ciudad = document.getElementById('ciudad').value;
+        const fechaActual = new Date().toLocaleDateString('es-CO', { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        const senores = document.getElementById('senores').value;
+        const departamento = document.getElementById('departamento_entidad').value;
+        const usuarioNombre = document.getElementById('usuario_nombre_completo').value;
+        const usuarioTipoId = document.getElementById('usuario_tipo_id').value;
+        const usuarioNumeroId = document.getElementById('usuario_numero_id').value;
+        const fechaInicio = new Date(document.getElementById('fecha_inicio').value + 'T00:00:00-05:00').toLocaleDateString('es-CO');
+        const fechaFin = new Date(document.getElementById('fecha_fin').value + 'T00:00:00-05:00').toLocaleDateString('es-CO');
+        const numeroPlanilla = document.getElementById('numero_planilla').value;
+        const repLegalNombre = document.getElementById('rep_legal_nombre').value;
+        const repLegalCargo = document.getElementById('rep_legal_cargo').value;
+        const repLegalCelular = document.getElementById('rep_legal_celular').value;
+        const repLegalDireccion = document.getElementById('rep_legal_direccion').value;
+        const repLegalCorreo = document.getElementById('rep_legal_correo').value;
+    
+        let texto2 = '';
+        let anexos = [];
+        
+        if (documentosSeleccionados.estado_cuenta.existe) anexos.push('Estado de cuenta');
+        if (documentosSeleccionados.afiliacion.existe) anexos.push('Formulario de afiliación');
+        if (documentosSeleccionados.ingreso.existe) anexos.push('Planilla de ingreso');
+        if (documentosSeleccionados.retiro.existe) anexos.push('Planilla de retiro');
+        if (documentosSeleccionados.cedula.existe) anexos.push('Cédula');
+    
+    
+        if (tipoEscenario === 'BASICO') {
+          texto2 = `El motivo de esta carta es para solicitarles la corrección de mora donde nos notifica de la siguiente persona <strong>${usuarioNombre}</strong> identificado con número de <strong>${usuarioTipoId} ${usuarioNumeroId}</strong>, el cual evidenciamos que no se ha realizado la solicitud de afiliación, por lo tanto anexamos estado de cuenta para que nos colaboren con el comprobante de afiliación y en caso contrario de no haber dicho documento solicitamos la anulación del reporte del estado de cuenta, ya que nuestra intención como empresa es estar al día con todas nuestras obligaciones.`;
+          
+        } else { // COMPLETO o SIN_RETIRO usan el mismo texto
+          texto2 = `El motivo de esta carta es para solicitarles la corrección de mora donde nos notifica de la siguiente persona <strong>${usuarioNombre}</strong> identificado con número de <strong>${usuarioTipoId} ${usuarioNumeroId}</strong>, el cual laboró desde <strong>${fechaInicio}</strong> hasta <strong>${fechaFin}</strong>, por lo tanto anexamos estado de cuenta, planilla con número <strong>${numeroPlanilla}</strong> y afiliación para que nos colaboren con la corrección ya que nuestra intención como empresa es estar al día con todas nuestras obligaciones.`;
+        }
+    
+        const preview = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.8; padding: 20px; background: white; border: 1px solid #ddd;">
+            <p><strong>${ciudad}, ${fechaActual}</strong></p>
+            <p><strong>Señores:</strong><br>${senores}</p>
+            <p><strong>Departamento:</strong><br>${departamento}</p>
+            <p>Cordial saludo,</p>
+            
+            <p style="text-align: justify; margin-top: 20px;">${texto2}</p>
+            
+            <p style="margin-top: 20px;"><strong>Anexamos:</strong></p>
+            <ol style="margin-left: 20px;">
+              ${anexos.map(doc => `<li>${doc}</li>`).join('')}
+            </ol>
+            
+            <p style="margin-top: 20px;">Muchas gracias.</p>
+            
+            <div style="margin-top: 50px; padding: 20px; background: #f8f9fa; border-left: 4px solid #007bff;">
+              <p style="margin: 0;"><strong>[FIRMA DIGITAL DE LA EMPRESA]</strong></p>
+              <p style="margin-top: 10px;"><strong>${repLegalNombre}</strong><br>
+              ${repLegalCargo}<br>
+              Celular: ${repLegalCelular}<br>
+              Dirección: ${repLegalDireccion}<br>
+              Correo: ${repLegalCorreo}</p>
+            </div>
+          </div>
+        `;
+    
+        document.getElementById('cartaPreview').innerHTML = preview;
+    
+        const listaHtml = anexos.map((doc, idx) => `
+          <div class="d-flex align-items-center mb-2">
+            <i data-feather="file-text" class="me-2"></i>
+            <span><strong>${idx + 1}. ${doc}</strong></span>
+          </div>
+        `).join('');
+        
+        document.getElementById('listaDocumentosAdjuntos').innerHTML = listaHtml;
+        feather.replace(); // Recargar iconos
+      }
+    
+      async function generarYGuardarPDF() {
+        const spinner = document.getElementById('generarPdfSpinner');
+        spinner.style.display = 'inline-block';
+        btnAceptar.disabled = true;
+    
+        try {
+          const formData = new FormData();
+          
+          formData.append('tipo_escenario', tipoEscenario);
+          formData.append('empresa_tipo_id', document.getElementById('empresa_tipo_id').value);
+          formData.append('empresa_numero_id', document.getElementById('empresa_numero_id').value);
+          formData.append('empresa_nombre', document.getElementById('empresa_nombre').value);
+          formData.append('usuario_tipo_id', document.getElementById('usuario_tipo_id').value);
+          formData.append('usuario_numero_id', document.getElementById('usuario_numero_id').value);
+          formData.append('usuario_nombre_completo', document.getElementById('usuario_nombre_completo').value);
+          formData.append('numero_planilla', document.getElementById('numero_planilla').value);
+          formData.append('rep_legal_nombre', document.getElementById('rep_legal_nombre').value);
+          formData.append('rep_legal_cargo', document.getElementById('rep_legal_cargo').value);
+          formData.append('rep_legal_celular', document.getElementById('rep_legal_celular').value);
+          formData.append('rep_legal_direccion', document.getElementById('rep_legal_direccion').value);
+          formData.append('rep_legal_correo', document.getElementById('rep_legal_correo').value);
+          formData.append('ciudad', document.getElementById('ciudad').value);
+          formData.append('senores', document.getElementById('senores').value);
+          formData.append('departamento_entidad', document.getElementById('departamento_entidad').value);
+          formData.append('fecha_inicio', document.getElementById('fecha_inicio').value);
+          formData.append('fecha_fin', document.getElementById('fecha_fin').value);
+    
+          Object.keys(documentosSeleccionados).forEach(key => {
+            if (documentosSeleccionados[key].existe && documentosSeleccionados[key].archivo) {
+              formData.append(key, documentosSeleccionados[key].archivo, documentosSeleccionados[key].archivo.name);
+            }
+          });
+    
+          const response = await fetch('/api/depuraciones/generar-carta', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+    
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Error al generar PDF');
+          }
+    
+          const result = await response.json();
+          
+          showAlert('✅ Carta generada exitosamente y guardada en la carpeta del usuario', 'success', 'alertsContainer'); // Alerta global
+          
+          if (result.pdf_url) {
+            const link = document.createElement('a');
+            link.href = result.pdf_url;
+            link.target = '_blank'; 
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+    
+          resetearModal();
+          modal.hide();
+          cargarPendientes(); 
+    
+        } catch (error) {
+          console.error(error);
+          showAlert('❌ Error al generar la carta: ' + error.message, 'danger', 'step3'); // Alerta en el modal
+        } finally {
+          spinner.style.display = 'none';
+          btnAceptar.disabled = false;
+        }
+      }
+    
+      function resetearModal() {
+        currentStep = 1;
+        mostrarPaso(1);
+        
+        document.querySelectorAll('input[type="radio"][value="si"]').forEach(radio => radio.checked = false);
+        document.querySelectorAll('input[type="radio"][value="no"]').forEach(radio => radio.checked = true);
+        
+        document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+        
+        document.querySelectorAll('[id$="_file_container"]').forEach(container => {
+          container.classList.add('hidden');
+        });
+        
+        document.querySelectorAll('#step2 input, #step2 select').forEach(input => {
+          if (input.type === 'select-one') {
+              input.selectedIndex = 0;
+          } else if (!input.readOnly) {
+              input.value = '';
+          }
+        });
+        
+        document.getElementById('cartaPreview').innerHTML = '';
+        document.getElementById('listaDocumentosAdjuntos').innerHTML = '';
+        
+        documentosSeleccionados = {};
+        tipoEscenario = null;
+      }
+    
+      function showAlert(message, type, containerId = 'alertsContainer') {
+        let container;
+        if (containerId.startsWith('step')) {
+            container = modalEl.querySelector(`#${containerId} .alert`); // Busca el alert de "Nota"
+            if (!container) container = modalEl.querySelector(`#${containerId}`); // Fallback
+        } else {
+            container = document.getElementById(containerId); // Contenedor global
+        }
+    
+        if (!container) return;
+        
+        // Crear la alerta
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        if (containerId.startsWith('step')) {
+            // Limpiar alertas anteriores *dentro* del paso
+            const existingAlert = modalEl.querySelector(`#${containerId} .alert-dismissible`);
+            if (existingAlert) existingAlert.remove();
+            
+            // Insertar después del elemento encontrado (ej. después de la Nota de info)
+            container.insertAdjacentElement('afterend', alert);
+        } else {
+            // Limpiar alertas globales
+            container.innerHTML = ''; 
+            container.appendChild(alert);
+        }
+        
+        setTimeout(() => {
+            const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            if (bsAlert) {
+                bsAlert.close();
+            } else {
+                alert.remove();
+            }
+        }, 5000);
+      }
+    
+      async function cargarPendientes() {
+        const tbody = document.getElementById('tablaDepuraciones');
+        if (!tbody) return; 
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Cargando pendientes...</td></tr>';
+        
+        try {
+          const response = await fetch('/api/depuraciones/pendientes', {
+            credentials: 'include'
+          });
+    
+          if (!response.ok) throw new Error('Error al cargar pendientes');
+    
+          depuracionesData = await response.json();
+          renderTabla(depuracionesData);
+        } catch (error) {
+          console.error(error);
+          showAlert('Error al cargar depuraciones pendientes', 'danger');
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error al cargar datos.</td></tr>';
+        }
+      }
+    
+      function renderTabla(data) {
+        const tbody = document.getElementById('tablaDepuraciones');
+        if (!tbody) return; 
+        
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay casos pendientes</td></tr>';
+          return;
+        }
+    
+        tbody.innerHTML = data.map(item => `
+          <tr data-id="${item.id}">
+            <td>${item.id}</td>
+            <td>${item.entidad_nombre}</td>
+            <td>${item.causa}</td>
+            <td>${item.fecha_sugerida}</td>
+            <td><span class="badge bg-warning">${item.estado || 'Pendiente'}</span></td>
+            <td>
+              <button class="btn btn-sm btn-info btn-revisar" disabled title="Función no implementada">
+                <i data-feather="eye"></i> Revisar
+              </button>
+            </td>
+          </tr>
+        `).join('');
+    
+        feather.replace(); // Recargar iconos en la tabla
+      }
+    
+      // ==================== INICIALIZACIÓN ====================
+      cargarPendientes(); // Cargar la tabla al iniciar
+      
+      feather.replace();
+      
+      if (typeof layout_change === 'function') layout_change('false');
+      if (typeof layout_theme_sidebar_change === 'function') layout_theme_sidebar_change('dark');
+      if (typeof change_box_container === 'function') change_box_container('false');
+      if (typeof layout_caption_change === 'function') layout_caption_change('true');
+      if (typeof layout_rtl_change === 'function') layout_rtl_change('false');
+      if (typeof preset_change === 'function') preset_change('preset-1');
+      if (typeof main_layout_change === 'function') main_layout_change('vertical');
+
+    });
+    </script>
+
+  </body>
+</html>
