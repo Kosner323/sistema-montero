@@ -1,0 +1,3 @@
+[pytest]
+# Indica a pytest que la carpeta raíz del proyecto se encuentra en esta subcarpeta
+rootdir = src/dashboard
