@@ -4,13 +4,13 @@ max-line-length = 127
 
 # Ignore specific errors
 extend-ignore =
-    E203,  # Whitespace before ':'
-    E266,  # Too many leading '#' for block comment
-    E501,  # Line too long (handled by Black)
-    W503,  # Line break before binary operator
-    W504,  # Line break after binary operator
-    E402,  # Module level import not at top of file
-    F401,  # Module imported but unused (sometimes needed)
+    E203,   Whitespace before ':'
+    E266,   Too many leading '#' for block comment
+    E501,   Line too long (handled by Black)
+    W503,   Line break before binary operator
+    W504,   Line break after binary operator
+    E402,   Module level import not at top of file
+    F401,   Module imported but unused (sometimes needed)
 
 # Exclude directories
 exclude =

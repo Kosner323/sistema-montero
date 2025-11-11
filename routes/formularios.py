@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, request, jsonify, send_file, current_app
-import sqlite3
-import os
-import traceback
-from werkzeug.utils import secure_filename
-from datetime import datetime
 import io
-from PyPDF2 import PdfReader, PdfWriter
+import os
+import sqlite3
+import traceback
+from datetime import datetime
+
+from flask import Blueprint, current_app, jsonify, request, send_file
+from pypdf import PdfReader, PdfWriter
 from PyPDF2.generic import NameObject, NumberObject
+from werkzeug.utils import secure_filename
+
+from logger import get_logger
 
 # --- IMPORTAR UTILIDADES ---
 # Importamos funciones y constantes necesarias desde utils.py
-from utils import get_db_connection, login_required, USER_DATA_FOLDER
-from logger import get_logger
+from utils import USER_DATA_FOLDER, get_db_connection, login_required
 
 logger = get_logger(__name__)
 
@@ -58,30 +60,20 @@ def generar_formulario():
             tpl_path = os.path.join(upload_folder, tpl_fname)
 
             if not os.path.exists(tpl_path):
-                logger.error(
-                    f"Error crítico: Archivo de plantilla no hallado en disco: {tpl_path}"
-                )
+                logger.error(f"Error crítico: Archivo de plantilla no hallado en disco: {tpl_path}")
                 return (
-                    jsonify(
-                        {
-                            "error": f"Archivo de plantilla '{tpl_fname}' no hallado en el servidor."
-                        }
-                    ),
+                    jsonify({"error": f"Archivo de plantilla '{tpl_fname}' no hallado en el servidor."}),
                     404,
                 )
 
             # Obtener datos del usuario (usando el ID numérico)
-            user_data = conn.execute(
-                "SELECT * FROM usuarios WHERE id = ?", (uid,)
-            ).fetchone()
+            user_data = conn.execute("SELECT * FROM usuarios WHERE id = ?", (uid,)).fetchone()
             if not user_data:
                 return jsonify({"error": "Usuario no encontrado."}), 404
             ud = dict(user_data)  # Convertir a diccionario
 
             # Obtener datos de la empresa
-            comp_data = conn.execute(
-                "SELECT * FROM empresas WHERE nit = ?", (enit,)
-            ).fetchone()
+            comp_data = conn.execute("SELECT * FROM empresas WHERE nit = ?", (enit,)).fetchone()
             if not comp_data:
                 return (
                     jsonify({"error": f"Empresa con NIT '{enit}' no encontrada."}),
@@ -116,9 +108,7 @@ def generar_formulario():
             "municipio_nac": ud.get("municipioNacimiento", ""),
             "pais_nac": ud.get("paisNacimiento", ""),
             "nacionalidad": ud.get("nacionalidad", ""),
-            "municipio": ud.get(
-                "municipioNacimiento", ""
-            ),  # Puede ser repetido dependiendo del PDF
+            "municipio": ud.get("municipioNacimiento", ""),  # Puede ser repetido dependiendo del PDF
             "departamento": ud.get("departamentoNacimiento", ""),  # Puede ser repetido
             "fecha_nacimiento": ud.get("fechaNacimiento", ""),
             "afp_nombre": ud.get("afpNombre", ""),
@@ -134,9 +124,7 @@ def generar_formulario():
             "direccion_empresa": cd.get("direccion_empresa", ""),
             "telefono_empresa": cd.get("telefono_empresa", ""),
             "correo_empresa": cd.get("correo_empresa", ""),
-            "afp_empresa": cd.get(
-                "afp_empresa", ""
-            ),  # Podría ser diferente al del usuario
+            "afp_empresa": cd.get("afp_empresa", ""),  # Podría ser diferente al del usuario
             "arl_empresa": cd.get("arl_empresa", ""),
             "ibc_empresa": str(cd.get("ibc_empresa", "")),  # Convertir a string
             "departamento_empresa": cd.get("departamento_empresa", ""),
@@ -151,9 +139,7 @@ def generar_formulario():
             fields = reader.get_fields()
 
             if not fields:
-                print(
-                    f"Advertencia: La plantilla PDF '{tpl_fname}' no parece tener campos rellenables."
-                )
+                print(f"Advertencia: La plantilla PDF '{tpl_fname}' no parece tener campos rellenables.")
                 # Considerar devolver error o continuar con el PDF original
 
             # Copiar páginas de la plantilla al escritor
@@ -167,9 +153,7 @@ def generar_formulario():
                     writer.update_page_form_field_values(writer.pages[0], pdf_map)
                 except Exception as update_err:
                     # Captura error específico si falla el relleno (ej. campo no existe)
-                    logger.error(
-                        f"Error al actualizar campos del PDF {tpl_fname}: {update_err}"
-                    )
+                    logger.error(f"Error al actualizar campos del PDF {tpl_fname}: {update_err}")
                     # Decide si continuar o devolver error. Por ahora, continuamos.
                     pass
             elif not writer.pages:
@@ -188,9 +172,7 @@ def generar_formulario():
                             if annot.get("/Subtype") == "/Widget":
                                 flags = annot.get("/Ff", 0)  # Obtener flags existentes
                                 # Añadir el flag 'ReadOnly' (bit 1)
-                                annot.update(
-                                    {NameObject("/Ff"): NumberObject(flags | 1)}
-                                )
+                                annot.update({NameObject("/Ff"): NumberObject(flags | 1)})
             except Exception as flat_err:
                 print(f"Advertencia: No se pudo aplanar el PDF {tpl_fname}: {flat_err}")
                 # Continuar aunque no se pueda aplanar
@@ -204,12 +186,8 @@ def generar_formulario():
                 # Construir ruta de guardado
                 user_folder = os.path.join(USER_DATA_FOLDER, ud["numeroId"])
                 # Nombre seguro para la carpeta de la empresa
-                comp_folder_name = secure_filename(
-                    cd["nit"] or cd["nombre_empresa"]
-                ).upper()
-                save_path = os.path.join(
-                    user_folder, "EMPRESAS_AFILIADAS", comp_folder_name
-                )
+                comp_folder_name = secure_filename(cd["nit"] or cd["nombre_empresa"]).upper()
+                save_path = os.path.join(user_folder, "EMPRESAS_AFILIADAS", comp_folder_name)
                 os.makedirs(save_path, exist_ok=True)  # Crear si no existe
 
                 # Nombre del archivo de guardado
@@ -240,16 +218,12 @@ def generar_formulario():
                 print(f"âœ“ Copia de PDF guardada en: {full_save_path}")
             except Exception as save_err:
                 # Solo registrar error, no detener la descarga para el usuario
-                logger.error(
-                    f"ÂÅ’ ERROR al guardar copia del PDF para usuario {ud['numeroId']}: {save_err}"
-                )
+                logger.error(f"ÂÅ’ ERROR al guardar copia del PDF para usuario {ud['numeroId']}: {save_err}")
             # traceback.print_exc()  # MIGRADO: reemplazar por logger.error con exc_info=True
             # --- Fin Guardar Copia ---
 
             # Nombre del archivo para la descarga
-            down_fname = secure_filename(
-                f"{form_row['nombre']}_{ud['numeroId']}_{datetime.now().strftime('%Y%m%d')}.pdf"
-            )
+            down_fname = secure_filename(f"{form_row['nombre']}_{ud['numeroId']}_{datetime.now().strftime('%Y%m%d')}.pdf")
 
             # Enviar el PDF generado como archivo adjunto para descarga
             return send_file(
@@ -360,9 +334,7 @@ def importar_formulario():
                 try:
                     os.remove(fpath)
                 except OSError as rm_err:
-                    logger.error(
-                        f"Error eliminando archivo '{fpath}' tras fallo de BD: {rm_err}"
-                    )
+                    logger.error(f"Error eliminando archivo '{fpath}' tras fallo de BD: {rm_err}")
             logger.error(f"Error de base de datos al importar formulario: {db_err}")
             # traceback.print_exc()  # MIGRADO: reemplazar por logger.error con exc_info=True
             return (
@@ -377,9 +349,7 @@ def importar_formulario():
             try:
                 os.remove(fpath)
             except OSError as rm_err:
-                logger.error(
-                    f"Error eliminando archivo '{fpath}' tras fallo de guardado: {rm_err}"
-                )
+                logger.error(f"Error eliminando archivo '{fpath}' tras fallo de guardado: {rm_err}")
         logger.error(f"Error al guardar archivo PDF: {e}")
         # traceback.print_exc()  # MIGRADO: reemplazar por logger.error con exc_info=True
         return jsonify({"error": f"Error al guardar el archivo PDF: {str(e)}"}), 500
@@ -398,9 +368,7 @@ def delete_formulario(form_id):
         cur = conn.cursor()
 
         # Obtener la ruta del archivo antes de borrar el registro
-        cur.execute(
-            "SELECT ruta_archivo FROM formularios_importados WHERE id = ?", (form_id,)
-        )
+        cur.execute("SELECT ruta_archivo FROM formularios_importados WHERE id = ?", (form_id,))
         row = cur.fetchone()
 
         # Eliminar el registro de la base de datos
@@ -420,13 +388,9 @@ def delete_formulario(form_id):
                         print(f"Archivo físico eliminado: {safe_fpath}")
                     except OSError as e:
                         # Registrar error si no se puede borrar, pero continuar
-                        logger.error(
-                            f"Error eliminando archivo físico {safe_fpath}: {e}"
-                        )
+                        logger.error(f"Error eliminando archivo físico {safe_fpath}: {e}")
                 elif not safe_fpath.startswith(safe_upld):
-                    print(
-                        f"Advertencia: Intento de eliminar archivo fuera de UPLOAD_FOLDER: {safe_fpath}"
-                    )
+                    print(f"Advertencia: Intento de eliminar archivo fuera de UPLOAD_FOLDER: {safe_fpath}")
 
             return jsonify({"message": "Formulario eliminado correctamente."}), 200
         else:
