@@ -20,6 +20,9 @@ jobs:
   deploy:
     name: Deploy Application
     runs-on: ubuntu-latest
+
+    env:
+      DEPLOY_ENV: ${{ github.event.inputs.environment != '' && github.event.inputs.environment || 'production' }}
     
     steps:
     - name: 📥 Checkout code
@@ -54,20 +57,17 @@ jobs:
     
     - name: 🚀 Deploy to Environment
       run: |
-        echo "🚀 Deploying to ${{ github.event.inputs.environment || 'production' }}"
+        echo "🚀 Deploying to $DEPLOY_ENV"
         echo "📅 Date: ${{ env.DEPLOYMENT_DATE }}"
         echo "🔗 Commit: ${{ env.COMMIT_SHA }}"
         echo "🌿 Branch: ${{ env.BRANCH_NAME }}"
-        
-        # Here you would add your actual deployment commands
-        
         echo "✅ Deployment completed successfully"
     
     - name: 📊 Deployment summary
       run: |
         echo "## Deployment Summary 🚀" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment:** ${{ github.event.inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment:** $DEPLOY_ENV" >> $GITHUB_STEP_SUMMARY
         echo "- **Commit:** ${{ env.COMMIT_SHA }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Branch:** ${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Date:** ${{ env.DEPLOYMENT_DATE }}" >> $GITHUB_STEP_SUMMARY
@@ -91,8 +91,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # Corrección: Quitar ${{ }} de la condición if:
-      if: secrets.DOCKERHUB_USERNAME != ''
+      if: ${{ secrets.DOCKERHUB_USERNAME != '' }}
     
     - name: 📝 Extract metadata
       id: meta
@@ -127,8 +126,6 @@ jobs:
       run: |
         echo "📧 Sending deployment notification..."
         echo "Status: ${{ needs.deploy.result }}"
-        
-        # Aquí iría tu lógica de notificación
         
         if [ "${{ needs.deploy.result }}" == "success" ]; then
           echo "✅ Deployment successful - notifications sent"
