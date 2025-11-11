@@ -72,7 +72,7 @@ repos:
 
   # Check for common security issues
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0 # <-- ¡ESTE ES EL CAMBIO! (De v1.4.0 a v1.5.0)
     hooks:
       - id: detect-secrets
         name: 🕵️ Detect secrets
