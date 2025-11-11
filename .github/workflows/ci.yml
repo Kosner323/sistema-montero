@@ -25,7 +25,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
     
-    # === PASO DE SETUP CRÍTICO ===
+    # ========== CONFIGURACIÓN DE ENTORNO CRÍTICA ==========
     - name: 🔧 Setup environment & Directories
       run: |
         # 1. Crear directorios necesarios para la app y testing
@@ -47,18 +47,15 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-html pytest-mock
         
-    # === SOLUCIÓN FINAL AL ERROR DE CARGA DE FLASK ===
-    - name: ➡️ Change Working Directory to Source
-      run: cd src/dashboard
-      
+    # El rootdir ya lo maneja pytest.ini
+    
     - name: 🗄️ Initialize test database
       run: |
-        # Usar python para inicializar (ejecutado desde src/dashboard)
         python -c "import sqlite3; conn = sqlite3.connect(':memory:'); conn.close()"
       
     - name: 🧪 Run tests with coverage
       run: |
-        # pytest ahora se ejecuta desde src/dashboard
+        # Pytest se ejecuta ahora con el rootdir='src/dashboard'
         pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing \
                --html=report.html --self-contained-html -v
       env:
@@ -69,7 +66,7 @@ jobs:
 
     - name: 📈 Coverage Report
       run: |
-        # Umbral ajustado al 20% para pasar con el 25% de cobertura actual
+        # Umbral ajustado al 20% para pasar
         coverage report --fail-under=20
       continue-on-error: true
 
@@ -90,10 +87,6 @@ jobs:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
     
-    # Añadir cd src/dashboard antes de linting
-    - name: ➡️ Change Working Directory to Source
-      run: cd src/dashboard
-      
     - name: 🐍 Set up Python
       uses: actions/setup-python@v4
       with:
@@ -113,7 +106,6 @@ jobs:
     - name: 📏 Run Flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       continue-on-error: true
     
     - name: 🔍 Run Pylint
@@ -140,9 +132,6 @@ jobs:
       with:
         python-version: '3.10'
     
-    - name: ➡️ Change Working Directory to Source
-      run: cd src/dashboard
-    
     - name: 📦 Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -160,6 +149,7 @@ jobs:
     
     - name: 🏗️ Build package
       run: |
+        # Las importaciones ahora funcionan gracias a pytest.ini
         python -c "import app; print('✅ Application imports successfully')"
         python -c "from routes import auth; print('✅ Auth module OK')"
         python -c "import encryption; print('✅ Encryption module OK')"
