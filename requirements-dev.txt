@@ -1,0 +1,66 @@
+# =====================================================================
+# REQUIREMENTS-DEV.TXT - Sistema Montero
+# =====================================================================
+# Dependencias de desarrollo, testing y CI/CD
+# Instalar con: pip install -r requirements-dev.txt
+# =====================================================================
+
+# Pre-commit and hooks
+pre-commit>=3.6.0
+
+# Code formatting
+black>=23.12.0
+isort>=5.13.0
+
+# Linting
+flake8>=7.0.0
+flake8-docstrings>=1.7.0
+flake8-bugbear>=23.12.0
+flake8-comprehensions>=3.14.0
+pylint>=3.0.0
+mypy>=1.8.0
+
+# Security scanning
+bandit>=1.7.6
+safety>=3.0.0
+pip-audit>=2.6.0
+detect-secrets>=1.5.0
+
+# Testing
+pytest>=7.4.3
+pytest-cov>=4.1.0
+pytest-html>=4.1.0
+pytest-mock>=3.12.0
+pytest-timeout>=2.2.0
+pytest-xdist>=3.5.0
+
+# Documentation
+pydocstyle>=6.3.0
+sphinx>=7.2.0
+sphinx-rtd-theme>=2.0.0
+
+# Build and packaging tools
+build>=1.0.0
+wheel>=0.42.0
+setuptools>=69.0.0
+twine>=4.0.0
+
+# Code coverage
+coverage>=7.4.0
+coverage-badge>=1.1.0
+
+# Debugging and profiling
+ipython>=8.18.0
+ipdb>=0.13.13
+
+# Git hooks
+gitpython>=3.1.40
+
+# YAML linting
+yamllint>=1.33.0
+
+# Requirements checking
+pip-tools>=7.3.0
+
+# Performance testing
+locust>=2.20.0
