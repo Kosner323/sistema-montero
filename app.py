@@ -56,6 +56,7 @@ from routes.envio_planillas import bp_envio_planillas
 from routes.credenciales import bp_credenciales
 from routes.novedades import bp_novedades
 from routes.unificacion import bp_unificacion
+from routes.notificaciones_routes import bp_notificaciones
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -209,6 +210,24 @@ def initialize_database():
     """
     )
 
+    # Crear tabla de notificaciones
+    c.execute(
+        """
+        CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT DEFAULT 'info',
+            link TEXT,
+            metadata TEXT,
+            is_read INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+    """
+    )
+
     try:
         c.execute("SELECT ruta_documento_txt FROM credenciales_plataforma LIMIT 1")
     except sqlite3.OperationalError:
@@ -249,6 +268,7 @@ app.register_blueprint(bp_envio_planillas)
 app.register_blueprint(bp_depuraciones)
 app.register_blueprint(bp_novedades)
 app.register_blueprint(bp_unificacion)
+app.register_blueprint(bp_notificaciones)
 # --- FIN DE CORRECCIÃ“N ---
 
 
