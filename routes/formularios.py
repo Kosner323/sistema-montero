@@ -7,7 +7,7 @@ from datetime import datetime
 
 from flask import Blueprint, current_app, g, jsonify, request, send_file
 from pypdf import PdfReader, PdfWriter
-from PyPDF2.generic import NameObject, NumberObject
+from pypdf.generic import NameObject, NumberObject
 from werkzeug.utils import secure_filename
 
 from logger import logger
