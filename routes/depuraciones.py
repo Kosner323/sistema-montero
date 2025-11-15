@@ -10,7 +10,7 @@ from datetime import datetime
 from io import BytesIO
 
 from flask import Blueprint, g, jsonify, request, send_file, session
-from PyPDF2 import PdfMerger, PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
@@ -419,7 +419,7 @@ def combinar_pdfs(carta_pdf, archivos_adjuntos, orden_anexos):
     Combina la carta con los archivos adjuntos en el orden especificado.
     """
     try:
-        merger = PdfMerger()
+        merger = PdfWriter()
 
         # Agregar carta primero
         merger.append(carta_pdf)
