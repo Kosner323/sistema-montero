@@ -36,7 +36,7 @@ pypdf>=4.0.0
 
 # Forzar push para activar Actions
 
-
+flask_wtf
 
 
 
