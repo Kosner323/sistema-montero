@@ -40,6 +40,7 @@ jobs:
         pytest -v --maxfail=1
       env:
         FLASK_ENV: testing
+        DATABASE_PATH: './test_ci_db.db'
     
     - name: 🏗️ Build application
       run: |

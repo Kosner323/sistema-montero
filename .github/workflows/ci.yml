@@ -38,7 +38,7 @@ jobs:
         SECRET_KEY=test-secret-key-for-ci-12345678901234567890123456789012
         ENCRYPTION_KEY=HLh9Yfi7v5-QnQ4WYALaTPIC__LX-VqCK01eJBNK8Zw=
         FLASK_ENV=testing
-        DATABASE_PATH=:memory:
+        DATABASE_PATH=./test_ci_db.db
         LOG_LEVEL=ERROR
         EOF
         
@@ -51,7 +51,7 @@ jobs:
     - name: 🗄️ Initialize test database
       # Nota: Pytest debe manejar el rootdir='src/dashboard' a través de pytest.ini (si se aplicó)
       run: |
-        python -c "import sqlite3; conn = sqlite3.connect(':memory:'); conn.close()"
+        python -c "import sqlite3; conn = sqlite3.connect('./test_ci_db.db'); conn.close()"
       
     - name: 🧪 Run tests with coverage
       run: |
@@ -61,13 +61,12 @@ jobs:
         FLASK_ENV: testing
         SECRET_KEY: test-secret-key-for-ci-12345678901234567890123456789012
         ENCRYPTION_KEY: HLh9Yfi7v5-QnQ4WYALaTPIC__LX-VqCK01eJBNK8Zw=
-        DATABASE_PATH: ':memory:'
+        DATABASE_PATH: './test_ci_db.db'
 
     - name: 📈 Coverage Report
       run: |
         # Umbral ajustado al 20% para pasar
         coverage report --fail-under=20
-      continue-on-error: true
 
     - name: ⬆️ Upload test results
       uses: actions/upload-artifact@v4
@@ -143,7 +142,7 @@ jobs:
         SECRET_KEY=test-secret-key-for-ci-12345678901234567890123456789012
         ENCRYPTION_KEY=HLh9Yfi7v5-QnQ4WYALaTPIC__LX-VqCK01eJBNK8Zw=
         FLASK_ENV=testing
-        DATABASE_PATH=:memory:
+        DATABASE_PATH=./test_ci_db.db
         EOF
     
     - name: 🏗️ Build package
