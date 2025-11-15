@@ -1,0 +1,26 @@
+# Archivo de secretos (¡EL MÁS IMPORTANTE!)
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+
+# Carpetas de entorno virtual (si usas una)
+venv/
+env/
+.venv/
+
+# Base de datos SQLite
+*.db
+*.sqlite
+*.sqlite3
+data/mi_sistema.db
+
+# Carpetas de logs y archivos subidos (mencionadas en tu dictamen y .env)
+logs/
+formularios_pdf/
+
+# Archivos de Celery Beat
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal

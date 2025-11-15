@@ -1,0 +1,102 @@
+name: Security Scans
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans every Monday at 9 AM
+    - cron: '0 9 * * 1'
+
+jobs:
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: 📦 Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety pip-audit
+    
+    - name: 🔒 Run Bandit Security Scan
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -f txt || true
+      continue-on-error: true
+    
+    - name: 📦 Check for known vulnerabilities in dependencies
+      run: |
+        safety check --json > safety-report.json || true
+        safety check || true
+      continue-on-error: true
+    
+    - name: 🔍 Run pip-audit
+      run: |
+        pip-audit --desc || true
+      continue-on-error: true
+    
+    - name: 📋 Upload security reports
+      # ***** INICIO DE LA CORRECCIÓN *****
+      uses: actions/upload-artifact@v4
+      # ***** FIN DE LA CORRECCIÓN *****
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
+    
+    - name: 🛡️ Security Summary
+      run: |
+        echo "🔒 Security scan completed"
+        echo "📊 Check artifacts for detailed reports"
+        echo "⚠️  Review any HIGH severity issues"
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Dependency Review
+      uses: actions/dependency-review-action@v3
+      with:
+        fail-on-severity: moderate
+        comment-summary-in-pr: true
+
+  secret-scanning:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🔐 TruffleHog Secret Scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+        extra_args: --debug --only-verified
+      continue-on-error: true
+    
+    - name: ✅ Secret Scan Complete
+      run: |
+        echo "🔍 Secret scanning completed"
+        echo "✅ Review any detected secrets in logs"

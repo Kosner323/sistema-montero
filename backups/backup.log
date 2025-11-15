@@ -1,0 +1,20 @@
+2025-11-02 13:01:47 - INFO - ============================================================
+2025-11-02 13:01:47 - INFO - Iniciando backup estándar...
+2025-11-02 13:01:47 - INFO - Archivos a respaldar: 27
+2025-11-02 13:01:47 - INFO - ✓ Backup creado exitosamente: backup_20251102_130147.zip
+2025-11-02 13:01:47 - INFO -   Tamaño: 0.05 MB
+2025-11-02 13:01:47 - INFO -   Ubicación: D:\Mi-App-React\src\dashboard\backups\backup_20251102_130147.zip
+2025-11-02 13:01:47 - INFO -   Archivos: 27
+2025-11-02 13:01:47 - INFO - ============================================================
+2025-11-02 13:01:47 - INFO - Limpiando backups antiguos...
+2025-11-02 13:01:47 - INFO - No hay backups antiguos para eliminar
+2025-11-02 13:51:35 - INFO - ============================================================
+2025-11-02 13:51:35 - INFO - Iniciando backup estándar...
+2025-11-02 13:51:35 - INFO - Archivos a respaldar: 27
+2025-11-02 13:51:35 - INFO - ✓ Backup creado exitosamente: backup_20251102_135135.zip
+2025-11-02 13:51:35 - INFO -   Tamaño: 0.05 MB
+2025-11-02 13:51:35 - INFO -   Ubicación: D:\Mi-App-React\src\dashboard\backups\backup_20251102_135135.zip
+2025-11-02 13:51:35 - INFO -   Archivos: 27
+2025-11-02 13:51:35 - INFO - ============================================================
+2025-11-02 13:51:35 - INFO - Limpiando backups antiguos...
+2025-11-02 13:51:35 - INFO - No hay backups antiguos para eliminar
