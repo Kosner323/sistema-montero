@@ -12,23 +12,18 @@ const original_layout_change_default = window.layout_change_default;
 
 // Función mejorada para cambiar el icono del tema
 function updateThemeIcon(theme) {
-    console.log('🎨 Actualizando icono para tema:', theme);
+    // Silenciosamente intentar actualizar el icono sin mostrar warnings
     const themeIcon = document.getElementById('themeIcon');
     
     if (themeIcon) {
-        // Cambiar el atributo data-feather
         const iconName = theme === 'dark' ? 'moon' : 'sun';
         themeIcon.setAttribute('data-feather', iconName);
         
-        // Reemplazar el icono
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
-        
-        console.log('✅ Icono actualizado a:', iconName);
-    } else {
-        console.warn('⚠️ No se encontró #themeIcon');
     }
+    // No mostrar warning si no existe, es normal en algunos layouts
 }
 
 // Función mejorada para aplicar estilos del tema

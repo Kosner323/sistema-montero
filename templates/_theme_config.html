@@ -1,0 +1,15 @@
+<script>
+    // Configuración centralizada del tema
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+        if (typeof layout_change === 'function') layout_change('false');
+        if (typeof layout_theme_sidebar_change === 'function') layout_theme_sidebar_change('dark');
+        if (typeof change_box_container === 'function') change_box_container('false');
+        if (typeof layout_caption_change === 'function') layout_caption_change('true');
+        if (typeof layout_rtl_change === 'function') layout_rtl_change('false');
+        if (typeof preset_change === 'function') preset_change('preset-1');
+        if (typeof main_layout_change === 'function') main_layout_change('vertical');
+    });
+</script>

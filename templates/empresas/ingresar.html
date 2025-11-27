@@ -1,0 +1,798 @@
+﻿<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Ingresar Empresa | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Sistema de registro y gestión de empresas - Portal Montero y Negocio" />
+    <meta name="author" content="Portal Montero" />
+    
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    
+    <script>
+      (async function checkAuthentication() {
+        const loader = document.querySelector('.loader-bg');
+        if (loader) loader.style.display = 'flex'; // Mostrar loader
+
+        try {
+          console.log('🔍 Verificando autenticación (ingresar_empresa)...');
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          const response = await fetch('/api/check_auth', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include' 
+          });
+
+          console.log('📡 Respuesta check_auth:', response.status);
+
+          if (!response.ok) {
+            console.error('❌ Error del servidor:', response.status, response.statusText);
+            window.location.href = '/login';
+            return;
+          }
+
+          const data = await response.json();
+          console.log('📦 Datos check_auth:', data);
+
+          if (!data.authenticated) {
+            console.log('🚫 Usuario no autenticado, redirigiendo...');
+            window.location.href = '/login';
+          } else { 
+            console.log('✅ Usuario autenticado:', data.user_name);
+            if (loader) loader.style.display = 'none'; // Ocultar loader
+            sessionStorage.setItem('userName', data.user_name); 
+
+            // Actualizar nombre de usuario
+            document.addEventListener('DOMContentLoaded', () => {
+                 const userNameDisplay = document.getElementById('userNameDisplay');
+                 if(userNameDisplay) userNameDisplay.textContent = data.user_name;
+             });
+          }
+        } catch (error) { 
+          console.error('❌ Error de red en check_auth:', error);
+          window.location.href = '/login';
+        }
+      })();
+    </script>
+    
+    <style>
+        #signatureCanvas {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: crosshair;
+            width: 100%;
+            background-color: #f7f9fc; /* Fondo ligeramente diferente para destacar */
+        }
+        /* Estilo para mensajes de feedback */
+        #feedbackMessage {
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+    </style>
+  </head>
+
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    
+    {% include '_header.html' %}
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="row align-items-center">
+              <div class="col-md-12">
+                <ul class="breadcrumb mb-3">
+                  <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                  <li class="breadcrumb-item"><a href="javascript: void(0)">Base de Datos</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Empresas</li>
+                </ul>
+              </div>
+              <div class="col-md-12">
+                <div class="page-header-title">
+                  <h2 class="mb-0">Registro y Gestión de Empresas</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Ingresar Nueva Empresa</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Complete el siguiente formulario con la información detallada de la empresa, su representante legal y adjuntos.</p>
+
+                        <div id="feedbackMessage"></div>
+
+                        <form id="formEmpresa" action="/api/empresas" method="POST">
+
+                            <h6 class="mb-3 mt-4 text-primary">1. Datos Generales y Afiliación</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-6">
+                                    <label for="nombre_empresa" class="form-label">Nombre de la Empresa</label>
+                                    <input type="text" class="form-control" id="nombre_empresa" name="nombre_empresa" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="tipo_identificacion_empresa" class="form-label">Tipo ID</label>
+                                    <select class="form-select" id="tipo_identificacion_empresa" name="tipo_identificacion_empresa" required>
+                                        <option value="NIT">NIT</option>
+                                        <option value="CC">CC</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="nit" class="form-label">Número ID (NIT)</label>
+                                    <input type="text" class="form-control" id="nit" name="nit" required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="direccion_empresa" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="direccion_empresa" name="direccion">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="telefono_empresa" class="form-label">Teléfono</label>
+                                    <input type="text" class="form-control" id="telefono_empresa" name="telefono">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="correo_empresa" class="form-label">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="correo_empresa" name="email">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="departamento_empresa" class="form-label">Departamento</label>
+                                    <input type="text" class="form-control" id="departamento_empresa" name="departamento_empresa">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ciudad_empresa" class="form-label">Ciudad</label>
+                                    <input type="text" class="form-control" id="ciudad_empresa" name="ciudad">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ibc_empresa" class="form-label">IBC (Ingreso Base de Cotización)</label>
+                                    <input type="number" class="form-control" id="ibc_empresa" name="ibc_empresa" min="0" step="1">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="afp_empresa" class="form-label">AFP (Fondo de Pensión)</label>
+                                    <input type="text" class="form-control" id="afp_empresa" name="afp_empresa">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="arl_empresa" class="form-label">ARL</label>
+                                    <input type="text" class="form-control" id="arl_empresa" name="arl_empresa">
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">2. Información Adicional de la Empresa</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-3">
+                                    <label for="tipo_empresa" class="form-label">Tipo de Empresa</label>
+                                    <select class="form-select" id="tipo_empresa" name="tipo_empresa">
+                                        <option value="">Seleccione...</option>
+                                        <option value="S.A.S.">S.A.S.</option>
+                                        <option value="S.A.">S.A.</option>
+                                        <option value="Ltda.">Ltda.</option>
+                                        <option value="Unipersonal">Unipersonal</option>
+                                        <option value="Otra">Otra</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sector_economico" class="form-label">Sector Económico</label>
+                                    <input type="text" class="form-control" id="sector_economico" name="sector_economico" placeholder="Ej: Construcción, Servicios">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="num_empleados" class="form-label">Número de Empleados</label>
+                                    <input type="number" class="form-control" id="num_empleados" name="num_empleados" min="0">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="fecha_constitucion" class="form-label">Fecha de Constitución</label>
+                                    <input type="date" class="form-control" id="fecha_constitucion" name="fecha_constitucion">
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">3. Datos Bancarios</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-4">
+                                    <label for="banco" class="form-label">Banco</label>
+                                    <input type="text" class="form-control" id="banco" name="banco" placeholder="Ej: Bancolombia, Davivienda">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="tipo_cuenta" class="form-label">Tipo de Cuenta</label>
+                                    <select class="form-select" id="tipo_cuenta" name="tipo_cuenta">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Ahorros">Ahorros</option>
+                                        <option value="Corriente">Corriente</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
+                                    <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta">
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">4. Información Adicional de Seguridad Social</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-6">
+                                    <label for="arl" class="form-label">ARL (Nivel Riesgo)</label>
+                                    <select class="form-select" id="arl" name="arl">
+                                        <option value="">Seleccione...</option>
+                                        <option value="I">Clase I - Riesgo Mínimo</option>
+                                        <option value="II">Clase II - Riesgo Bajo</option>
+                                        <option value="III">Clase III - Riesgo Medio</option>
+                                        <option value="IV">Clase IV - Riesgo Alto</option>
+                                        <option value="V">Clase V - Riesgo Máximo</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="ccf" class="form-label">Caja de Compensación Familiar</label>
+                                    <input type="text" class="form-control" id="ccf" name="ccf" placeholder="Ej: Compensar, Colsubsidio">
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">5. Datos de Representante Legal</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-4">
+                                    <label for="rep_legal_nombre" class="form-label">Nombre Completo</label>
+                                    <input type="text" class="form-control" id="rep_legal_nombre" name="rep_legal_nombre">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="rep_legal_tipo_id" class="form-label">Tipo ID</label>
+                                    <select class="form-select" id="rep_legal_tipo_id" name="rep_legal_tipo_id">
+                                        <option value="CC">Cédula de Ciudadanía (CC)</option>
+                                        <option value="CE">Cédula de Extranjería (CE)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="rep_legal_numero_id" class="form-label">Número ID</label>
+                                    <input type="text" class="form-control" id="rep_legal_numero_id" name="rep_legal_numero_id">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="rep_legal_telefono" class="form-label">Teléfono del Representante</label>
+                                    <input type="text" class="form-control" id="rep_legal_telefono" name="rep_legal_telefono">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="rep_legal_correo" class="form-label">Correo del Representante</label>
+                                    <input type="email" class="form-control" id="rep_legal_correo" name="rep_legal_correo">
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">6. Documentación Digital</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-6">
+                                    <label for="logoEmpresa" class="form-label">Logo de la Empresa (PNG/JPG)</label>
+                                    <input class="form-control" type="file" id="logoEmpresa" name="logoEmpresa" accept="image/*">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cedulaRepresentante" class="form-label">Cédula Representante Legal (PDF)</label>
+                                    <input class="form-control" type="file" id="cedulaRepresentante" name="cedulaRepresentante" accept=".pdf">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="rut" class="form-label">RUT (PDF)</label>
+                                    <input class="form-control" type="file" id="rut" name="rut" accept=".pdf">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="camaraComercio" class="form-label">Cámara de Comercio (PDF)</label>
+                                    <input class="form-control" type="file" id="camaraComercio" name="camaraComercio" accept=".pdf">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="certificadoARL" class="form-label">Certificado ARL (PDF)</label>
+                                    <input class="form-control" type="file" id="certificadoARL" name="certificadoARL" accept=".pdf">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cuentaBancaria" class="form-label">Cuenta Bancaria (PDF)</label>
+                                    <input class="form-control" type="file" id="cuentaBancaria" name="cuentaBancaria" accept=".pdf">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="carta" class="form-label">Carta (PDF)</label>
+                                    <input class="form-control" type="file" id="carta" name="carta" accept=".pdf">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="otrosAdjuntos" class="form-label">Otros Documentos Adjuntos (Múltiples Archivos)</label>
+                                    <input class="form-control" type="file" id="otrosAdjuntos" name="otrosAdjuntos" multiple>
+                                </div>
+                            </div>
+
+                            <h6 class="mb-3 mt-4 text-primary">7. Firma Digital del Representante</h6>
+                            <div class="row g-3 mb-4 border rounded p-3">
+                                <div class="col-md-8">
+                                    <canvas id="signatureCanvas" width="500" height="150"></canvas>
+                                    <small class="form-text text-muted">Dibuje la firma en el espacio superior.</small>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center">
+                                    <button type="button" class="btn btn-outline-danger w-100" id="clearSignatureBtn">
+                                        <i class="ph-duotone ph-x me-2"></i> Limpiar Firma
+                                    </button>
+                                </div>
+                                <input type="hidden" id="firmaDigitalBase64" name="firmaDigitalBase64">
+                            </div>
+
+                            <div class="mt-4 text-end">
+                                <button type="button" class="btn btn-info me-2" id="btnLlenarPruebaEmpresa">
+                                    <i data-feather="terminal" class="me-2"></i> Llenar Datos de Prueba
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="btnGuardarEmpresa">
+                                    <i data-feather="save" class="me-2"></i> GUARDAR EMPRESA EN SERVIDOR
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+    
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+
+    <script>
+        // Función para leer archivo (sin cambios)
+        function readFileAsArrayBuffer(file) {
+           return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(reader.error);
+                reader.readAsArrayBuffer(file);
+           });
+        }
+
+        const form = document.getElementById('formEmpresa');
+        const signatureCanvas = document.getElementById('signatureCanvas');
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        const firmaDigitalBase64Input = document.getElementById('firmaDigitalBase64');
+        const feedbackMessageDiv = document.getElementById('feedbackMessage'); // Div para mensajes
+        const saveButton = document.getElementById('btnGuardarEmpresa'); // Botón de guardar
+        let signaturePad = null; // Inicializar como null
+
+        function resizeCanvas() {
+            // Asegurar que el canvas existe antes de intentar redimensionar
+            if (!signatureCanvas) return;
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            signatureCanvas.width = signatureCanvas.offsetWidth * ratio;
+            signatureCanvas.height = signatureCanvas.offsetHeight * ratio;
+            const ctx = signatureCanvas.getContext("2d");
+             if (ctx) {
+                ctx.scale(ratio, ratio);
+                // Si signaturePad existe, limpiar; si no, solo el contexto
+                if (signaturePad) {
+                    signaturePad.clear();
+                } else {
+                    ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                }
+             } else {
+                 console.error("No se pudo obtener el contexto 2D del canvas de firma.");
+             }
+        }
+
+        // Función para llenar datos de prueba (sin cambios)
+        function llenarDatosDePruebaEmpresa() {
+            document.getElementById('nombre_empresa').value = 'Constructora El Futuro S.A.S.';
+            document.getElementById('tipo_identificacion_empresa').value = 'NIT';
+            document.getElementById('nit').value = '900.123.456-7';
+            document.getElementById('direccion_empresa').value = 'Avenida Siempre Viva 742';
+            document.getElementById('telefono_empresa').value = '6024851234';
+            document.getElementById('correo_empresa').value = 'contacto@elfuturosas.com';
+            document.getElementById('departamento_empresa').value = 'Valle del Cauca';
+            document.getElementById('ciudad_empresa').value = 'Cali';
+            document.getElementById('ibc_empresa').value = '15000000';
+            document.getElementById('afp_empresa').value = 'Protección';
+            document.getElementById('arl_empresa').value = 'Sura';
+            document.getElementById('rep_legal_nombre').value = 'Homero J. Simpson';
+            document.getElementById('rep_legal_tipo_id').value = 'CC';
+            document.getElementById('rep_legal_numero_id').value = '79123456';
+            feedbackMessageDiv.innerHTML = '<div class="alert alert-info">✅ Datos de prueba cargados. Dibuja la firma y adjunta documentos.</div>';
+        }
+
+        // Función para inicializar Feather Icons de forma segura
+        function initializeFeatherIcons() {
+             if (typeof feather !== 'undefined' && feather && typeof feather.replace === 'function') {
+                 try {
+                     feather.replace();
+                     console.log("Feather Icons initialized.");
+                 } catch (e) {
+                     console.error("Error calling feather.replace():", e);
+                 }
+             } else {
+                 console.error("Feather Icons library (feather) is not defined or does not have the 'replace' method. Verify script loading order.");
+             }
+        }
+
+        // Event listeners y carga inicial
+        document.addEventListener('DOMContentLoaded', async () => {
+             // Verificar si los elementos existen antes de añadir listeners
+            const btnLlenarPrueba = document.getElementById('btnLlenarPruebaEmpresa');
+            if (btnLlenarPrueba) {
+                btnLlenarPrueba.addEventListener('click', llenarDatosDePruebaEmpresa);
+            }
+
+            // ========================================================================
+            // MODO EDICIÓN: Auto-cargar datos de empresa si viene ?edit_nit= en URL
+            // ========================================================================
+            const urlParams = new URLSearchParams(window.location.search);
+            const editNit = urlParams.get('edit_nit');
+            
+            if (editNit) {
+                console.log(`📝 Modo EDICIÓN activado para Empresa NIT: ${editNit}`);
+                
+                try {
+                    // Cambiar título de la página a MODO EDICIÓN
+                    const pageTitle = document.querySelector('.page-header-title');
+                    if (pageTitle) {
+                        pageTitle.innerHTML = `<span style="color: #ff9800; font-weight: bold;">EDITAR EMPRESA: ${editNit}</span>`;
+                    }
+                    
+                    // Cambiar también el título de la card/formulario
+                    const cardTitle = document.querySelector('.card-header h5, .card-header .card-title');
+                    if (cardTitle) {
+                        cardTitle.innerHTML = `<i class="feather icon-edit me-2"></i>EDITAR EMPRESA: ${editNit}`;
+                        cardTitle.style.color = '#ff9800';
+                    }
+                    
+                    // Fetch datos de la empresa
+                    const response = await fetch(`/api/empresas/${editNit}`, { 
+                        credentials: 'include' 
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Empresa no encontrada (NIT: ${editNit})`);
+                    }
+                    
+                    const empresa = await response.json();
+                    console.log('✅ Datos de empresa cargados:', empresa);
+                    
+                    // AUTO-LLENAR FORMULARIO
+                    const form = document.getElementById('formEmpresa');
+                    if (form) {
+                        // Datos básicos
+                        if (empresa.nit) {
+                            const nitInput = form.querySelector('#nit');
+                            if (nitInput) {
+                                nitInput.value = empresa.nit;
+                                nitInput.readOnly = true; // No permitir cambiar NIT
+                                nitInput.style.backgroundColor = '#e9ecef';
+                            }
+                        }
+                        if (empresa.nombre_empresa) form.querySelector('#nombre_empresa').value = empresa.nombre_empresa;
+                        
+                        // Representante Legal
+                        if (empresa.rep_legal_tipo_id && form.querySelector('#rep_legal_tipo_id')) {
+                            form.querySelector('#rep_legal_tipo_id').value = empresa.rep_legal_tipo_id;
+                        }
+                        if (empresa.rep_legal_numero_id && form.querySelector('#rep_legal_numero_id')) {
+                            form.querySelector('#rep_legal_numero_id').value = empresa.rep_legal_numero_id;
+                        }
+                        if (empresa.rep_legal_nombre && form.querySelector('#rep_legal_nombre')) {
+                            form.querySelector('#rep_legal_nombre').value = empresa.rep_legal_nombre;
+                        }
+                        if (empresa.rep_legal_telefono && form.querySelector('#rep_legal_telefono')) {
+                            form.querySelector('#rep_legal_telefono').value = empresa.rep_legal_telefono;
+                        }
+                        if (empresa.rep_legal_correo && form.querySelector('#rep_legal_correo')) {
+                            form.querySelector('#rep_legal_correo').value = empresa.rep_legal_correo;
+                        }
+                        
+                        // Información de Contacto
+                        if (empresa.direccion_empresa && form.querySelector('#direccion_empresa')) {
+                            form.querySelector('#direccion_empresa').value = empresa.direccion_empresa;
+                        }
+                        if (empresa.telefono_empresa && form.querySelector('#telefono_empresa')) {
+                            form.querySelector('#telefono_empresa').value = empresa.telefono_empresa;
+                        }
+                        if (empresa.correo_empresa && form.querySelector('#correo_empresa')) {
+                            form.querySelector('#correo_empresa').value = empresa.correo_empresa;
+                        }
+                        if (empresa.ciudad_empresa && form.querySelector('#ciudad_empresa')) {
+                            form.querySelector('#ciudad_empresa').value = empresa.ciudad_empresa;
+                        }
+                        if (empresa.departamento_empresa && form.querySelector('#departamento_empresa')) {
+                            form.querySelector('#departamento_empresa').value = empresa.departamento_empresa;
+                        }
+                        
+                        // Información Adicional
+                        if (empresa.tipo_empresa && form.querySelector('#tipo_empresa')) {
+                            form.querySelector('#tipo_empresa').value = empresa.tipo_empresa;
+                        }
+                        if (empresa.sector_economico && form.querySelector('#sector_economico')) {
+                            form.querySelector('#sector_economico').value = empresa.sector_economico;
+                        }
+                        if (empresa.num_empleados && form.querySelector('#num_empleados')) {
+                            form.querySelector('#num_empleados').value = empresa.num_empleados;
+                        }
+                        if (empresa.fecha_constitucion && form.querySelector('#fecha_constitucion')) {
+                            form.querySelector('#fecha_constitucion').value = empresa.fecha_constitucion;
+                        }
+
+                        // Datos Bancarios
+                        if (empresa.banco && form.querySelector('#banco')) {
+                            form.querySelector('#banco').value = empresa.banco;
+                        }
+                        if (empresa.tipo_cuenta && form.querySelector('#tipo_cuenta')) {
+                            form.querySelector('#tipo_cuenta').value = empresa.tipo_cuenta;
+                        }
+                        if (empresa.numero_cuenta && form.querySelector('#numero_cuenta')) {
+                            form.querySelector('#numero_cuenta').value = empresa.numero_cuenta;
+                        }
+
+                        // Seguridad Social
+                        if (empresa.ibc_empresa && form.querySelector('#ibc_empresa')) {
+                            form.querySelector('#ibc_empresa').value = empresa.ibc_empresa;
+                        }
+                        if (empresa.afp_empresa && form.querySelector('#afp_empresa')) {
+                            form.querySelector('#afp_empresa').value = empresa.afp_empresa;
+                        }
+                        if (empresa.arl_empresa && form.querySelector('#arl_empresa')) {
+                            form.querySelector('#arl_empresa').value = empresa.arl_empresa;
+                        }
+                        if (empresa.arl && form.querySelector('#arl')) {
+                            form.querySelector('#arl').value = empresa.arl;
+                        }
+                        if (empresa.ccf && form.querySelector('#ccf')) {
+                            form.querySelector('#ccf').value = empresa.ccf;
+                        }
+
+                        console.log('✅ Formulario de empresa auto-llenado correctamente');
+                    }
+                    
+                    // ============================================================
+                    // GESTIÓN DE PDFS (RUT, Cámara de Comercio, Cédula Rep.)
+                    // ============================================================
+                    const pdfFields = [
+                        { key: 'camara_comercio_pdf', label: 'Cámara de Comercio', inputId: 'camaraComercio' },
+                        { key: 'rut_pdf', label: 'RUT', inputId: 'rut' },
+                        { key: 'cedula_representante_pdf', label: 'Cédula Representante', inputId: 'cedulaRepresentante' },
+                        { key: 'certificado_arl_pdf', label: 'Certificado ARL', inputId: 'certificadoARL' },
+                        { key: 'cuenta_bancaria_pdf', label: 'Cuenta Bancaria', inputId: 'cuentaBancaria' },
+                        { key: 'carta_pdf', label: 'Carta', inputId: 'carta' }
+                    ];
+                    
+                    pdfFields.forEach(field => {
+                        const pdfUrl = empresa[field.key] || empresa[field.key.replace('_pdf', '_url')];
+                        
+                        if (pdfUrl) {
+                            const inputElement = document.getElementById(field.inputId);
+                            if (inputElement) {
+                                const pdfContainer = inputElement.parentElement;
+                                const pdfFileName = pdfUrl.split('/').pop();
+                                
+                                // Ocultar el input file original
+                                inputElement.style.display = 'none';
+                                
+                                // Crear contenedor de gestión de PDF
+                                const pdfAlert = document.createElement('div');
+                                pdfAlert.className = 'alert alert-secondary d-flex justify-content-between align-items-center mt-2 mb-2';
+                                pdfAlert.id = `pdfContainer_${field.inputId}`;
+                                pdfAlert.innerHTML = `
+                                    <span>📄 <strong>${field.label} Actual:</strong> ${pdfFileName}</span>
+                                    <div>
+                                        <a href="${pdfUrl}" target="_blank" class="btn btn-sm btn-info me-2">
+                                            👁️ Ver PDF
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-warning" onclick="habilitarCargaNueva_${field.inputId}()">
+                                            🔄 Actualizar
+                                        </button>
+                                    </div>
+                                `;
+                                
+                                pdfContainer.appendChild(pdfAlert);
+                                
+                                // Crear función global para este campo específico
+                                window[`habilitarCargaNueva_${field.inputId}`] = function() {
+                                    const input = document.getElementById(field.inputId);
+                                    const container = document.getElementById(`pdfContainer_${field.inputId}`);
+                                    
+                                    if (input) {
+                                        input.style.display = 'block';
+                                        input.focus();
+                                    }
+                                    if (container) {
+                                        container.innerHTML = `
+                                            <div class="alert alert-warning">
+                                                ⚠️ Selecciona un nuevo ${field.label} para reemplazar el actual
+                                            </div>
+                                        `;
+                                    }
+                                };
+                                
+                                console.log(`✅ Gestión de ${field.label} PDF configurada`);
+                            }
+                        }
+                    });
+                    
+                    // CAMBIAR ACCIÓN DEL FORMULARIO A PUT (UPDATE)
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        submitButton.innerHTML = '<i class="feather icon-save me-2"></i>Actualizar Empresa';
+                        
+                        // Modificar el submit para usar PUT
+                        form.addEventListener('submit', async function(e) {
+                            e.preventDefault();
+                            
+                            const formData = new FormData(form);
+                            const data = Object.fromEntries(formData);
+                            
+                            try {
+                                const updateResponse = await fetch(`/api/empresas/${editNit}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    credentials: 'include',
+                                    body: JSON.stringify(data)
+                                });
+                                
+                                if (updateResponse.ok) {
+                                    alert('✅ Empresa actualizada exitosamente');
+                                    window.close(); // Cerrar pestaña si fue abierta desde tabla
+                                } else {
+                                    const error = await updateResponse.json();
+                                    alert(`❌ Error al actualizar: ${error.message || 'Error desconocido'}`);
+                                }
+                            } catch (error) {
+                                console.error('Error al actualizar empresa:', error);
+                                alert('❌ Error de conexión al actualizar empresa');
+                            }
+                        }, { once: true });
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error al cargar empresa para edición:', error);
+                    alert(`❌ No se pudo cargar la empresa con NIT: ${editNit}\n\n${error.message}`);
+                    
+                    // Limpiar parámetro de URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+            // ========================================================================
+
+            // --- LÓGICA DE LOGOUT AÑADIDA (de index.html) ---
+            async function handleLogout() {
+              try {
+                console.log('🚪 Intentando logout...');
+                const response = await fetch('/api/logout', { 
+                  method: 'POST',
+                  headers: { 'Accept': 'application/json' },
+                  credentials: 'include' 
+                });
+
+                console.log('📡 Respuesta logout:', response.status);
+                const result = await response.json();
+                console.log('📦 Resultado logout:', result);
+
+                if(response.ok) {
+                  console.log('✅ Logout exitoso');
+                  sessionStorage.removeItem('userName'); 
+                  window.location.href = '/login'; 
+                } else {
+                  console.error('❌ Error al hacer logout:', result.error);
+                  alert('Error al cerrar sesión: ' + (result.error || 'Error desconocido'));
+                  sessionStorage.removeItem('userName');
+                  window.location.href = '/login';
+                }
+              } catch (error) {
+                console.error('❌ Error de red al hacer logout:', error);
+                alert('Error de conexión al cerrar sesión.');
+                 sessionStorage.removeItem('userName');
+                window.location.href = '/login';
+              }
+            }
+
+            // Asignar evento a los botones de logout
+            const logoutButton1 = document.getElementById('logoutButton');
+            const logoutButton2 = document.getElementById('logoutButton2');
+            if(logoutButton1) logoutButton1.addEventListener('click', handleLogout);
+            if(logoutButton2) logoutButton2.addEventListener('click', handleLogout);
+            
+            // --- FIN DE LÓGICA DE LOGOUT ---
+
+
+            // --- Mostrar Nombre de Usuario (leído desde sessionStorage) ---
+            const storedUserName = sessionStorage.getItem('userName');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if (userNameDisplay && storedUserName) {
+              userNameDisplay.textContent = storedUserName;
+            }
+
+            // Inicializar SignaturePad solo si el canvas existe
+            if (signatureCanvas) {
+                signaturePad = new SignaturePad(signatureCanvas, {
+                    backgroundColor: 'rgb(247, 249, 252)'
+                });
+                 if (clearSignatureBtn) {
+                     clearSignatureBtn.addEventListener('click', () => signaturePad.clear());
+                 }
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas(); // Llamar una vez al cargar
+            } else {
+                 console.error("El elemento canvas 'signatureCanvas' no se encontró.");
+            }
+
+            // ============================================================
+            // MANEJO DE SUBMIT (Solo si NO estamos en modo edición)
+            // ============================================================
+            if (!editNit) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    console.log("🚀 Submit interceptado - MODO CREACIÓN");
+
+                    // 1. CAPTURAR FIRMA
+                    if (signaturePad && !signaturePad.isEmpty()) {
+                        const firmaBase64 = signaturePad.toDataURL('image/png');
+                        document.getElementById('firmaDigitalBase64').value = firmaBase64;
+                    }
+
+                    // 2. PREPARAR FORMDATA (Esto envía texto + archivos)
+                    const formData = new FormData(this);
+
+                    // 3. ENVIAR AL BACKEND
+                    try {
+                        Swal.fire({
+                            title: 'Guardando empresa...',
+                            html: 'Subiendo archivos y generando expediente...',
+                            didOpen: () => Swal.showLoading()
+                        });
+
+                        const response = await fetch('/api/empresas', {
+                            method: 'POST',
+                            body: formData // ¡Importante! No usar JSON.stringify ni Content-Type header
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            Swal.fire('¡Éxito!', 'Empresa creada y expediente generado.', 'success')
+                                .then(() => window.location.reload());
+                        } else {
+                            Swal.fire('Error', result.error || 'Error desconocido', 'error');
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        Swal.fire('Error', 'Fallo de conexión', 'error');
+                    }
+                });
+            }
+
+            // Inicializar Feather Icons al cargar el DOM
+            initializeFeatherIcons();
+        });
+    </script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </body>
+</html>

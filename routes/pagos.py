@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-pagos.py - ACTUALIZADO con logging
+pagos.py - REFACTORIZADO CON ORM
 ==================================================
-Maneja la lógica para registrar y consultar pagos.
+Maneja la lógica para registrar y consultar pagos usando SQLAlchemy ORM.
+Elimina SQL manual y usa modelos ORM al 100%.
 """
-
-import sqlite3
+import traceback
 from datetime import datetime
+from flask import Blueprint, jsonify, request, session, current_app
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from flask import Blueprint, g, jsonify, request
-
-# --- IMPORTAR UTILIDADES Y LOGGER ---
 from logger import logger
-from utils import login_required
+from extensions import db
+from models.orm_models import Pago, Empresa
+
+# --- IMPORTACIÓN CENTRALIZADA ---
+try:
+    from ..utils import login_required
+except (ImportError, ValueError):
+    from utils import login_required
+# -------------------------------
+
 
 # ==================== DEFINICIÓN DEL BLUEPRINT ====================
 bp_pagos = Blueprint("bp_pagos", __name__, url_prefix="/api/pagos")
@@ -23,32 +31,67 @@ bp_pagos = Blueprint("bp_pagos", __name__, url_prefix="/api/pagos")
 @bp_pagos.route("", methods=["GET"])
 @login_required
 def get_pagos():
-    """Obtiene todos los registros de pagos."""
+    """
+    Obtiene todos los registros de pagos usando ORM con joins.
+
+    Returns:
+        JSON con lista de pagos ordenados por fecha, incluyendo datos del usuario y empresa
+    """
     try:
-        conn = g.db
-        pagos = conn.execute(
-            """
-            SELECT p.*, u.primerNombre, u.primerApellido, e.nombre_empresa
-            FROM pagos p
-            LEFT JOIN usuarios u ON p.usuario_id = u.numeroId
-            LEFT JOIN empresas e ON p.empresa_nit = e.nit
-            ORDER BY p.fecha_pago DESC
-        """
-        ).fetchall()
+        # ✅ Usando ORM con query compleja
+        pagos = db.session.query(
+            Pago,
+            Usuario.primerNombre,
+            Usuario.primerApellido,
+            Usuario.empresa_nit,
+            Empresa.nombre_empresa
+        ).outerjoin(
+            Usuario, Pago.usuario_id == Usuario.numeroId
+        ).outerjoin(
+            Empresa, Usuario.empresa_nit == Empresa.nit
+        ).order_by(
+            Pago.fecha_pago.desc()
+        ).all()
 
-        logger.debug(f"Se consultaron {len(pagos)} registros de pagos")
-        return jsonify([dict(row) for row in pagos])
+        logger.debug(f"Se consultaron {len(pagos)} registros de pagos usando ORM")
 
-    except Exception as e:
-        logger.error(f"Error obteniendo lista de pagos: {e}", exc_info=True)
+        # Construir respuesta con datos combinados
+        resultado = []
+        for pago, primer_nombre, primer_apellido, empresa_nit, nombre_empresa in pagos:
+            pago_dict = pago.to_dict()
+            pago_dict['primerNombre'] = primer_nombre
+            pago_dict['primerApellido'] = primer_apellido
+            pago_dict['empresa_nit'] = empresa_nit
+            pago_dict['nombre_empresa'] = nombre_empresa
+            resultado.append(pago_dict)
+
+        return jsonify(resultado)
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de SQLAlchemy obteniendo pagos: {e}", exc_info=True)
         return jsonify({"error": "No se pudo obtener la lista de pagos."}), 500
-    # g.db se cierra automáticamente por app.after_request
+    except Exception as e:
+        logger.error(f"Error inesperado obteniendo pagos: {e}", exc_info=True)
+        return jsonify({"error": "Error interno del servidor."}), 500
 
 
 @bp_pagos.route("", methods=["POST"])
 @login_required
 def add_pago():
-    """Añade un nuevo registro de pago."""
+    """
+    Añade un nuevo registro de pago usando ORM.
+
+    Request JSON:
+        - usuario_id: ID del usuario que recibe el pago (requerido)
+        - empresa_nit: NIT de la empresa que realiza el pago (requerido)
+        - monto: Monto del pago (requerido)
+        - tipo_pago: Tipo de pago (nomina, prima, etc.) (requerido)
+        - fecha_pago: Fecha del pago (opcional, default: hoy)
+        - referencia: Referencia o número de comprobante (opcional)
+
+    Returns:
+        JSON con el pago creado
+    """
     try:
         data = request.get_json()
 
@@ -61,51 +104,48 @@ def add_pago():
                 400,
             )
 
-        monto = float(data["monto"])
-        if monto <= 0:
-            logger.warning(f"Intento de agregar pago con monto inválido: {monto}")
-            return jsonify({"error": "El monto debe ser un valor positivo."}), 400
+        # Validar monto
+        try:
+            monto = float(data["monto"])
+            if monto <= 0:
+                logger.warning(f"Intento de agregar pago con monto inválido: {monto}")
+                return jsonify({"error": "El monto debe ser un valor positivo."}), 400
+        except (ValueError, TypeError):
+            return jsonify({"error": "El monto debe ser un número válido."}), 400
 
         fecha_pago = data.get("fecha_pago", datetime.now().strftime("%Y-%m-%d"))
 
-        conn = g.db
-        cur = conn.cursor()
-
-        cur.execute(
-            """
-            INSERT INTO pagos (usuario_id, empresa_nit, monto, tipo_pago, fecha_pago, referencia)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                data["usuario_id"],
-                data["empresa_nit"],
-                monto,
-                data["tipo_pago"],
-                fecha_pago,
-                data.get("referencia"),
-            ),
+        # ✅ Crear nuevo pago usando ORM
+        nuevo_pago = Pago(
+            usuario_id=data["usuario_id"],
+            empresa_nit=data["empresa_nit"],
+            monto=monto,
+            tipo_pago=data["tipo_pago"],
+            fecha_pago=fecha_pago,
+            referencia=data.get("referencia")
         )
-        conn.commit()
 
-        nuevo_id = cur.lastrowid
-        logger.info(f"Nuevo pago registrado con ID: {nuevo_id} por un monto de {monto}")
+        # ✅ Guardar en la base de datos
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        logger.info(f"Nuevo pago registrado con ID: {nuevo_pago.id} por un monto de {monto}")
 
         # Devolver el registro completo
-        nuevo_pago = conn.execute("SELECT * FROM pagos WHERE id = ?", (nuevo_id,)).fetchone()
+        return jsonify(nuevo_pago.to_dict()), 201
 
-        return jsonify(dict(nuevo_pago)), 201
-
-    except sqlite3.IntegrityError as ie:
-        conn = g.db
-        conn.rollback()
+    except IntegrityError as ie:
+        db.session.rollback()
         logger.error(f"Error de integridad al agregar pago: {ie}", exc_info=True)
         return (
             jsonify({"error": "Error de integridad, verifique los datos (ej. NIT o ID de usuario no existen)."}),
             409,
         )
+    except SQLAlchemyError as se:
+        db.session.rollback()
+        logger.error(f"Error de SQLAlchemy al agregar pago: {se}", exc_info=True)
+        return jsonify({"error": "Error de base de datos al crear pago."}), 500
     except Exception as e:
-        conn = g.db
-        conn.rollback()
+        db.session.rollback()
         logger.error(f"Error general al agregar pago: {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
-    # g.db se cierra automáticamente por app.after_request

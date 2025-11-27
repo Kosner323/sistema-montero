@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 SISTEMA DE DEPURACIONES MONTERO - VERSIÓN COMPLETA
 Genera cartas de depuración personalizadas según 3 escenarios diferentes
@@ -17,7 +17,14 @@ from reportlab.pdfgen import canvas
 from werkzeug.utils import secure_filename
 
 from logger import logger
-from utils import login_required
+
+# --- IMPORTACIÓN CENTRALIZADA ---
+# Intentamos importar desde nivel superior o local
+try:
+    from ..utils import get_db_connection, login_required
+except (ImportError, ValueError):
+    from utils import get_db_connection, login_required
+# -------------------------------
 
 # Definir el Blueprint
 bp_depuraciones = Blueprint("bp_depuraciones", __name__, url_prefix="/api/depuraciones")
@@ -37,7 +44,7 @@ def allowed_file(filename):
 def get_depuraciones_pendientes():
     """Obtiene todos los registros marcados como pendientes de depuración."""
     try:
-        conn = g.db
+        conn = get_db_connection()
         c = conn.cursor()
         c.execute(
             "SELECT id, entidad_nombre, causa, fecha_sugerida, estado FROM depuraciones_pendientes ORDER BY fecha_sugerida DESC"
@@ -58,7 +65,7 @@ def iniciar_proceso_depuracion():
     Busca usuarios con +1 año de antigüedad.
     """
     try:
-        conn = g.db
+        conn = get_db_connection()
         c = conn.cursor()
         nuevos_pendientes_count = 0
 
@@ -109,7 +116,7 @@ def iniciar_proceso_depuracion():
         )
 
     except Exception as e:
-        conn = g.db
+        conn = get_db_connection()
         conn.rollback()
         logger.error("Error en operación", exc_info=True)
         return jsonify({"error": f"Error al iniciar depuración: {str(e)}"}), 500
@@ -131,7 +138,7 @@ def resolver_depuracion(depuracion_id):
         if not accion:
             return jsonify({"error": "Falta la 'accion' (aprobar/rechazar)"}), 400
 
-        conn = g.db
+        conn = get_db_connection()
         c = conn.cursor()
 
         c.execute(
@@ -171,7 +178,7 @@ def resolver_depuracion(depuracion_id):
         return jsonify({"success": True, "message": message}), 200
 
     except Exception as e:
-        conn = g.db
+        conn = get_db_connection()
         conn.rollback()
         logger.error("Error en operación", exc_info=True)
         return jsonify({"error": f"Error al resolver depuración: {str(e)}"}), 500
@@ -491,7 +498,7 @@ def buscar_empresa():
         if not tipo or not numero:
             return jsonify({"error": "Faltan parámetros"}), 400
 
-        conn = g.db
+        conn = get_db_connection()
         c = conn.cursor()
 
         c.execute(
@@ -537,7 +544,7 @@ def buscar_usuario():
             return jsonify({"error": "Faltan parámetros"}), 400
 
         # Conectar a la base de datos
-        conn = g.db
+        conn = get_db_connection()
         c = conn.cursor()
 
         # --- CONSULTA SQL ACTUALIZADA ---

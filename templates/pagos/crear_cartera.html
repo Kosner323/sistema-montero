@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <title>Registrar Cuenta por Cobrar | Portal Montero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="page-header-title">
+                        <h5 class="mb-0 font-medium">Registrar Cuenta por Cobrar</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/pagos/cartera">Cartera</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Nueva Cuenta</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <!-- Formulario de Nueva Cuenta por Cobrar -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i data-feather="trending-up" class="me-2"></i>
+                                Información de la Cuenta
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formNuevaCuenta">
+                                <div class="row g-4">
+                                    
+                                    <!-- Empresa Cliente -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">
+                                            Empresa Cliente <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select form-select-lg" id="empresaNit" required>
+                                            <option value="">Seleccione una empresa...</option>
+                                            {% for empresa in empresas %}
+                                            <option value="{{ empresa.nit }}">
+                                                {{ empresa.nombre_empresa }} - NIT: {{ empresa.nit }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">Empresa que nos debe dinero</small>
+                                    </div>
+
+                                    <!-- Concepto -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">
+                                            Concepto <span class="text-danger">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            id="concepto" 
+                                            placeholder="Ej: Servicios de nómina mes de octubre 2025"
+                                            required
+                                        >
+                                        <small class="text-muted">Descripción del servicio o producto</small>
+                                    </div>
+
+                                    <!-- Monto -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">
+                                            Monto (COP) <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input 
+                                                type="number" 
+                                                class="form-control" 
+                                                id="monto" 
+                                                placeholder="0"
+                                                min="1"
+                                                step="1000"
+                                                required
+                                            >
+                                        </div>
+                                        <small class="text-muted">Valor total de la deuda</small>
+                                    </div>
+
+                                    <!-- Fecha Vencimiento -->
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">
+                                            Fecha de Vencimiento <span class="text-danger">*</span>
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            class="form-control" 
+                                            id="fechaVencimiento" 
+                                            required
+                                        >
+                                        <small class="text-muted">Fecha límite de pago</small>
+                                    </div>
+
+                                    <!-- Notas Adicionales -->
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Notas Adicionales</label>
+                                        <textarea 
+                                            class="form-control" 
+                                            id="notas" 
+                                            rows="4"
+                                            placeholder="Información adicional, condiciones de pago, referencias, etc."
+                                        ></textarea>
+                                        <small class="text-muted">Opcional: Detalles adicionales sobre esta cuenta</small>
+                                    </div>
+
+                                    <!-- Botones de Acción -->
+                                    <div class="col-md-12">
+                                        <hr class="my-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="/pagos/cartera" class="btn btn-secondary">
+                                                <i data-feather="arrow-left" class="me-2"></i>
+                                                Cancelar y Volver
+                                            </a>
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i data-feather="save" class="me-2"></i>
+                                                Registrar Cuenta
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Ayuda -->
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h6 class="mb-3">
+                                <i data-feather="info" class="me-2"></i>
+                                Información Importante
+                            </h6>
+                            <ul class="mb-0">
+                                <li class="mb-2">
+                                    <strong>Cuentas por Cobrar:</strong> Son los montos que nuestros clientes nos deben por servicios prestados.
+                                </li>
+                                <li class="mb-2">
+                                    <strong>Seguimiento:</strong> El sistema alertará automáticamente sobre cuentas próximas a vencer o vencidas.
+                                </li>
+                                <li>
+                                    <strong>Pagos Parciales:</strong> Puedes registrar pagos parciales desde la vista principal de Cartera.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    
+    {% include '_theme_config.html' %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+
+            // Establecer fecha mínima como hoy
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaVencimiento').setAttribute('min', hoy);
+        });
+
+        // Función para mostrar alertas
+        function showAlert(message, type = 'success') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.getElementById('alertContainer').innerHTML = alertHtml;
+            feather.replace();
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('formNuevaCuenta').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Validaciones
+            const monto = parseFloat(document.getElementById('monto').value);
+            if (monto <= 0) {
+                showAlert('El monto debe ser mayor a cero', 'danger');
+                return;
+            }
+
+            const empresaNit = document.getElementById('empresaNit').value;
+            if (!empresaNit) {
+                showAlert('Debes seleccionar una empresa', 'danger');
+                return;
+            }
+
+            // Preparar datos
+            const data = {
+                empresa_nit: empresaNit,
+                concepto: document.getElementById('concepto').value.trim(),
+                monto: monto,
+                fecha_vencimiento: document.getElementById('fechaVencimiento').value,
+                notas: document.getElementById('notas').value.trim()
+            };
+
+            // Validar concepto
+            if (!data.concepto) {
+                showAlert('El concepto es obligatorio', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/cartera/cobrar', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showAlert('Cuenta registrada exitosamente. Redirigiendo...', 'success');
+                    
+                    // Redireccionar después de 1.5 segundos
+                    setTimeout(() => {
+                        window.location.href = '/pagos/cartera';
+                    }, 1500);
+                } else {
+                    showAlert(result.error || 'Error al registrar la cuenta', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error de conexión. Por favor, intenta nuevamente.', 'danger');
+            }
+        });
+
+        // Formatear monto mientras se escribe
+        document.getElementById('monto').addEventListener('blur', function() {
+            if (this.value) {
+                const valor = parseFloat(this.value);
+                if (!isNaN(valor)) {
+                    this.value = Math.round(valor);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

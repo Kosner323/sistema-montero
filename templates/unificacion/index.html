@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Control de Nómina y Afiliados | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="description" content="Sistema de gestión de nómina y afiliados - Portal Montero" />
+  <meta name="author" content="Portal Montero" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+  <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/assets/fonts/material.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+  <style>
+    /* ========== ESTILOS TABLA DE CONTROL DE NÓMINA ========== */
+    .table-bordered th,
+    .table-bordered td {
+      border: 1px solid #dee2e6 !important;
+      padding: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    /* Colores de grupos de columnas */
+    .bg-gray-100 { background-color: #f8f9fa !important; }
+    .bg-blue-100 { background-color: #e3f2fd !important; }
+    .bg-green-100 { background-color: #e8f5e9 !important; }
+    .bg-yellow-100 { background-color: #fff3e0 !important; }
+    .bg-primary-100 { background-color: #e3f2fd !important; }
+    .bg-purple-100 { background-color: #f3e5f5 !important; }
+
+    /* Estados de filas */
+    .row-sin-empresa {
+      background-color: #ffeaea !important;
+    }
+
+    .row-activo {
+      background-color: #d1f2eb !important;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-sm {
+      font-size: 0.875rem;
+    }
+
+    .whitespace-nowrap {
+      white-space: nowrap;
+    }
+
+    /* Card headers personalizados */
+    .card-header-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+    }
+
+    .card-header-custom h5 {
+      color: white;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    /* Badges */
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.35rem 0.65rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .table {
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+
+  <!-- Script de autenticación IIFE (se ejecuta inmediatamente) -->
+  <script>
+    (async function checkAuthentication() {
+      const loader = document.querySelector('.loader-bg');
+      if (loader) loader.style.display = 'flex';
+
+      try {
+        console.log('🔍 Verificando autenticación (unificación)...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const response = await fetch('/api/check_auth', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'include'
+        });
+
+        console.log('📡 Respuesta check_auth:', response.status);
+
+        if (!response.ok) {
+          console.error('❌ Error del servidor:', response.status, response.statusText);
+          window.location.href = '/login';
+          return;
+        }
+
+        const data = await response.json();
+        console.log('📦 Datos check_auth:', data);
+
+        if (!data.authenticated) {
+          console.log('🚫 Usuario no autenticado, redirigiendo...');
+          window.location.href = '/login';
+        } else {
+          console.log('✅ Usuario autenticado:', data.user_name);
+          if (loader) loader.style.display = 'none';
+          sessionStorage.setItem('userName', data.user_name);
+
+          document.addEventListener('DOMContentLoaded', () => {
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if (userNameDisplay) userNameDisplay.textContent = data.user_name;
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error de red en check_auth:', error);
+        window.location.href = '/login';
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <!-- Loader (mismo estilo que novedades) -->
+  <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+    <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+      <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+    </div>
+  </div>
+
+  {% include '_sidebar.html' %}
+  {% include '_header.html' %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+
+      <!-- Breadcrumb -->
+      <div class="page-header">
+        <div class="page-block">
+          <div class="page-header-title">
+            <h5 class="mb-0 font-medium">Control de Nómina y Afiliados</h5>
+          </div>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item"><a href="#!">Administración</a></li>
+            <li class="breadcrumb-item" aria-current="page">Control de Nómina</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ========== BLOQUE 1: FILTROS DE USUARIO ========== -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header card-header-custom">
+              <h5>
+                <i class="ti ti-user-search me-2"></i>
+                Búsqueda de Afiliado
+              </h5>
+            </div>
+            <div class="card-body">
+              <form id="formBuscarAfiliado" class="row g-3">
+                <div class="col-md-3">
+                  <label for="filtroUserTipoId" class="form-label">
+                    <i class="feather icon-credit-card me-1"></i>
+                    Tipo de Identificación
+                  </label>
+                  <select class="form-select" id="filtroUserTipoId">
+                    <option value="">Todos los Tipos</option>
+                    <option value="CC">CC - Cédula de Ciudadanía</option>
+                    <option value="CE">CE - Cédula de Extranjería</option>
+                    <option value="PA">PA - Pasaporte</option>
+                    <option value="TI">TI - Tarjeta de Identidad</option>
+                    <option value="RC">RC - Registro Civil</option>
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label for="filtroUserNumeroId" class="form-label">
+                    <i class="feather icon-hash me-1"></i>
+                    Número de Identificación
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="filtroUserNumeroId"
+                    placeholder="Ej: 1010123456"
+                  />
+                </div>
+
+                <div class="col-md-4">
+                  <label for="filtroUserNombre" class="form-label">
+                    <i class="feather icon-user me-1"></i>
+                    Nombres / Apellidos
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="filtroUserNombre"
+                    placeholder="Buscar por nombre o apellido..."
+                  />
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">
+                    <i class="feather icon-search me-1"></i> Buscar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== BLOQUE 2: TABLA MAESTRA DE CONTROL ========== -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">Tabla Maestra de Control de Nómina</h5>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary" id="contadorRegistros">0 registros</span>
+                <button class="btn btn-sm btn-primary" onclick="cargarDatosIniciales()">
+                  <i data-feather="refresh-cw" style="width:16px;height:16px;"></i> Recargar
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="text-muted mb-3">
+                Listado completo de afiliados con información de seguridad social, costos y vinculación laboral.
+              </p>
+              <div class="table-responsive">
+                <table class="table table-hover table-bordered text-sm whitespace-nowrap" id="tablaControl">
+                  <thead>
+                    <!-- FILA SUPERIOR: AGRUPADORES -->
+                    <tr>
+                      <th rowspan="2" class="align-middle text-center" style="width: 40px;">
+                        <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
+                      </th>
+
+                      <th colspan="3" class="text-center bg-gray-100">IDENTIFICACIÓN</th>
+
+                      <th colspan="4" class="text-center bg-blue-100">NOMBRE COMPLETO</th>
+
+                      <th colspan="4" class="text-center bg-green-100">SEGURIDAD SOCIAL</th>
+
+                      <th colspan="3" class="text-center bg-yellow-100">DATOS INGRESO</th>
+
+                      <th colspan="4" class="text-center bg-purple-100">APORTES ($COP)</th>
+
+                      <th rowspan="2" class="align-middle text-center bg-primary-100">EMPRESA / ADMIN</th>
+
+                      <th rowspan="2" class="align-middle text-center" style="width: 100px;">ACCIONES</th>
+                    </tr>
+
+                    <!-- FILA INFERIOR: DETALLE -->
+                    <tr>
+                      <!-- IDENTIFICACIÓN -->
+                      <th class="bg-gray-100">TIPO</th>
+                      <th class="bg-gray-100">NÚMERO</th>
+                      <th class="bg-gray-100">EDAD</th>
+
+                      <!-- NOMBRE COMPLETO -->
+                      <th class="bg-blue-100">1ER NOMBRE</th>
+                      <th class="bg-blue-100">2DO NOMBRE</th>
+                      <th class="bg-blue-100">1ER APELLIDO</th>
+                      <th class="bg-blue-100">2DO APELLIDO</th>
+
+                      <!-- SEGURIDAD SOCIAL -->
+                      <th class="bg-green-100">EPS</th>
+                      <th class="bg-green-100">ARL</th>
+                      <th class="bg-green-100">PENSIÓN</th>
+                      <th class="bg-green-100">CAJA COMP.</th>
+
+                      <!-- DATOS INGRESO -->
+                      <th class="bg-yellow-100">FECHA</th>
+                      <th class="bg-yellow-100">MES</th>
+                      <th class="bg-yellow-100">IBC</th>
+
+                      <!-- APORTES -->
+                      <th class="bg-purple-100">$ EPS</th>
+                      <th class="bg-purple-100">$ ARL</th>
+                      <th class="bg-purple-100">$ PENSIÓN</th>
+                      <th class="bg-purple-100">$ CAJA</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaControlBody">
+                    <!-- Datos cargados dinámicamente -->
+                    <tr>
+                      <td colspan="21" class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 mb-0 text-muted">Cargando datos...</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== BLOQUE 3: DATOS DE LA EMPRESA ========== -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header card-header-custom">
+              <h5>
+                <i class="ti ti-building me-2"></i>
+                Datos de la Empresa
+              </h5>
+            </div>
+            <div class="card-body">
+              <form id="formBuscarEmpresa" class="row g-3">
+                <div class="col-md-3">
+                  <label for="filtroEmpresaTipoId" class="form-label">
+                    <i class="feather icon-file-text me-1"></i>
+                    Tipo de Identificación
+                  </label>
+                  <select class="form-select" id="filtroEmpresaTipoId">
+                    <option value="">Todos los Tipos</option>
+                    <option value="NIT">NIT - Número de Identificación Tributaria</option>
+                    <option value="RUT">RUT - Registro Único Tributario</option>
+                    <option value="CC">CC - Cédula de Ciudadanía</option>
+                    <option value="CE">CE - Cédula de Extranjería</option>
+                    <option value="OTRO">Otro</option>
+                  </select>
+                </div>
+
+                <div class="col-md-3">
+                  <label for="filtroEmpresaNit" class="form-label">
+                    <i class="feather icon-hash me-1"></i>
+                    Número de Identificación (NIT)
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="filtroEmpresaNit"
+                    placeholder="Búsqueda parcial permitida"
+                  />
+                </div>
+
+                <div class="col-md-4">
+                  <label for="filtroEmpresaNombre" class="form-label">
+                    <i class="feather icon-briefcase me-1"></i>
+                    Razón Social / Nombre
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="filtroEmpresaNombre"
+                    placeholder="Buscar por nombre de empresa..."
+                  />
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-success w-100">
+                    <i class="feather icon-search me-1"></i> Buscar Empresa
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% include '_footer.html' %}
+
+  <!-- ========================================================================
+       SCRIPTS - ORDEN CRÍTICO PARA ABLE PRO TEMPLATE
+       NO MODIFICAR EL ORDEN - CAUSA ERRORES DE SIDEBAR/HEADER
+       ======================================================================== -->
+
+  <!-- 1. Plugins Base (SimpleBar debe ir primero) -->
+  <script src="/assets/js/plugins/simplebar.min.js"></script>
+  <script src="/assets/js/plugins/popper.min.js"></script>
+
+  <!-- 2. BOOTSTRAP 5 BUNDLE - ¡CRÍTICO! Debe estar ANTES de component.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 3. Sistema de Iconos (Custom Icons y Feather) -->
+  <script src="/assets/js/icon/custom-icon.js"></script>
+  <script src="/assets/js/plugins/feather.min.js"></script>
+
+  <!-- 4. Scripts del Tema Able Pro (Requieren Bootstrap ya cargado) -->
+  <script src="/assets/js/component.js"></script>
+  <script src="/assets/js/theme.js"></script>
+
+  <!-- 5. Polyfills - Previene errores cuando script.js llama funciones del tema -->
+  <script>
+    window.layout_change = window.layout_change || function() {};
+    window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+    window.change_box_container = window.change_box_container || function() {};
+    window.layout_caption_change = window.layout_caption_change || function() {};
+    window.layout_rtl_change = window.layout_rtl_change || function() {};
+    window.preset_change = window.preset_change || function() {};
+    window.main_layout_change = window.main_layout_change || function() {};
+  </script>
+
+  <!-- 6. Script Principal del Template - El cerebro del Sidebar y Header -->
+  <script src="/assets/js/script.js"></script>
+
+  <!-- 7. Librerías Adicionales -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- 8. Configuración del Tema (Customizer) -->
+  {% include '_theme_config.html' %}
+
+  <script>
+    // ========================================================================
+    // CONTROL DE NÓMINA - LÓGICA PRINCIPAL
+    // ========================================================================
+
+    let todosLosDatos = []; // Cache de todos los empleados
+
+    // === INICIALIZACIÓN COMPLETA DE UI ===
+    // Usamos 'load' en lugar de 'DOMContentLoaded' para asegurar que todos los scripts externos estén cargados
+    window.addEventListener('load', function() {
+      console.log('🔧 Iniciando inicialización completa de UI...');
+      
+      // Ocultar loader
+      const loader = document.querySelector('.loader-bg');
+      if (loader) loader.style.display = 'none';
+      
+      // Inicializar iconos Feather
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+        console.log('✓ Iconos Feather inicializados');
+      }
+      
+      // Inicializar tema
+      if (typeof initializeTheme === 'function') {
+        initializeTheme();
+        console.log('✓ Tema inicializado');
+      }
+
+      // === PARCHE DE REACTIVACIÓN UI (Bootstrap + Sidebar) ===
+      // 1. Inicializar Dropdowns de Bootstrap manualmente
+      if (typeof bootstrap !== 'undefined') {
+        console.log('✓ Bootstrap detectado, versión:', bootstrap.Dropdown.VERSION || 'desconocida');
+        
+        // Destruir instancias existentes primero (evita duplicados)
+        const existingDropdowns = document.querySelectorAll('.dropdown-toggle');
+        existingDropdowns.forEach(function(el) {
+          const instance = bootstrap.Dropdown.getInstance(el);
+          if (instance) {
+            instance.dispose();
+          }
+        });
+        
+        // Crear nuevas instancias con configuración optimizada
+        var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+        var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+          return new bootstrap.Dropdown(dropdownToggleEl, {
+            autoClose: true,
+            boundary: 'viewport',
+            popperConfig: {
+              strategy: 'fixed'
+            }
+          });
+        });
+        console.log('✅ Dropdowns de Bootstrap inicializados:', dropdownList.length);
+        
+        // Verificar que los dropdowns funcionan
+        if (dropdownList.length === 0) {
+          console.warn('⚠️ No se encontraron elementos .dropdown-toggle');
+        }
+      } else {
+        console.error('❌ Bootstrap no está disponible! Verifica que el CDN esté cargado.');
+      }
+
+      // 2. Manejo manual del Sidebar Toggle Desktop
+      const sidebarHideBtn = document.querySelector('#sidebar-hide');
+      if (sidebarHideBtn) {
+        sidebarHideBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelector('.pc-sidebar').classList.toggle('pc-sidebar-hide');
+          console.log('🔄 Sidebar toggle activado');
+        });
+        console.log('✓ Event listener #sidebar-hide agregado');
+      }
+      
+      // 3. Manejo manual del Sidebar Mobile
+      const mobileCollapseBtn = document.querySelector('#mobile-collapse');
+      if (mobileCollapseBtn) {
+        mobileCollapseBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelector('.pc-sidebar').classList.toggle('mob-sidebar-active');
+          console.log('📱 Sidebar mobile toggle activado');
+        });
+        console.log('✓ Event listener #mobile-collapse agregado');
+      }
+
+      console.log('✅ Re-inicialización de UI completada');
+    });
+
+    // Cargar datos cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Cargar datos
+      await cargarDatosIniciales();
+
+      // Event Listeners
+      document.getElementById('formBuscarAfiliado')?.addEventListener('submit', filtrarPorAfiliado);
+      document.getElementById('formBuscarEmpresa')?.addEventListener('submit', filtrarPorEmpresa);
+      
+      // Logout buttons
+      const logoutButton1 = document.getElementById('logoutButton');
+      const logoutButton2 = document.getElementById('logoutButton2');
+      if (logoutButton1) logoutButton1.addEventListener('click', handleLogout);
+      if (logoutButton2) logoutButton2.addEventListener('click', handleLogout);
+      
+      // Mostrar nombre de usuario
+      const storedUserName = sessionStorage.getItem('userName');
+      const userNameDisplay = document.getElementById('userNameDisplay');
+      if (userNameDisplay && storedUserName) {
+        userNameDisplay.textContent = storedUserName;
+      }
+    });
+
+    // Cargar datos iniciales
+    async function cargarDatosIniciales() {
+      try {
+        console.log('📥 Cargando datos del servidor...');
+
+        const response = await fetch('/api/unificacion/master', {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // La API devuelve {usuarios: [...], empresas: [...], stats: {...}}
+          todosLosDatos = data.usuarios || data || [];
+          console.log(`✅ Cargados ${todosLosDatos.length} empleados`);
+          console.log('📊 Primer empleado (muestra):', todosLosDatos[0]);
+
+          renderizarTabla(todosLosDatos);
+
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: `${todosLosDatos.length} registros cargados`,
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true
+          });
+        } else {
+          throw new Error('Error al cargar datos');
+        }
+      } catch (error) {
+        console.error('❌ Error:', error);
+        document.getElementById('tablaControlBody').innerHTML = `
+          <tr>
+            <td colspan="21" class="text-center py-5">
+              <i class="feather icon-alert-triangle text-danger" style="font-size: 3rem;"></i>
+              <p class="mt-3 text-danger">Error al cargar los datos</p>
+              <button class="btn btn-primary mt-2" onclick="cargarDatosIniciales()">
+                <i class="feather icon-refresh-cw me-2"></i>Reintentar
+              </button>
+            </td>
+          </tr>
+        `;
+        feather.replace();
+      }
+    }
+
+    // Filtrar por afiliado
+    function filtrarPorAfiliado(e) {
+      e.preventDefault();
+
+      const tipoId = document.getElementById('filtroUserTipoId').value.trim();
+      const numeroId = document.getElementById('filtroUserNumeroId').value.trim().toLowerCase();
+      const nombre = document.getElementById('filtroUserNombre').value.trim().toLowerCase();
+
+      let filtrados = todosLosDatos;
+
+      if (tipoId) {
+        filtrados = filtrados.filter(d => (d.tipoId || '').toUpperCase() === tipoId);
+      }
+
+      if (numeroId) {
+        filtrados = filtrados.filter(d =>
+          (d.numeroId || '').toLowerCase().includes(numeroId)
+        );
+      }
+
+      if (nombre) {
+        filtrados = filtrados.filter(d => {
+          const nombreCompleto = `${d.primerNombre || ''} ${d.segundoNombre || ''} ${d.primerApellido || ''} ${d.segundoApellido || ''}`.toLowerCase();
+          return nombreCompleto.includes(nombre);
+        });
+      }
+
+      renderizarTabla(filtrados);
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'info',
+        title: `${filtrados.length} resultado(s) encontrado(s)`,
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+
+    // Filtrar por empresa
+    function filtrarPorEmpresa(e) {
+      e.preventDefault();
+
+      const tipoId = document.getElementById('filtroEmpresaTipoId').value.trim();
+      const nit = document.getElementById('filtroEmpresaNit').value.trim().toLowerCase();
+      const nombre = document.getElementById('filtroEmpresaNombre').value.trim().toLowerCase();
+
+      let filtrados = todosLosDatos;
+
+      if (nit) {
+        filtrados = filtrados.filter(d =>
+          (d.empresa_nit || '').toLowerCase().includes(nit)
+        );
+      }
+
+      if (nombre) {
+        filtrados = filtrados.filter(d =>
+          (d.nombre_empresa || d.administracion || '').toLowerCase().includes(nombre)
+        );
+      }
+
+      renderizarTabla(filtrados);
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'info',
+        title: `${filtrados.length} resultado(s) encontrado(s)`,
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+
+    // Renderizar tabla
+    function renderizarTabla(datos) {
+      const tbody = document.getElementById('tablaControlBody');
+      const contador = document.getElementById('contadorRegistros');
+
+      contador.textContent = `${datos.length} registro${datos.length !== 1 ? 's' : ''}`;
+
+      if (datos.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="21" class="text-center py-5">
+              <i class="feather icon-inbox" style="font-size: 3rem; color: #ccc;"></i>
+              <p class="mt-3 mb-0 text-muted">No se encontraron registros</p>
+            </td>
+          </tr>
+        `;
+        feather.replace();
+        return;
+      }
+
+      let html = '';
+      datos.forEach(empleado => {
+        // Datos básicos
+        const tipoId = empleado.tipoId || 'CC';
+        const numeroId = empleado.numeroId || 'N/A';
+        const edad = empleado.edad || 'N/A';
+        
+        // Debug: Ver si edad está llegando
+        if (!empleado.edad && empleado.fechaNacimiento) {
+          console.warn('⚠️ Usuario sin edad calculada:', empleado.numeroId, 'Fecha:', empleado.fechaNacimiento);
+        }
+        
+        const primerNombre = empleado.primerNombre || '';
+        const segundoNombre = empleado.segundoNombre || '';
+        const primerApellido = empleado.primerApellido || '';
+        const segundoApellido = empleado.segundoApellido || '';
+
+        // Entidades
+        const epsNombre = empleado.epsNombre || 'N/A';
+        const arlNombre = empleado.arlNombre || 'N/A';
+        const afpNombre = empleado.afpNombre || 'N/A';
+        const ccfNombre = empleado.ccfNombre || 'N/A';
+
+        // Datos laborales
+        const fechaIngreso = empleado.fechaIngreso || 'N/A';
+        const ibc = parseFloat(empleado.ibc) || 0;
+
+        // Calcular mes de ingreso
+        let mesIngreso = 'N/A';
+        if (empleado.fechaIngreso) {
+          const fecha = new Date(empleado.fechaIngreso);
+          const mes = fecha.toLocaleString('es-CO', { month: 'short' }).toUpperCase();
+          const anio = fecha.getFullYear();
+          mesIngreso = `${mes}/${anio}`;
+        }
+
+        // Costos
+        const epsCosto = parseFloat(empleado.epsCosto) || 0;
+        const arlCosto = parseFloat(empleado.arlCosto) || 0;
+        const afpCosto = parseFloat(empleado.afpCosto) || 0;
+        const ccfCosto = parseFloat(empleado.ccfCosto) || 0;
+
+        // Empresa
+        const administracion = empleado.administracion || empleado.nombre_empresa || 'Sin Empresa';
+
+        // Clase de fila
+        const rowClass = !empleado.empresa_nit ? 'row-sin-empresa' : 'row-activo';
+
+        html += `
+          <tr class="${rowClass}">
+            <td class="text-center"><input type="checkbox" name="selectRow" value="${numeroId}"></td>
+            <td class="text-center">${tipoId}</td>
+            <td>${numeroId}</td>
+            <td class="text-center">${edad}</td>
+            <td>${primerNombre}</td>
+            <td>${segundoNombre}</td>
+            <td>${primerApellido}</td>
+            <td>${segundoApellido}</td>
+            <td>${epsNombre}</td>
+            <td>${arlNombre}</td>
+            <td>${afpNombre}</td>
+            <td>${ccfNombre}</td>
+            <td class="text-center">${fechaIngreso}</td>
+            <td class="text-center">${mesIngreso}</td>
+            <td class="text-right">${ibc.toLocaleString('es-CO')}</td>
+            <td class="text-right">${epsCosto.toLocaleString('es-CO')}</td>
+            <td class="text-right">${arlCosto.toLocaleString('es-CO')}</td>
+            <td class="text-right">${afpCosto.toLocaleString('es-CO')}</td>
+            <td class="text-right">${ccfCosto.toLocaleString('es-CO')}</td>
+            <td>${administracion}</td>
+            <td class="text-center">
+              <a href="/usuarios/gestion?edit_id=${numeroId}"
+                 class="btn btn-sm btn-outline-primary"
+                 target="_blank"
+                 title="Ver Información Completa y PDFs">
+                <i data-feather="edit" style="width:14px;height:14px;" class="me-1"></i>Ver Completo
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      feather.replace();
+    }
+
+    // Toggle all checkboxes
+    function toggleAll(source) {
+      const checkboxes = document.querySelectorAll('input[name="selectRow"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+      });
+    }
+
+    // Logout
+    async function handleLogout() {
+      try {
+        const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+        if (response.ok) {
+          window.location.href = '/login';
+        }
+      } catch (error) {
+        console.error('Error en logout:', error);
+        window.location.href = '/login';
+      }
+    }
+  </script>
+</body>
+</html>

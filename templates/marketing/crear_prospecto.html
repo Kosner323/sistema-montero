@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Crear Prospecto | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+</head>
+<body>
+  <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]" style="display:none"></div>
+  {% include '_sidebar.html' %}
+  {% include '_header.html' %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+      <div class="page-header">
+        <div class="page-block">
+          <div class="page-header-title">
+            <h5 class="mb-0 font-medium">Nuevo Prospecto</h5>
+          </div>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item"><a href="/marketing/prospectos">Prospectos</a></li>
+            <li class="breadcrumb-item" aria-current="page">Crear</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-8">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+              <h5 class="mb-0"><i data-feather="user-plus" class="me-2"></i>Datos del Interesado</h5>
+            </div>
+            <div class="card-body">
+              <form id="formProspecto" class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Nombre Completo *</label>
+                  <input type="text" class="form-control" id="nombre_completo" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Teléfono</label>
+                  <input type="tel" class="form-control" id="telefono" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Correo</label>
+                  <input type="email" class="form-control" id="correo" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Origen *</label>
+                  <select id="origen" class="form-select" required>
+                    <option value="Web">Web</option>
+                    <option value="Redes">Redes</option>
+                    <option value="Referido">Referido</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="Llamada">Llamada</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Interés</label>
+                  <select id="interes" class="form-select">
+                    <option value="Afiliación">Afiliación</option>
+                    <option value="Impuestos">Impuestos</option>
+                    <option value="Planillas">Planillas</option>
+                    <option value="Asesoría">Asesoría</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Notas</label>
+                  <textarea id="notas" class="form-control" rows="3"></textarea>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-2">
+              <a href="/marketing/prospectos" class="btn btn-light">Cancelar</a>
+              <button id="btnGuardarProspecto" class="btn btn-primary">
+                <i data-feather="save" class="me-1"></i>Guardar Prospecto
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% include '_footer.html' %}
+
+  <script src="/assets/js/plugins/feather.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      const btn = document.getElementById('btnGuardarProspecto');
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        const data = {
+          nombre_completo: document.getElementById('nombre_completo').value.trim(),
+          telefono: document.getElementById('telefono').value.trim(),
+          correo: document.getElementById('correo').value.trim(),
+          origen: document.getElementById('origen').value,
+          interes: document.getElementById('interes').value,
+          notas: document.getElementById('notas').value.trim()
+        };
+        if (!data.nombre_completo) { alert('El nombre es requerido'); btn.disabled = false; return; }
+        try {
+          const resp = await fetch('/marketing/api/prospectos', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
+          });
+          const result = await resp.json();
+          if (resp.ok) { window.location.href = '/marketing/prospectos'; }
+          else { alert(result.error || 'Error al guardar'); btn.disabled = false; }
+        } catch (e) { console.error(e); alert('Error de red'); btn.disabled = false; }
+      });
+    });
+  </script>
+</body>
+</html>

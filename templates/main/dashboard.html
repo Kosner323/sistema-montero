@@ -1,0 +1,887 @@
+﻿<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dashboard Principal | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Panel principal del sistema de gestión Montero y Negocio." />
+    <meta name="author" content="Montero y Negocio" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <script>
+      (async function checkAuthentication() {
+        const loader = document.querySelector('.loader-bg');
+        if (loader) loader.style.display = 'flex';
+
+        try {
+          console.log('🔐 Verificando autenticación...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          const response = await fetch('/api/check_auth', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include'
+          });
+
+          console.log('📡 Respuesta check_auth:', response.status);
+
+          if (!response.ok) {
+            console.error('❌ Error del servidor:', response.status, response.statusText);
+            window.location.href = '/login';
+            return;
+          }
+
+          const data = await response.json();
+          console.log('📦 Datos check_auth:', data);
+
+          if (!data.authenticated) {
+            console.log('🚫 Usuario no autenticado, redirigiendo...');
+            window.location.href = '/login';
+          } else {
+            console.log('✅ Usuario autenticado:', data.user_name);
+            if (loader) loader.style.display = 'none';
+            sessionStorage.setItem('userName', data.user_name);
+
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if (userNameDisplay) {
+              userNameDisplay.textContent = data.user_name;
+            } else {
+              document.addEventListener('DOMContentLoaded', () => {
+                const userNameDisplayLate = document.getElementById('userNameDisplay');
+                if(userNameDisplayLate) userNameDisplayLate.textContent = data.user_name;
+              });
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error de red en check_auth:', error);
+          window.location.href = '/login';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]" style="display: flex;">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+      <div class="pc-content">
+        <!-- Barra compacta de herramientas (Hero reemplazado) -->
+        <div class="card border-0 shadow-sm mb-6 overflow-hidden" style="background: linear-gradient(135deg, #7267EF 0%, #3ebfea 50%, #1de9b6 100%);">
+          <div class="card-body p-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+              <div class="text-white d-flex align-items-center">
+                <div class="bg-white bg-opacity-25 rounded p-2 me-3">
+                  <i data-feather="aperture" class="text-white" style="width:20px; height:20px;"></i>
+                </div>
+                <div>
+                  <h5 class="mb-0 fw-bold text-white">Portal Montero</h5>
+                  <small class="text-white text-opacity-75">Panel de Control Estratégico</small>
+                </div>
+              </div>
+              <div class="d-flex gap-2">
+                <a href="/copiloto/arl" class="btn btn-sm btn-light text-primary fw-bold shadow-none border-0 d-flex align-items-center py-1 px-3">
+                  <i data-feather="zap" class="me-2" style="width:14px; height:14px;"></i>Copiloto
+                </a>
+                <a href="/pagos/recaudo" class="btn btn-sm bg-white bg-opacity-25 text-white hover-bg-opacity-50 border-0 d-flex align-items-center py-1 px-3">
+                  <i data-feather="dollar-sign" class="me-2" style="width:14px; height:14px;"></i>Pago
+                </a>
+                <a href="/ingresar_empresa" class="btn btn-sm bg-white bg-opacity-25 text-white hover-bg-opacity-50 border-0 d-flex align-items-center py-1 px-3">
+                  <i data-feather="user-plus" class="me-2" style="width:14px; height:14px;"></i>Cliente
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs con gradientes Datta Able -->
+        <div class="grid grid-cols-12 gap-6 mb-6">
+          <div class="col-span-12 md:col-span-6 lg:col-span-3">
+            <div class="card border-0 shadow h-100" style="background: linear-gradient(160deg, #7267EF 0%, #a08cff 100%); color: #fff;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <small class="d-block mb-1" style="opacity:.85">Leads Nuevos</small>
+                    <h3 class="mb-1" id="leadsNuevos">0</h3>
+                    <small id="leadsSemana" style="opacity:.9">+0 esta semana</small>
+                  </div>
+                  <i data-feather="users" style="width:34px;height:34px;opacity:.9"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 md:col-span-6 lg:col-span-3">
+            <div class="card border-0 shadow h-100" style="background: linear-gradient(160deg, #3ebfea 0%, #63d6ff 100%); color: #0b2239;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <small class="d-block mb-1" style="opacity:.85">Empresas Activas</small>
+                    <h3 class="mb-1" id="empresasActivas">0</h3>
+                    <small style="opacity:.9">Base consolidada</small>
+                  </div>
+                  <i data-feather="briefcase" style="width:34px;height:34px;opacity:.9"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 md:col-span-6 lg:col-span-3">
+            <div class="card border-0 shadow h-100" style="background: linear-gradient(135deg, #FF5370 0%, #ff7991 100%); color: #fff;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <small class="d-block mb-1" style="opacity:.85">Cartera Vencida</small>
+                    <h3 class="mb-1" id="carteraVencidaDash">$ 0</h3>
+                    <small id="cuentasVencidas" style="opacity:.9">0 vencidas</small>
+                  </div>
+                  <i data-feather="alert-triangle" style="width:34px;height:34px;opacity:.9;color:#fff"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 md:col-span-6 lg:col-span-3">
+            <div class="card border-0 shadow h-100" style="background: linear-gradient(160deg, #1de9b6 0%, #7cf7db 100%); color: #083a2f;">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <small class="d-block mb-1" style="opacity:.85">Objetivo Mensual</small>
+                    <h3 class="mb-1">85%</h3>
+                    <small style="opacity:.9">Tendencia positiva</small>
+                  </div>
+                  <i data-feather="trending-up" style="width:34px;height:34px;opacity:.9"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-6 mb-6">
+          
+          <div class="col-span-12 md:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="w-100" style="height:4px;background: linear-gradient(90deg,#7267EF 0%, #3ebfea 100%);"></div>
+              <div class="card-body">
+                <h6 class="mb-2 text-muted fw-normal">Ganancia Mensual</h6>
+                <div class="row align-items-center">
+                  <div class="col-6">
+                    <h3 class="mb-0 fw-bold text-primary">$ 24.5M</h3>
+                  </div>
+                  <div class="col-6 text-end">
+                    <span class="badge bg-light-success text-success fw-normal">+12% vs mes anterior</span>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <small>Meta: <span style="color:#7267EF">$ 30M</span></small>
+                    <small class="fw-bold text-primary">82%</small>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 82%" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="w-100" style="height:4px;background: linear-gradient(90deg,#FFB64D 0%, #FF8A48 100%);"></div>
+              <div class="card-body">
+                <h6 class="mb-2 text-muted fw-normal">Ganancia Anual (YTD)</h6>
+                <div class="row align-items-center">
+                  <div class="col-6">
+                    <h3 class="mb-0 fw-bold text-warning">$ 145M</h3>
+                  </div>
+                  <div class="col-6 text-end">
+                    <span class="badge bg-light-warning text-warning fw-normal">En proyección</span>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <small>Meta: <span style="color:#FFB64D">$ 250M</span></small>
+                    <small class="fw-bold text-warning">58%</small>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 58%" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12 md:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="w-100" style="height:4px;background: linear-gradient(90deg,#1de9b6 0%, #00c9a7 100%);"></div>
+              <div class="card-body">
+                <h6 class="mb-2 text-muted fw-normal">Margen Neto</h6>
+                <div class="row align-items-center">
+                  <div class="col-6">
+                    <h3 class="mb-0 fw-bold text-success">28.5%</h3>
+                  </div>
+                  <div class="col-6 text-end">
+                    <span class="badge bg-light-success text-success fw-normal">Saludable</span>
+                  </div>
+                </div>
+                <div class="mt-3">
+                  <div class="d-flex justify-content-between mb-1">
+                    <small>Industria: <span style="color:#1de9b6">25%</span></small>
+                    <small class="fw-bold text-success">Excelente</small>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Gráficos clave -->
+        <div class="grid grid-cols-12 gap-6 mb-6">
+          <div class="col-span-12 lg:col-span-6">
+            <div class="card h-full border-0 shadow-sm">
+              <div class="card-header border-0 bg-transparent">
+                <h5 class="mb-0"><i data-feather="bar-chart-2" class="me-2 text-success"></i>Flujo de Caja (Semestral)</h5>
+              </div>
+              <div class="card-body">
+                <div id="chartFlujoCaja"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 lg:col-span-3">
+            <div class="card h-full border-0 shadow-sm">
+              <div class="card-header border-0 bg-transparent">
+                <h5 class="mb-0"><i data-feather="pie-chart" class="me-2 text-primary"></i>Embudo de Ventas</h5>
+              </div>
+              <div class="card-body">
+                <div id="chartEmbudo" class="d-flex justify-center"></div>
+                <!-- Top Servicios Solicitados (nuevo gráfico bajo el donut) -->
+                <div class="mt-3">
+                  <h6 class="mb-2 text-muted">Top Servicios Solicitados</h6>
+                  <div id="chartTopServicios"></div>
+                </div>
+                <div class="mt-3 border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted text-sm"><i class="fas fa-circle text-primary me-1" style="font-size:8px; color: #7267EF !important;"></i> Contactados</span>
+                        <span class="fw-bold">65%</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted text-sm"><i class="fas fa-circle text-info me-1" style="font-size:8px; color: #3ebfea !important;"></i> Interesados</span>
+                        <span class="fw-bold">45%</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted text-sm"><i class="fas fa-circle text-success me-1" style="font-size:8px; color: #1de9b6 !important;"></i> Cerrados</span>
+                        <span class="fw-bold">20%</span>
+                    </div>
+                </div>
+                <div class="text-center mt-2"><small class="text-muted">Conversion Rate: <strong>20%</strong></small></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-12 lg:col-span-3">
+            <div class="card h-full border-0 shadow-sm">
+              <div class="card-header border-0 bg-transparent">
+                <h5 class="mb-0"><i data-feather="user-plus" class="me-2 text-warning"></i>Usuarios Registrados</h5>
+              </div>
+              <div class="card-body">
+                <div id="chartUsuarios"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="grid grid-cols-12 gap-6 mb-6">
+          <div class="col-span-12">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-transparent border-0 d-flex align-items-center">
+                <h5 class="mb-0"><i data-feather="clock" class="me-2 text-info"></i>Actividad Reciente</h5>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th style="width:180px">Fecha</th>
+                        <th>Usuario</th>
+                        <th>Acción</th>
+                        <th>Módulo</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentActivityTbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAPA DE NAVEGACIÓN VISUAL (estilizado Datta Able) -->
+        <div class="grid grid-cols-12 gap-6">
+          <!-- Crecimiento & Automatización -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm" style="backdrop-filter: blur(2px);">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #FFB64D 0%, #FF8A48 100%);">
+                <div>
+                  <h5 class="mb-0">Crecimiento & Automatización</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Robots y marketing de crecimiento</p>
+                </div>
+                <i data-feather="zap" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/copiloto/arl" class="text-decoration-none"><span class="fw-semibold">Copiloto ARL</span></a>
+                    <div class="text-muted text-sm">Robot para afiliaciones automáticas en Sura</div>
+                  </li>
+                  <li class="mb-3">
+                    <a href="/marketing/prospectos" class="text-decoration-none"><span class="fw-semibold">Marketing · Prospectos</span></a>
+                    <div class="text-muted text-sm">Gestión de leads y CRM comercial</div>
+                  </li>
+                  <li>
+                    <a href="/marketing/campanas" class="text-decoration-none"><span class="fw-semibold">Marketing · Campañas</span></a>
+                    <div class="text-muted text-sm">Diseño, estados y seguimiento de campañas</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Finanzas & Contabilidad -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #1de9b6 0%, #00c9a7 100%);">
+                <div>
+                  <h5 class="mb-0">Finanzas & Contabilidad</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Ingresos, cartera y obligaciones</p>
+                </div>
+                <i data-feather="dollar-sign" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/pagos/recaudo" class="text-decoration-none"><span class="fw-semibold">Recaudo</span></a>
+                    <div class="text-muted text-sm">Registro de ingresos de clientes</div>
+                  </li>
+                  <li class="mb-3">
+                    <a href="/pagos/cartera" class="text-decoration-none"><span class="fw-semibold">Cartera</span></a>
+                    <div class="text-muted text-sm">Control de deudas por cobrar y por pagar</div>
+                  </li>
+                  <li class="mb-3">
+                    <a href="/planillas/enviar" class="text-decoration-none"><span class="fw-semibold">Planillas</span></a>
+                    <div class="text-muted text-sm">Gestión de pagos a seguridad social</div>
+                  </li>
+                  <li>
+                    <a href="/pagos/impuestos" class="text-decoration-none"><span class="fw-semibold">Impuestos</span></a>
+                    <div class="text-muted text-sm">Calendario y soporte de pagos fiscales</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gestión Operativa -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #3b82f6 0%, #536dfe 100%);">
+                <div>
+                  <h5 class="mb-0">Gestión Operativa</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Operación diaria de servicios</p>
+                </div>
+                <i data-feather="activity" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/novedades" class="text-decoration-none"><span class="fw-semibold">Novedades</span></a>
+                    <div class="text-muted text-sm">Reporte y seguimiento de incidencias diarias</div>
+                  </li>
+                  <li>
+                    <a href="/formularios" class="text-decoration-none"><span class="fw-semibold">Formularios</span></a>
+                    <div class="text-muted text-sm">Repositorio de documentos estándar</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gestión Jurídica -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #FF5370 0%, #ff7991 100%);">
+                <div>
+                  <h5 class="mb-0">Gestión Jurídica</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Procesos y trámites legales</p>
+                </div>
+                <i data-feather="shield" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/incapacidades" class="text-decoration-none"><span class="fw-semibold">Incapacidades</span></a>
+                    <div class="text-muted text-sm">Radicación y seguimiento ante EPS</div>
+                  </li>
+                  <li class="mb-3">
+                    <a href="/tutelas" class="text-decoration-none"><span class="fw-semibold">Tutelas</span></a>
+                    <div class="text-muted text-sm">Control de procesos legales en curso</div>
+                  </li>
+                  <li>
+                    <a href="/depuraciones" class="text-decoration-none"><span class="fw-semibold">Depuraciones</span></a>
+                    <div class="text-muted text-sm">Limpieza y saneamiento de bases de datos</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Base de Datos -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);">
+                <div>
+                  <h5 class="mb-0">Base de Datos</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Catálogos y maestro de entidades</p>
+                </div>
+                <i data-feather="hard-drive" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/base-datos-usuarios" class="text-decoration-none"><span class="fw-semibold">Usuarios / Empresas</span></a>
+                    <div class="text-muted text-sm">Directorio maestro del sistema</div>
+                  </li>
+                  <li>
+                    <a href="/unificacion" class="text-decoration-none"><span class="fw-semibold">Unificación</span></a>
+                    <div class="text-muted text-sm">Herramientas de fusión y deduplicación</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Soporte & Seguridad -->
+          <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header d-flex justify-content-between align-items-center text-white border-0" style="background: linear-gradient(135deg, #7267EF 0%, #a08cff 100%);">
+                <div>
+                  <h5 class="mb-0">Soporte & Seguridad</h5>
+                  <p class="mb-0 text-white" style="opacity:.9">Almacenamiento, auditoría y acceso</p>
+                </div>
+                <i data-feather="lock" style="width:40px;height:40px;opacity:.85"></i>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                  <li class="mb-3">
+                    <a href="/archivos/gestor" class="text-decoration-none"><span class="fw-semibold">Gestor de Archivos</span></a>
+                    <div class="text-muted text-sm">Nube privada de documentos</div>
+                  </li>
+                  <li class="mb-3">
+                    <a href="/auditoria/logs" class="text-decoration-none"><span class="fw-semibold">Auditoría</span></a>
+                    <div class="text-muted text-sm">Logs de seguridad y trazabilidad</div>
+                  </li>
+                  <li>
+                    <a href="/usuarios-y-contrasenas" class="text-decoration-none"><span class="fw-semibold">Credenciales</span></a>
+                    <div class="text-muted text-sm">Bóveda de contraseñas empresariales</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    {% include '_theme_config.html' %}
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+
+        // =============================================================================
+        // CARGAR DATOS DEL DASHBOARD
+        // =============================================================================
+        async function cargarDashboardData() {
+          try {
+            // Cargar estadísticas de cartera
+            const statsResponse = await fetch('/api/cartera/stats', { credentials: 'include' });
+            if (statsResponse.ok) {
+              const stats = await statsResponse.json();
+              document.getElementById('carteraVencidaDash').textContent = formatMoney(stats.cartera_vencida || 0);
+              
+              // Contar cuentas vencidas
+              const cuentasResponse = await fetch('/api/cartera/cobrar', { credentials: 'include' });
+              if (cuentasResponse.ok) {
+                const cuentas = await cuentasResponse.json();
+                const hoy = new Date();
+                const vencidas = cuentas.filter(c => {
+                  return c.estado === 'Pendiente' && new Date(c.fecha_vencimiento) < hoy;
+                }).length;
+                document.getElementById('cuentasVencidas').textContent = `${vencidas} vencida${vencidas !== 1 ? 's' : ''}`;
+              }
+            }
+
+            // Cargar leads de marketing
+            const leadsResponse = await fetch('/marketing/api/prospectos', { credentials: 'include' });
+            if (leadsResponse.ok) {
+              const leads = await leadsResponse.json();
+              document.getElementById('leadsNuevos').textContent = leads.length;
+              
+              // Leads de esta semana
+              const haceUnaSemana = new Date();
+              haceUnaSemana.setDate(haceUnaSemana.getDate() - 7);
+              const leadsSemana = leads.filter(l => new Date(l.fecha_ingreso) > haceUnaSemana).length;
+              document.getElementById('leadsSemana').textContent = `+${leadsSemana} esta semana`;
+            }
+
+            // Cargar empresas activas
+            const empresasResponse = await fetch('/api/empresas', { credentials: 'include' });
+            if (empresasResponse.ok) {
+              const empresas = await empresasResponse.json();
+              document.getElementById('empresasActivas').textContent = empresas.length;
+            }
+
+            // Cargar actividad reciente
+            cargarActividadReciente();
+
+          } catch (error) {
+            console.error('Error cargando datos del dashboard:', error);
+          }
+        }
+
+        function cargarActividadReciente() {
+          const tbody = document.getElementById('recentActivityTbody');
+          const actividadSimulada = [
+            { fecha: '2025-11-17 10:30', usuario: 'Admin', accion: 'Registró nueva campaña', modulo: 'Marketing', estado: 'Completado' },
+            { fecha: '2025-11-17 09:15', usuario: 'Carlos M.', accion: 'Actualizó cuenta por cobrar', modulo: 'Cartera', estado: 'Completado' },
+            { fecha: '2025-11-16 16:45', usuario: 'Ana G.', accion: 'Nuevo prospecto agregado', modulo: 'Marketing', estado: 'Completado' },
+            { fecha: '2025-11-16 14:20', usuario: 'Admin', accion: 'Generó reporte de nómina', modulo: 'Nómina', estado: 'Completado' },
+            { fecha: '2025-11-16 11:00', usuario: 'Luis R.', accion: 'Actualizó datos de empresa', modulo: 'Empresas', estado: 'Completado' }
+          ];
+
+          tbody.innerHTML = '';
+          actividadSimulada.forEach(act => {
+            const estadoBadge = act.estado === 'Completado' 
+              ? '<span class="badge bg-success">Completado</span>'
+              : '<span class="badge bg-warning">Pendiente</span>';
+            
+            const row = `
+              <tr>
+                <td><small class="text-muted">${act.fecha}</small></td>
+                <td>${act.usuario}</td>
+                <td>${act.accion}</td>
+                <td><span class="badge bg-light-primary text-primary">${act.modulo}</span></td>
+                <td>${estadoBadge}</td>
+              </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+          });
+          feather.replace();
+        }
+
+        // =============================================================================
+        // GRÁFICO 1: FLUJO DE CAJA
+        // =============================================================================
+        const optionsFlujoCaja = {
+          series: [{
+            name: 'Ingresos',
+            data: [45000000, 52000000, 48000000, 61000000, 58000000, 67000000]
+          }, {
+            name: 'Egresos',
+            data: [32000000, 38000000, 35000000, 42000000, 39000000, 44000000]
+          }],
+          chart: {
+            type: 'area',
+            height: 350,
+            toolbar: {
+              show: false
+            }
+          },
+          colors: ['#7267EF', '#1de9b6'],
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            curve: 'smooth',
+            width: 2
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.7,
+              opacityTo: 0.3,
+              stops: [0, 90, 100]
+            }
+          },
+          xaxis: {
+            categories: ['Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov']
+          },
+          yaxis: {
+            labels: {
+              formatter: function (value) {
+                return '$ ' + (value / 1000000).toFixed(1) + 'M';
+              }
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: function (value) {
+                return '$ ' + value.toLocaleString('es-CO');
+              }
+            }
+          },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'right'
+          }
+        };
+
+        const chartFlujoCaja = new ApexCharts(document.querySelector("#chartFlujoCaja"), optionsFlujoCaja);
+        chartFlujoCaja.render();
+
+        // =============================================================================
+        // GRÁFICO 2: EMBUDO DE VENTAS
+        // =============================================================================
+        const optionsEmbudo = {
+          series: [65, 45, 28, 13],
+          chart: {
+            type: 'donut',
+            height: 280
+          },
+          labels: ['Contactados', 'Interesados', 'Propuesta Enviada', 'Cerrados'],
+          colors: ['#7267EF', '#3ebfea', '#1de9b6', '#A098F5'],
+          legend: {
+            position: 'bottom'
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                size: '65%',
+                labels: {
+                  show: true,
+                  total: {
+                    show: true,
+                    label: 'Total Leads',
+                    formatter: function (w) {
+                      return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                    }
+                  }
+                }
+              }
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+              return val.toFixed(0) + '%';
+            }
+          }
+        };
+
+        const chartEmbudo = new ApexCharts(document.querySelector("#chartEmbudo"), optionsEmbudo);
+        chartEmbudo.render();
+
+        // =============================================================================
+        // GRÁFICO 3: TOP SERVICIOS SOLICITADOS (Barras horizontales)
+        // =============================================================================
+        const optionsTopServicios = {
+          series: [{
+            name: 'Solicitudes',
+            data: [40, 28, 22]
+          }],
+          chart: {
+            type: 'bar',
+            height: 180,
+            toolbar: { show: false },
+            animations: { enabled: true }
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              barHeight: '60%',
+              distributed: true,
+              borderRadius: 4
+            }
+          },
+          colors: ['#7267EF', '#3ebfea', '#1de9b6'],
+          dataLabels: { enabled: false },
+          xaxis: {
+            categories: ['Afiliaciones', 'Seguros', 'Asesoría'],
+            labels: { show: false },
+            axisTicks: { show: false },
+            axisBorder: { show: false }
+          },
+          yaxis: {
+            labels: {
+              style: { colors: '#6b7280' }
+            }
+          },
+          grid: {
+            borderColor: 'rgba(0,0,0,0.06)',
+            strokeDashArray: 4,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: false } }
+          },
+          legend: { show: false },
+          tooltip: {
+            y: {
+              formatter: (val) => `${val} solicitudes`
+            }
+          }
+        };
+
+        const chartTopServicios = new ApexCharts(document.querySelector('#chartTopServicios'), optionsTopServicios);
+        chartTopServicios.render();
+
+        // =============================================================================
+        // GRÁFICO 4: USUARIOS REGISTRADOS (Barras verticales)
+        // =============================================================================
+        const optionsUsuarios = {
+          series: [{
+            name: 'Usuarios',
+            data: [10, 15, 8, 20, 25]
+          }],
+          chart: {
+            type: 'bar',
+            height: 260,
+            toolbar: { show: false }
+          },
+          colors: ['#7267EF', '#3ebfea', '#1de9b6', '#FFB64D', '#FF5370'],
+          plotOptions: {
+            bar: {
+              columnWidth: '45%',
+              borderRadius: 6,
+              distributed: true
+            }
+          },
+          dataLabels: { enabled: false },
+          grid: {
+            borderColor: 'rgba(0,0,0,0.06)',
+            strokeDashArray: 4,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: false } }
+          },
+          xaxis: {
+            categories: ['Jul', 'Ago', 'Sep', 'Oct', 'Nov'],
+            axisTicks: { show: false },
+            axisBorder: { show: false },
+            labels: { style: { colors: '#6b7280' } }
+          },
+          yaxis: {
+            labels: { show: false }
+          },
+          legend: { show: false },
+          tooltip: {
+            y: {
+              formatter: (val) => `${val} registros`
+            }
+          }
+        };
+
+        const chartUsuarios = new ApexCharts(document.querySelector('#chartUsuarios'), optionsUsuarios);
+        chartUsuarios.render();
+
+        // =============================================================================
+        // FUNCIÓN DE FORMATEO
+        // =============================================================================
+        function formatMoney(value) {
+          return '$ ' + parseFloat(value || 0).toLocaleString('es-CO', { 
+            minimumFractionDigits: 0, 
+            maximumFractionDigits: 0 
+          });
+        }
+
+        // =============================================================================
+        // LÓGICA DE LOGOUT
+        // =============================================================================
+        async function handleLogout() {
+          try {
+            console.log('🚪 Intentando logout...');
+            const response = await fetch('/api/logout', {
+              method: 'POST',
+              headers: { 'Accept': 'application/json' },
+              credentials: 'include'
+            });
+
+            console.log('📡 Respuesta logout:', response.status);
+            const result = await response.json();
+            console.log('📦 Resultado logout:', result);
+
+            if(response.ok) {
+              console.log('✅ Logout exitoso');
+              sessionStorage.removeItem('userName');
+              window.location.href = '/login';
+            } else {
+              console.error('❌ Error al hacer logout:', result.error);
+              alert('Error al cerrar sesión: ' + (result.error || 'Error desconocido'));
+              sessionStorage.removeItem('userName');
+              window.location.href = '/login';
+            }
+          } catch (error) {
+            console.error('❌ Error de red al hacer logout:', error);
+            alert('Error de conexión al cerrar sesión.');
+            sessionStorage.removeItem('userName');
+            window.location.href = '/login';
+          }
+        }
+
+        // Asignar evento a los botones de logout
+        const logoutButton1 = document.getElementById('logoutButton');
+        const logoutButton2 = document.getElementById('logoutButton2');
+        if(logoutButton1) logoutButton1.addEventListener('click', handleLogout);
+        if(logoutButton2) logoutButton2.addEventListener('click', handleLogout);
+
+        // Mostrar nombre de usuario desde sessionStorage
+        const storedUserName = sessionStorage.getItem('userName');
+        const userNameDisplay = document.getElementById('userNameDisplay');
+        if (userNameDisplay && storedUserName) {
+          userNameDisplay.textContent = storedUserName;
+        }
+
+        // Carga inicial de datos
+        cargarDashboardData();
+      });
+    </script>
+
+  </body>
+</html>

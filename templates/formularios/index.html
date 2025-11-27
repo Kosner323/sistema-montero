@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Gestor de Afiliaciones | Montero y Negocio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Sistema de gestión de afiliaciones y documentos" />
+    <meta name="author" content="Montero y Negocio" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    
+    <!-- SweetAlert2 para alertas modernas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Toastify para notificaciones tipo toast -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <style>
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .badge-docs {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .table-afiliaciones {
+            font-size: 0.875rem;
+        }
+        .table-afiliaciones th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            padding: 0.5rem;
+        }
+        .table-afiliaciones td {
+            padding: 0.5rem;
+            vertical-align: middle;
+        }
+        .entity-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        .btn-file-upload {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-file-upload input[type=file] {
+            position: absolute;
+            opacity: 0;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .switch-no-aplica {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="row align-items-center">
+              <div class="col-md-12">
+                <ul class="breadcrumb mb-3">
+                  <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                  <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Operativa</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Gestor de Afiliaciones</li>
+                </ul>
+              </div>
+              <div class="col-md-12">
+                <div class="page-header-title">
+                  <h2 class="mb-0"><i class="ph-duotone ph-users-three me-2"></i>Gestor de Afiliaciones</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="feedbackMessage" class="mb-4"></div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- BLOQUE 1: VERIFICADOR DE IDENTIDAD -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1"><i class="ti ti-user-search me-2"></i>Verificador de Identidad</h4>
+                        <p class="text-muted mb-0">Busca al afiliado por Tipo y Número de Documento para gestionar sus documentos</p>
+                    </div>
+                </div>
+                
+                <form id="formBuscarAfiliado" onsubmit="buscarAfiliado(event)">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label"><i class="ti ti-id-badge me-2"></i>Tipo ID</label>
+                            <select id="selectTipoId" class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="PEP">Permiso Especial de Permanencia</option>
+                                <option value="PA">Pasaporte</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="ti ti-hash me-2"></i>Número ID</label>
+                            <input type="text" id="inputNumeroId" class="form-control" placeholder="Ingrese el número..." required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="ti ti-user me-2"></i>Nombre del Usuario</label>
+                            <input type="text" id="inputNombreUsuario" class="form-control bg-light" placeholder="Se completará automáticamente..." readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="ti ti-search me-2"></i>Buscar Afiliado
+                                </button>
+                                <a href="/formularios/generador" target="_blank" class="btn btn-outline-secondary" title="Ir al Generador de PDF">
+                                    <i class="ph-duotone ph-file-pdf"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- BLOQUE 2: TABLA DE USUARIOS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="ti ti-users me-2"></i>Lista de Usuarios</h5>
+                <span class="badge bg-primary" id="totalUsuariosBadge">0 usuarios</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 250px;">Usuario</th>
+                                <th style="width: 120px;">Documento</th>
+                                <th>Empresa</th>
+                                <th style="width: 80px;" class="text-center">Docs</th>
+                                <th style="width: 120px;" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="5" class="text-center text-muted py-4">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- BLOQUE 3: TABLA DE DOCUMENTOS (GESTIÓN INDIVIDUAL) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="card d-none" id="panelGestionDocumentos">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar bg-white text-primary rounded-circle me-3">
+                        <span id="userAvatarLetter">?</span>
+                    </div>
+                    <div>
+                        <h5 class="mb-0" id="userNameDisplay">-</h5>
+                        <small><strong>Doc:</strong> <span id="userDocDisplay">-</span> | <strong>Empresa:</strong> <span id="userEmpresaDisplay">-</span></small>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-light" onclick="cerrarPanelGestion()">
+                    <i class="ti ti-x"></i> Cerrar
+                </button>
+            </div>
+            <div class="card-body py-2">
+                <table class="table table-sm table-bordered table-hover table-afiliaciones mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Entidad</th>
+                            <th style="width: 120px;" class="text-center">Estado</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- EPS -->
+                        <tr>
+                            <td>
+                                <i class="ph-duotone ph-heartbeat entity-icon text-danger"></i>
+                                <strong>EPS</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light-secondary text-secondary" id="badge-eps">Pendiente</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-success" onclick="generarFormularioEPS()">
+                                        <i class="ti ti-file-pdf me-1"></i> Generar
+                                    </button>
+                                    <button class="btn btn-sm btn-primary btn-file-upload" id="upload-eps">
+                                        <i class="ti ti-upload me-1"></i> Subir
+                                        <input type="file" accept=".pdf" onchange="handleFileUpload('EPS', this)">
+                                    </button>
+                                    <button class="btn btn-sm btn-info d-none" id="view-eps" onclick="verDocumento('EPS')">
+                                        <i class="ti ti-eye me-1"></i> Ver
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- ARL -->
+                        <tr>
+                            <td>
+                                <i class="ph-duotone ph-hard-hat entity-icon text-success"></i>
+                                <strong>ARL</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light-secondary text-secondary" id="badge-arl">Pendiente</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary btn-file-upload" id="upload-arl">
+                                        <i class="ti ti-upload me-1"></i> Subir
+                                        <input type="file" accept=".pdf" onchange="handleFileUpload('ARL', this)">
+                                    </button>
+                                    <button class="btn btn-sm btn-info d-none" id="view-arl" onclick="verDocumento('ARL')">
+                                        <i class="ti ti-eye me-1"></i> Ver
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- PENSIÓN -->
+                        <tr>
+                            <td>
+                                <i class="ph-duotone ph-piggy-bank entity-icon text-warning"></i>
+                                <strong>Pensión</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light-secondary text-secondary" id="badge-pension">Pendiente</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <button class="btn btn-sm btn-primary btn-file-upload" id="upload-pension">
+                                        <i class="ti ti-upload me-1"></i> Subir
+                                        <input type="file" accept=".pdf" onchange="handleFileUpload('PENSION', this)">
+                                    </button>
+                                    <button class="btn btn-sm btn-info d-none" id="view-pension" onclick="verDocumento('PENSION')">
+                                        <i class="ti ti-eye me-1"></i> Ver
+                                    </button>
+                                    <div class="switch-no-aplica ms-auto">
+                                        <input type="checkbox" class="form-check-input" id="switch-pension-na">
+                                        <label class="form-check-label text-muted" for="switch-pension-na">No Aplica</label>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- CAJA -->
+                        <tr>
+                            <td>
+                                <i class="ph-duotone ph-hand-coins entity-icon text-info"></i>
+                                <strong>Caja de Compensación</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light-secondary text-secondary" id="badge-caja">Pendiente</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <button class="btn btn-sm btn-primary btn-file-upload" id="upload-caja">
+                                        <i class="ti ti-upload me-1"></i> Subir
+                                        <input type="file" accept=".pdf" onchange="handleFileUpload('CAJA', this)">
+                                    </button>
+                                    <button class="btn btn-sm btn-info d-none" id="view-caja" onclick="verDocumento('CAJA')">
+                                        <i class="ti ti-eye me-1"></i> Ver
+                                    </button>
+                                    <div class="switch-no-aplica ms-auto">
+                                        <input type="checkbox" class="form-check-input" id="switch-caja-na">
+                                        <label class="form-check-label text-muted" for="switch-caja-na">No Aplica</label>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    
+    <!-- SweetAlert2 para alertas modernas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Toastify para notificaciones tipo toast -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        // Polyfills para tema
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    <script>
+        // Variables globales
+        const API_URL = '/api';
+        let usuariosStore = [];
+        let empresasStore = [];
+        let currentUsuarioGestion = null;
+
+        // ═══════════════════════════════════════════════════════════════
+        // FUNCIONES DE MENSAJES
+        // ═══════════════════════════════════════════════════════════════
+        function showMessage(message, type = 'info') {
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // CARGA DE DATOS: USUARIOS Y EMPRESAS
+        // ═══════════════════════════════════════════════════════════════
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch(`${API_URL}/usuarios`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Error al cargar usuarios');
+                
+                const data = await response.json();
+                usuariosStore = data.items || data.usuarios || [];
+                
+                renderizarTablaUsuarios(usuariosStore);
+                
+                document.getElementById('totalUsuariosBadge').textContent = `${usuariosStore.length} usuarios`;
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error al cargar usuarios: ' + error.message, 'danger');
+            }
+        }
+
+        // Función eliminada: poblarFiltroEmpresas() ya no es necesaria
+
+        function renderizarTablaUsuarios(usuarios) {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (!usuarios || usuarios.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No se encontraron usuarios</td></tr>';
+                return;
+            }
+            
+            usuarios.forEach(user => {
+                const nombreCompleto = `${user.primerNombre || ''} ${user.primerApellido || ''}`.trim() || 'Sin nombre';
+                const iniciales = nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar bg-light-primary text-primary rounded-circle me-2">
+                                ${iniciales}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">${nombreCompleto}</div>
+                                <small class="text-muted">${user.correoElectronico || '-'}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.numeroId || '-'}</td>
+                    <td>
+                        <span class="badge bg-light-info text-info">
+                            ${user.empresa_nombre || 'Sin asignar'}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge badge-docs bg-secondary">0/4</span>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-primary" onclick="abrirGestionDocumentos(${user.id})">
+                            <i class="ti ti-folder-open me-1"></i> Gestionar
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // VERIFICADOR DE IDENTIDAD (BÚSQUEDA ESTRICTA)
+        // ═══════════════════════════════════════════════════════════════
+        function buscarAfiliado(event) {
+            event.preventDefault();
+            
+            const tipoId = document.getElementById('selectTipoId').value;
+            const numeroId = document.getElementById('inputNumeroId').value.trim();
+            const inputNombre = document.getElementById('inputNombreUsuario');
+            
+            // Validar campos
+            if (!tipoId || !numeroId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos Incompletos',
+                    text: 'Por favor seleccione el Tipo de ID e ingrese el Número de Documento.',
+                    confirmButtonColor: '#3f51b5'
+                });
+                return;
+            }
+            
+            // Buscar usuario por numeroId (búsqueda estricta)
+            const usuarioEncontrado = usuariosStore.find(u => u.numeroId && u.numeroId.toString() === numeroId);
+            
+            if (usuarioEncontrado) {
+                // Usuario encontrado
+                const nombreCompleto = `${usuarioEncontrado.primerNombre || ''} ${usuarioEncontrado.primerApellido || ''}`.trim() || 'Sin nombre';
+                const empresaNombre = usuarioEncontrado.empresa_nombre || 'Sin asignar';
+                
+                // Llenar campo de nombre (readonly)
+                inputNombre.value = nombreCompleto;
+                
+                // Renderizar tabla con único usuario
+                renderizarTablaUsuarios([usuarioEncontrado]);
+                
+                // Toast de éxito
+                Toastify({
+                    text: `✓ Usuario Encontrado: ${empresaNombre}`,
+                    duration: 3000,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#28a745',
+                    stopOnFocus: true
+                }).showToast();
+                
+            } else {
+                // Usuario NO encontrado
+                inputNombre.value = '';
+                
+                // Limpiar tabla
+                const tbody = document.getElementById('usersTableBody');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No se encontraron resultados</td></tr>';
+                }
+                
+                // Alerta de error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Usuario No Encontrado',
+                    html: `El usuario con ID <strong>${numeroId}</strong> no existe o no está activo en el sistema.<br><br><small class="text-muted">Verifique el número de documento e intente nuevamente.</small>`,
+                    confirmButtonColor: '#3f51b5',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // GESTIÓN INDIVIDUAL DE DOCUMENTOS
+        // ═══════════════════════════════════════════════════════════════
+        async function abrirGestionDocumentos(userId) {
+            const user = usuariosStore.find(u => u.id === userId);
+            if (!user) return;
+            
+            currentUsuarioGestion = user;
+            
+            const nombreCompleto = `${user.primerNombre || ''} ${user.primerApellido || ''}`.trim() || 'Sin nombre';
+            const iniciales = nombreCompleto.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            
+            document.getElementById('userAvatarLetter').textContent = iniciales;
+            document.getElementById('userNameDisplay').textContent = nombreCompleto;
+            document.getElementById('userDocDisplay').textContent = user.numeroId || '-';
+            document.getElementById('userEmpresaDisplay').textContent = user.empresa_nombre || 'Sin asignar';
+            
+            document.getElementById('panelGestionDocumentos')?.classList.remove('d-none');
+            
+            await cargarEstadosAfiliaciones(userId);
+            
+            document.getElementById('panelGestionDocumentos')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function cerrarPanelGestion() {
+            document.getElementById('panelGestionDocumentos')?.classList.add('d-none');
+            currentUsuarioGestion = null;
+        }
+
+        async function cargarEstadosAfiliaciones(userId) {
+            try {
+                const response = await fetch(`${API_URL}/formularios/estado_afiliaciones/${userId}`, { 
+                    credentials: 'include' 
+                });
+                
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                ['eps', 'arl', 'pension', 'caja'].forEach(tipo => {
+                    const tipoUpper = tipo.toUpperCase();
+                    const estado = data.estados?.[tipoUpper];
+                    const badge = document.getElementById(`badge-${tipo}`);
+                    const viewBtn = document.getElementById(`view-${tipo}`);
+                    
+                    if (estado && estado.estado === 'COMPLETADO') {
+                        if (badge) {
+                            badge.className = 'badge bg-light-success text-success';
+                            badge.textContent = '✓ Completado';
+                        }
+                        viewBtn?.classList.remove('d-none');
+                    } else {
+                        if (badge) {
+                            badge.className = 'badge bg-light-secondary text-secondary';
+                            badge.textContent = 'Pendiente';
+                        }
+                        viewBtn?.classList.add('d-none');
+                    }
+                });
+            } catch (error) {
+                console.error('Error cargando estados:', error);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // SUBIDA DE ARCHIVOS
+        // ═══════════════════════════════════════════════════════════════
+        async function handleFileUpload(tipoEntidad, inputElement) {
+            if (!currentUsuarioGestion) {
+                showMessage('No hay usuario seleccionado', 'warning');
+                return;
+            }
+
+            const archivo = inputElement.files[0];
+            if (!archivo) return;
+
+            const formData = new FormData();
+            formData.append('usuario_id', currentUsuarioGestion.id);
+            formData.append('tipo_entidad', tipoEntidad);
+            formData.append('archivo', archivo);
+
+            try {
+                showMessage(`Subiendo documento ${tipoEntidad}...`, 'info');
+
+                const response = await fetch(`${API_URL}/formularios/subir_constancia`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`✅ ${data.message}`, 'success');
+                    await cargarEstadosAfiliaciones(currentUsuarioGestion.id);
+                } else {
+                    showMessage(`❌ Error: ${data.error}`, 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error al subir el documento', 'danger');
+            } finally {
+                inputElement.value = '';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // GENERAR FORMULARIO EPS
+        // ═══════════════════════════════════════════════════════════════
+        function generarFormularioEPS() {
+            if (!currentUsuarioGestion) return;
+            
+            const url = `/formularios/generador?usuario=${currentUsuarioGestion.numeroId}`;
+            window.open(url, '_blank');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // VER DOCUMENTO
+        // ═══════════════════════════════════════════════════════════════
+        function verDocumento(tipoEntidad) {
+            if (!currentUsuarioGestion) return;
+            
+            showMessage(`Funcionalidad de visualización en desarrollo para ${tipoEntidad}`, 'info');
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INICIALIZACIÓN
+        // ═══════════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', function() {
+            const loader = document.querySelector('.loader-bg');
+            if(loader) loader.style.display = 'none';
+
+            cargarUsuarios();
+
+            // Event listener para búsqueda con Enter en el campo de Número ID
+            document.getElementById('inputNumeroId')?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    document.getElementById('formBuscarAfiliado')?.requestSubmit();
+                }
+            });
+
+            if (typeof layout_change === 'function') layout_change('false');
+            if (typeof layout_theme_sidebar_change === 'function') layout_theme_sidebar_change('dark');
+            if (typeof change_box_container === 'function') change_box_container('false');
+            if (typeof layout_caption_change === 'function') layout_caption_change('true');
+            if (typeof layout_rtl_change === 'function') layout_rtl_change('false');
+            if (typeof preset_change === 'function') preset_change('preset-1');
+            if (typeof main_layout_change === 'function') main_layout_change('vertical');
+        });
+    </script>
+
+  </body>
+</html>

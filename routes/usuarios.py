@@ -1,63 +1,186 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 usuarios.py - ACTUALIZADO con validación de archivos y logging
 ==================================================
-Valida cédulas PDF, firma digital y usa logging profesional
 """
-
-import base64
 import os
-import sqlite3
 import traceback
+import base64
 from datetime import datetime
-
 from flask import Blueprint, jsonify, request, session
-from werkzeug.utils import secure_filename
-
-# --- IMPORTAR UTILIDADES Y LOGGER ---
 from logger import logger
 
-# --- INICIO DE CORRECCIÓN DE RUTA ---
+# --- IMPORTACIÓN CENTRALIZADA ---
 try:
-    from utils import (  # USER_DATA_FOLDER, # <-- Eliminada de la importación; NUEVAS FUNCIONES DE VALIDACIÓN
-        format_key,
-        get_db_connection,
-        log_file_upload,
-        login_required,
-        sanitize_and_save_file,
-        validate_upload,
-    )
+    from ..utils import get_db_connection, login_required, format_key, log_file_upload, sanitize_and_save_file, validate_upload
+except (ImportError, ValueError):
+    from utils import get_db_connection, login_required, format_key, log_file_upload, sanitize_and_save_file, validate_upload
+# -------------------------------
 
-    # Leer la variable del .env, con el fallback correcto
-    USER_DATA_FOLDER = os.getenv("USER_DATA_FOLDER", "../../MONTERO_NEGOCIO/MONTERO_TOTAL/USUARIOS")
-except ImportError as e:
-    # --- FIN DE CORRECCIÓN DE RUTA ---
-    logger.error(f"Error importando utils en usuarios.py: {e}", exc_info=True)
+# Leer USER_DATA_FOLDER del entorno
+USER_DATA_FOLDER = os.getenv("USER_DATA_FOLDER", "../../MONTERO_NEGOCIO/MONTERO_TOTAL/USUARIOS")
 
-    # Fallbacks
-    def get_db_connection():
-        return None
-
-    def login_required(f):
-        return f
-
-    def format_key(k):
-        return k
-
-    USER_DATA_FOLDER = "."  # Fallback de emergencia si utils falla
-
-    def validate_upload(f, file_type):
-        return False, "Error de importación"
-
-    def sanitize_and_save_file(f, p, n):
-        raise ImportError("Error de importación")
-
-    def log_file_upload(f, u, s, e=None):
-        pass
-
+# Ruta base absoluta para expedientes
+RUTA_BASE_EXPEDIENTES = r"D:\Mi-App-React\MONTERO_NEGOCIO\MONTERO_TOTAL\USUARIOS"
 
 # ==================== DEFINICIÓN DEL BLUEPRINT ====================
 usuarios_bp = Blueprint("usuarios", __name__, url_prefix="/api/usuarios")
+
+
+# ==================== FUNCIÓN AUXILIAR: GENERAR EXPEDIENTE ====================
+def generar_expediente_usuario(user_data: dict, firma_base64: str = None) -> dict:
+    """
+    Genera la estructura de carpetas y archivos para un expediente de usuario.
+
+    Args:
+        user_data: Diccionario con los datos del usuario
+        firma_base64: String base64 de la firma (formato data:image/png;base64,...)
+
+    Returns:
+        dict: {"success": bool, "files_created": list, "errors": list, "path": str}
+    """
+    resultado = {
+        "success": False,
+        "files_created": [],
+        "errors": [],
+        "path": ""
+    }
+
+    try:
+        numero_id = user_data.get("numeroId") or user_data.get("numero_documento")
+
+        if not numero_id:
+            resultado["errors"].append("Número de identificación es obligatorio")
+            return resultado
+
+        # 1. CREAR CARPETA PRINCIPAL DEL USUARIO
+        carpeta_usuario = os.path.join(RUTA_BASE_EXPEDIENTES, str(numero_id))
+        os.makedirs(carpeta_usuario, exist_ok=True)
+        resultado["path"] = carpeta_usuario
+        logger.info(f"📁 Carpeta usuario creada/verificada: {carpeta_usuario}")
+
+        # 2. CREAR SUBCARPETAS OBLIGATORIAS
+        subcarpetas = [
+            "BENEFICIARIOS",
+            "DEPURACIONES",
+            "EMPRESAS_AFILIADAS",
+            "INCAPACIDADES",
+            "MORAS",
+            "NOVEDADES",
+            "PLANILLAS",
+            "RECIBOS",
+            "TUTELAS",
+            "USUARIOS Y CONTRASEÑAS"
+        ]
+
+        for subcarpeta in subcarpetas:
+            ruta_subcarpeta = os.path.join(carpeta_usuario, subcarpeta)
+            os.makedirs(ruta_subcarpeta, exist_ok=True)
+            logger.debug(f"  ✓ Subcarpeta creada: {subcarpeta}")
+
+        resultado["files_created"].append(f"Estructura de {len(subcarpetas)} carpetas")
+
+        # 3. GENERAR ARCHIVO datos_usuario.txt
+        archivo_datos = os.path.join(carpeta_usuario, "datos_usuario.txt")
+
+        contenido = f"""
+{'=' * 80}
+                     INFORMACIÓN DEL USUARIO
+{'=' * 80}
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+Tipo de ID:          {user_data.get('tipoId', 'N/A')}
+Número de ID:        {user_data.get('numeroId', 'N/A')}
+
+DATOS PERSONALES
+----------------
+Primer Nombre:       {user_data.get('primerNombre', 'N/A')}
+Segundo Nombre:      {user_data.get('segundoNombre', 'N/A')}
+Primer Apellido:     {user_data.get('primerApellido', 'N/A')}
+Segundo Apellido:    {user_data.get('segundoApellido', 'N/A')}
+Sexo Biológico:      {user_data.get('sexoBiologico', 'N/A')}
+Sexo Identificación: {user_data.get('sexoIdentificacion', 'N/A')}
+Fecha Nacimiento:    {user_data.get('fechaNacimiento', 'N/A')}
+Nacionalidad:        {user_data.get('nacionalidad', 'N/A')}
+
+DATOS DE NACIMIENTO
+-------------------
+País:                {user_data.get('paisNacimiento', 'N/A')}
+Departamento:        {user_data.get('departamentoNacimiento', 'N/A')}
+Municipio:           {user_data.get('municipioNacimiento', 'N/A')}
+
+DATOS DE CONTACTO
+-----------------
+Correo Electrónico:  {user_data.get('correoElectronico', 'N/A')}
+Teléfono Celular:    {user_data.get('telefonoCelular', 'N/A')}
+Teléfono Fijo:       {user_data.get('telefonoFijo', 'N/A')}
+Dirección:           {user_data.get('direccion', 'N/A')}
+Comuna/Barrio:       {user_data.get('comunaBarrio', 'N/A')}
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+AFP:                 {user_data.get('afpNombre', 'N/A')}
+EPS:                 {user_data.get('epsNombre', 'N/A')}
+ARL:                 {user_data.get('arlNombre', 'N/A')}
+CCF:                 {user_data.get('ccfNombre', 'N/A')}
+
+DATOS LABORALES
+---------------
+Empresa (NIT):       {user_data.get('empresa_nit', 'N/A')}
+Empresa (Nombre):    {user_data.get('empresa_nombre', 'N/A')}
+Fecha Ingreso:       {user_data.get('fechaIngreso', 'N/A')}
+IBC:                 {user_data.get('ibc', 'N/A')}
+
+{'=' * 80}
+Fecha de Generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+{'=' * 80}
+"""
+
+        with open(archivo_datos, "w", encoding="utf-8") as f:
+            f.write(contenido)
+
+        resultado["files_created"].append("datos_usuario.txt")
+        logger.info(f"📄 Archivo datos_usuario.txt creado/actualizado")
+
+        # 4. GUARDAR FIRMA DIGITAL (SI SE PROPORCIONA)
+        if firma_base64 and isinstance(firma_base64, str):
+            try:
+                # Verificar si contiene el prefijo data:image
+                if "," in firma_base64:
+                    # Formato: data:image/png;base64,iVBORw0KGgoAAAANS...
+                    _, encoded = firma_base64.split(",", 1)
+                else:
+                    # Ya es base64 puro
+                    encoded = firma_base64
+
+                # Decodificar
+                firma_bytes = base64.b64decode(encoded)
+
+                # Validar tamaño (máximo 5MB)
+                if len(firma_bytes) > 5 * 1024 * 1024:
+                    resultado["errors"].append("Firma digital: Tamaño excedido (máximo 5MB)")
+                else:
+                    # Guardar archivo
+                    archivo_firma = os.path.join(carpeta_usuario, "firma_usuario.png")
+                    with open(archivo_firma, "wb") as f:
+                        f.write(firma_bytes)
+
+                    resultado["files_created"].append("firma_usuario.png")
+                    logger.info(f"✍️ Firma digital guardada: {len(firma_bytes)} bytes")
+
+            except Exception as e:
+                logger.error(f"❌ Error al guardar firma: {e}", exc_info=True)
+                resultado["errors"].append(f"Error al guardar firma: {str(e)}")
+
+        resultado["success"] = True
+        logger.info(f"✅ Expediente generado exitosamente para usuario {numero_id}")
+
+    except Exception as e:
+        logger.error(f"❌ Error crítico al generar expediente: {e}", exc_info=True)
+        resultado["errors"].append(f"Error crítico: {str(e)}")
+
+    return resultado
 
 
 # ==================== ENDPOINTS DE USUARIOS ====================
@@ -87,62 +210,127 @@ def add_usuario():
 
     conn = None
     numero_documento = "desconocido"
+    numero_id = "desconocido"  # Para modo FormData
 
     try:
+        # Log para debugging
+        logger.info(f"📥 Content-Type recibido: {request.content_type}")
+        
         # Detectar si es JSON o Form data
         is_json = request.is_json
+        
+        if not is_json:
+            # Intentar forzar JSON
+            try:
+                json_data = request.get_json(force=True)
+                is_json = True if json_data else False
+                logger.info(f"✅ JSON parseado con force=True")
+            except:
+                is_json = False
 
         if is_json:
             # ==================== MODO JSON (API SIMPLE) ====================
             try:
+                json_data = request.get_json(force=True) if not request.is_json else request.get_json()
+                logger.info(f"📥 Datos JSON recibidos: {json_data}")
+                
                 # Validación con Pydantic
-                usuario_data = UsuarioCreate(**request.get_json())
+                usuario_data = UsuarioCreate(**json_data)
             except ValidationError as ve:
-                logger.warning(f"Error de validación Pydantic: {ve}")
-                return jsonify({"error": "Datos inválidos", "details": ve.errors()}), 422
+                logger.warning(f"❌ Error de validación Pydantic: {ve.errors()}")
+                error_list = []
+                for err in ve.errors():
+                    field = err.get('loc', ['unknown'])[0]
+                    msg = err.get('msg', 'Error de validación')
+                    error_list.append({"field": field, "message": msg})
+                
+                return jsonify({"error": "Datos inválidos", "details": error_list}), 422
 
             numero_documento = usuario_data.numero_documento
 
             if not numero_documento:
-                logger.warning("Intento de agregar usuario sin Número de ID")
+                logger.warning("⚠️ Intento de agregar usuario sin Número de ID")
                 return jsonify({"error": "Número de ID es obligatorio."}), 400
 
+            # Dividir nombre_completo en partes
+            nombre_parts = usuario_data.nombre_completo.strip().split() if usuario_data.nombre_completo else []
+            primer_nombre = nombre_parts[0] if len(nombre_parts) > 0 else ''
+            segundo_nombre = nombre_parts[1] if len(nombre_parts) > 1 else ''
+            primer_apellido = nombre_parts[2] if len(nombre_parts) > 2 else ''
+            segundo_apellido = nombre_parts[3] if len(nombre_parts) > 3 else ''
+
             # Guardar en base de datos (modo simple)
-            conn = g.db
+            conn = get_db_connection()
+            
+            # Asegurar que empresa_nit tenga un valor válido (NOT NULL constraint)
+            empresa_nit_final = usuario_data.empresa_nit if usuario_data.empresa_nit else '999999999'
+            logger.info(f"📋 Empresa NIT asignado: {empresa_nit_final}")
+            
             try:
                 conn.execute(
                     """
                     INSERT INTO usuarios (
-                        nombre_completo, email, tipo_documento, numero_documento,
-                        telefono, cargo, empresa_nit
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                        empresa_nit, tipoId, numeroId, primerNombre, segundoNombre, 
+                        primerApellido, segundoApellido, correoElectronico, telefonoCelular
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
-                        usuario_data.nombre_completo,
-                        usuario_data.email,
+                        empresa_nit_final,
                         usuario_data.tipo_documento,
                         usuario_data.numero_documento,
+                        primer_nombre,
+                        segundo_nombre,
+                        primer_apellido,
+                        segundo_apellido,
+                        usuario_data.email,
                         usuario_data.telefono,
-                        usuario_data.cargo,
-                        usuario_data.empresa_nit,
                     ),
                 )
                 conn.commit()
 
-                logger.info(f"Usuario {numero_documento} creado exitosamente (modo JSON)")
-                return jsonify({"message": f"Usuario creado: {numero_documento}"}), 201
+                # ==========================================================
+                # CORRECCIÓN CODE 1: GENERAR EXPEDIENTE FÍSICO EN MODO JSON
+                # ==========================================================
+                logger.info("📂 Iniciando generación de expediente (Modo JSON)...")
+
+                # 1. Preparar datos para la función
+                datos_para_expediente = json_data.copy()
+                # Asegurar campos críticos
+                datos_para_expediente['numeroId'] = numero_documento
+                datos_para_expediente['primerNombre'] = primer_nombre
+                datos_para_expediente['primerApellido'] = primer_apellido
+                datos_para_expediente['segundoNombre'] = segundo_nombre
+                datos_para_expediente['segundoApellido'] = segundo_apellido
+                datos_para_expediente['correoElectronico'] = usuario_data.email
+                datos_para_expediente['telefonoCelular'] = usuario_data.telefono
+
+                # 2. Obtener firma si existe en el JSON
+                firma_b64 = json_data.get('firma_digital') or json_data.get('firmaDigitalData')
+
+                # 3. Llamar a la función generadora
+                resultado_expediente = generar_expediente_usuario(datos_para_expediente, firma_b64)
+
+                if resultado_expediente['success']:
+                    logger.info(f"✅ Expediente creado en: {resultado_expediente['path']}")
+                else:
+                    logger.warning(f"⚠️ Alerta expediente: {resultado_expediente['errors']}")
+
+                # ==========================================================
+
+                logger.info(f"✅ Usuario {numero_documento} creado exitosamente (modo JSON)")
+                return jsonify({"message": f"Usuario creado exitosamente", "numero_documento": numero_documento}), 201
 
             except sqlite3.IntegrityError as ie:
                 conn.rollback()
                 if "UNIQUE constraint failed" in str(ie):
-                    logger.warning(f"Intento de duplicar usuario. ID: {numero_documento}")
+                    logger.warning(f"⚠️ Intento de duplicar usuario. ID: {numero_documento}")
                     return jsonify({"error": "El usuario ya existe."}), 409
                 else:
-                    logger.error(f"Error de integridad: {ie}", exc_info=True)
+                    logger.error(f"❌ Error de integridad: {ie}", exc_info=True)
                     return jsonify({"error": f"Error de integridad: {ie}"}), 409
             except Exception as db_err:
                 conn.rollback()
-                logger.error(f"Error al guardar usuario {numero_documento}: {db_err}", exc_info=True)
+                logger.error(f"❌ Error al guardar usuario {numero_documento}: {db_err}", exc_info=True)
                 return jsonify({"error": f"Error al guardar: {str(db_err)}"}), 500
 
         else:
@@ -155,90 +343,25 @@ def add_usuario():
 
             numero_documento = numero_id
 
-            # Crear carpeta de usuario
-            user_folder_path = os.path.join(USER_DATA_FOLDER, numero_id)
-            os.makedirs(user_folder_path, exist_ok=True)
-            logger.info(
-                f"Carpeta creada para usuario: {numero_id} en {user_folder_path}"
-            )  # Log actualizado para verificar ruta
+            # ==================== GENERAR EXPEDIENTE FÍSICO ====================
+            # Convertir form data a diccionario para la función auxiliar
+            user_data_dict = dict(data)
+            firma_base64 = data.get("firmaDigitalData")
 
-            # Crear archivo de texto con datos
-            txt_content = f"--- DATOS AFILIADO: {numero_id} ---\n\n"
-            beneficiarios_content = ""
-            beneficiario_count = 0
-            beneficiario_keys = {}  # Para agrupar datos de beneficiarios por índice
+            # Llamar a la función auxiliar para generar toda la estructura
+            expediente_result = generar_expediente_usuario(user_data_dict, firma_base64)
 
-            # Iterar sobre los datos del formulario
-            for key, value in data.items():
-                if key in ["firmaDigitalData", "documentoPdf"]:
-                    continue
+            if not expediente_result["success"]:
+                logger.error(f"❌ Errores al generar expediente: {expediente_result['errors']}")
+                # Continuar con el proceso aunque el expediente falle (no crítico)
 
-                if key.startswith(("nombreBeneficiario_", "parentesco_", "documentoBeneficiario_")):
-                    parts = key.split("_")
-                    if len(parts) == 2:
-                        field_type, index = parts[0], parts[1]
-                        if index not in beneficiario_keys:
-                            beneficiario_keys[index] = {}
-                        beneficiario_keys[index][field_type] = value
-                else:
-                    txt_content += f"{format_key(key)}: {value}\n"
-
-            # Procesar y añadir beneficiarios al texto
-            if beneficiario_keys:
-                beneficiarios_content += "\n--- BENEFICIARIOS ---\n"
-
-                # --- INICIO DE CORRECCIÓN 'X' ---
-                # Filtrar solo claves que sean numéricas (ignora la 'X' de la plantilla)
-                numeric_indices = [k for k in beneficiario_keys.keys() if k.isdigit()]
-                sorted_indices = sorted(numeric_indices, key=int)
-                # --- FIN DE CORRECCIÓN 'X' ---
-
-                for index in sorted_indices:
-                    b = beneficiario_keys[index]
-                    nombre = b.get("nombreBeneficiario", "N/A")
-                    parentesco = b.get("parentesco", "N/A")
-                    documento = b.get("documentoBeneficiario", "N/A")
-                    if nombre != "N/A":
-                        beneficiario_count += 1
-                        beneficiarios_content += f"\nBeneficiario #{beneficiario_count}:\n  Nombre: {nombre}\n  Parentesco: {parentesco}\n  Documento ID: {documento}\n"
-
-            # Escribir el archivo de texto
-            with open(os.path.join(user_folder_path, "datos_usuario.txt"), "w", encoding="utf-8") as f:
-                f.write(txt_content + beneficiarios_content)
+            logger.info(f"📁 Expediente generado: {expediente_result['files_created']}")
+            user_folder_path = expediente_result["path"]
 
             # ==================== VALIDACIÓN Y GUARDADO DE ARCHIVOS ====================
-
             saved_files = {}
-            upload_errors = []
+            upload_errors = expediente_result.get("errors", [])
             user_session_id = session.get("user_id", "unknown")
-
-            # 1. FIRMA DIGITAL (base64)
-            firma_data_url = data.get("firmaDigitalData")
-            if firma_data_url and "," in firma_data_url:
-                try:
-                    _, encoded = firma_data_url.split(",", 1)
-                    firma_data = base64.b64decode(encoded)
-
-                    if len(firma_data) <= 2 * 1024 * 1024:  # Validar tamaño (máximo 2MB)
-                        with open(os.path.join(user_folder_path, "firma_usuario.png"), "wb") as f:
-                            f.write(firma_data)
-                        saved_files["firma"] = "firma_usuario.png"
-                        log_file_upload("firma_usuario.png", user_session_id, success=True)
-                    else:
-                        upload_errors.append("Firma digital: Tamaño excedido (máximo 2MB)")
-                        log_file_upload(
-                            "firma_usuario.png",
-                            user_session_id,
-                            success=False,
-                            error="Tamaño excedido",
-                        )
-                except Exception as e:
-                    logger.error(
-                        f"Error decodificando o guardando firma para usuario {numero_id}: {e}",
-                        exc_info=True,
-                    )
-                    upload_errors.append(f"Firma digital: Error al procesar ({str(e)})")
-                    log_file_upload("firma_usuario.png", user_session_id, success=False, error=str(e))
 
             # 2. DOCUMENTO PDF (cédula) - VALIDACIÓN CRÍTICA
             if "documentoPdf" in request.files:
@@ -307,6 +430,11 @@ def add_usuario():
                         logger.warning(
                             f"Advertencia: Empresa '{data['administracion']}' no encontrada en la tabla 'empresas' para el usuario {numero_id}."
                         )
+                
+                # Asegurar que empresa_nit tenga un valor válido (NOT NULL constraint)
+                if not empresa_nit:
+                    empresa_nit = '999999999'  # NIT de MONTERO ADMINISTRADORA por defecto
+                    logger.info(f"📋 Empresa NIT asignado por defecto: {empresa_nit}")
 
                 afp_costo = float(data.get("afpCosto")) if data.get("afpCosto") else None
                 eps_costo = float(data.get("epsCosto")) if data.get("epsCosto") else None
@@ -321,8 +449,9 @@ def add_usuario():
                         sexoBiologico, sexoIdentificacion, nacionalidad, fechaNacimiento, paisNacimiento,
                         departamentoNacimiento, municipioNacimiento, direccion, telefonoCelular, telefonoFijo,
                         correoElectronico, comunaBarrio, afpNombre, afpCosto, epsNombre, epsCosto, arlNombre,
-                        arlCosto, ccfNombre, ccfCosto, administracion, ibc, claseRiesgoARL, fechaIngreso
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        arlCosto, ccfNombre, ccfCosto, administracion, ibc, claseRiesgoARL, fechaIngreso,
+                        paisResidencia, departamentoResidencia, municipioResidencia, cargo, tipo_contrato
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                     (
                         empresa_nit,
@@ -356,6 +485,11 @@ def add_usuario():
                         ibc,
                         data.get("claseRiesgoARL"),
                         data.get("fechaIngreso"),
+                        data.get("paisResidencia"),
+                        data.get("departamentoResidencia"),
+                        data.get("municipioResidencia"),
+                        data.get("cargo"),
+                        data.get("tipo_contrato"),
                     ),
                 )
                 conn.commit()
@@ -418,41 +552,41 @@ def add_usuario():
 @usuarios_bp.route("", methods=["GET"])
 @login_required
 def get_usuarios():
-    """Obtiene lista de usuarios"""
-    from flask import g
-
+    """Obtiene lista de usuarios con columnas que existen en la tabla"""
     conn = None
     try:
+        conn = get_db_connection()
         empresa_nit = request.args.get("empresa_nit")
-        conn = g.db
 
-        # Intentar buscar por nombre_completo (tabla simple) o primerNombre (tabla compleja)
-        try:
-            if empresa_nit:
-                usuarios = conn.execute(
-                    "SELECT * FROM usuarios WHERE empresa_nit = ? ORDER BY nombre_completo",
-                    (empresa_nit,),
-                ).fetchall()
-            else:
-                usuarios = conn.execute("SELECT * FROM usuarios ORDER BY nombre_completo").fetchall()
-        except sqlite3.OperationalError:
-            # Si falla con nombre_completo, intentar con primerNombre
-            if empresa_nit:
-                usuarios = conn.execute(
-                    "SELECT * FROM usuarios WHERE empresa_nit = ? ORDER BY primerNombre, primerApellido",
-                    (empresa_nit,),
-                ).fetchall()
-            else:
-                usuarios = conn.execute("SELECT * FROM usuarios ORDER BY primerNombre, primerApellido").fetchall()
+        # Consulta simplificada: solo columnas que existen en la tabla 'usuarios'
+        query = "SELECT id, primerNombre, primerApellido, numeroId, correoElectronico, empresa_nit FROM usuarios"
+        params = []
 
-        usuarios_list = [dict(row) for row in usuarios]
-        logger.debug(f"Se consultaron {len(usuarios_list)} usuarios (filtro NIT: {empresa_nit})")
+        if empresa_nit:
+            query += " WHERE empresa_nit = ?"
+            params.append(empresa_nit)
 
-        # Formato esperado por los tests
+        query += " ORDER BY primerApellido, primerNombre"  # Ordena por campos existentes
+
+        usuarios = conn.execute(query, params).fetchall()
+
+        usuarios_list = []
+        for row in usuarios:
+            user_dict = dict(row)
+            # CONCATENACIÓN en Python para el frontend
+            user_dict['nombre_completo'] = f"{row['primerNombre']} {row['primerApellido']}"
+            usuarios_list.append(user_dict)
+
+        logger.debug(f"✅ Se consultaron {len(usuarios_list)} usuarios (filtro NIT: {empresa_nit or 'TODOS'})")
+
         return jsonify({"items": usuarios_list, "total_items": len(usuarios_list)})
+
     except Exception as e:
-        logger.error(f"Error obteniendo lista de usuarios: {e}", exc_info=True)
+        logger.error(f"❌ Error obteniendo lista de usuarios: {e}", exc_info=True)
         return jsonify({"error": "No se pudo obtener la lista de usuarios."}), 500
+    finally:
+        if conn:
+            conn.close()
 
 
 # --- COPIAR Y PEGAR ESTE BLOQUE EN usuarios.py ---
@@ -490,6 +624,150 @@ def buscar_usuario():
     except Exception as e:
         logger.error(f"Error buscando usuario: {e}", exc_info=True)
         return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@usuarios_bp.route("/<int:user_id>", methods=["GET"])
+@login_required
+def get_usuario_by_id(user_id):
+    """
+    Obtener un usuario específico por su ID para edición
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        
+        usuario = conn.execute("""
+            SELECT * FROM usuarios WHERE id = ?
+        """, (user_id,)).fetchone()
+        
+        if not usuario:
+            return jsonify({"error": f"Usuario con ID {user_id} no encontrado"}), 404
+        
+        # Convertir Row a dict
+        usuario_dict = dict(usuario)
+        
+        logger.info(f"✅ Usuario ID {user_id} obtenido para edición")
+        return jsonify(usuario_dict), 200
+        
+    except Exception as e:
+        logger.error(f"❌ Error obteniendo usuario {user_id}: {e}", exc_info=True)
+        return jsonify({"error": "Error interno del servidor"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+
+@usuarios_bp.route("/<int:user_id>", methods=["PUT"])
+@login_required
+def update_usuario(user_id):
+    """
+    Endpoint para actualizar un usuario existente.
+    Soporta JSON y regenera el expediente físico automáticamente.
+    """
+    conn = None
+
+    try:
+        # Obtener datos del request
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No se proporcionaron datos para actualizar"}), 400
+
+        conn = get_db_connection()
+
+        # Verificar que el usuario existe
+        usuario_actual = conn.execute(
+            "SELECT * FROM usuarios WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+
+        if not usuario_actual:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        # Construir query dinámicamente solo con campos proporcionados
+        update_fields = []
+        update_values = []
+
+        # Campos permitidos para actualización
+        campos_actualizables = [
+            'primerNombre', 'segundoNombre', 'primerApellido', 'segundoApellido',
+            'tipoId', 'numeroId', 'sexoBiologico', 'sexoIdentificacion',
+            'fechaNacimiento', 'nacionalidad', 'paisNacimiento',
+            'departamentoNacimiento', 'municipioNacimiento',
+            'correoElectronico', 'telefonoCelular', 'telefonoFijo',
+            'direccion', 'comunaBarrio',
+            'afpNombre', 'epsNombre', 'arlNombre', 'ccfNombre',
+            'empresa_nit', 'fechaIngreso', 'ibc',
+            'paisResidencia', 'departamentoResidencia', 'municipioResidencia',
+            'cargo', 'tipo_contrato'
+        ]
+
+        for campo in campos_actualizables:
+            if campo in data and data[campo] is not None:
+                update_fields.append(f"{campo} = ?")
+                update_values.append(data[campo])
+
+        if not update_fields:
+            return jsonify({"error": "No se proporcionaron campos válidos para actualizar"}), 400
+
+        # Agregar timestamp de actualización
+        update_fields.append("updated_at = CURRENT_TIMESTAMP")
+
+        # Agregar user_id para la cláusula WHERE
+        update_values.append(user_id)
+
+        # Ejecutar UPDATE
+        query = f"UPDATE usuarios SET {', '.join(update_fields)} WHERE id = ?"
+        conn.execute(query, tuple(update_values))
+        conn.commit()
+
+        logger.info(f"✅ Usuario {user_id} actualizado exitosamente")
+
+        # ==================== REGENERAR EXPEDIENTE FÍSICO ====================
+        # Obtener los datos completos actualizados del usuario
+        usuario_actualizado = conn.execute(
+            "SELECT * FROM usuarios WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+
+        if usuario_actualizado:
+            user_data_dict = dict(usuario_actualizado)
+
+            # Obtener firma si se proporciona
+            firma_base64 = data.get("firmaDigitalData")
+
+            # Regenerar expediente con datos actualizados
+            expediente_result = generar_expediente_usuario(user_data_dict, firma_base64)
+
+            if expediente_result["success"]:
+                logger.info(f"📁 Expediente actualizado: {expediente_result['files_created']}")
+            else:
+                logger.warning(f"⚠️ Errores al actualizar expediente: {expediente_result['errors']}")
+
+        return jsonify({
+            "message": "Usuario actualizado exitosamente",
+            "expediente": {
+                "success": expediente_result.get("success", False),
+                "files_created": expediente_result.get("files_created", []),
+                "errors": expediente_result.get("errors", [])
+            }
+        }), 200
+
+    except sqlite3.IntegrityError as ie:
+        if conn:
+            conn.rollback()
+        logger.error(f"❌ Error de integridad al actualizar usuario {user_id}: {ie}", exc_info=True)
+        return jsonify({"error": f"Error de integridad: {str(ie)}"}), 409
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        logger.error(f"❌ Error al actualizar usuario {user_id}: {e}", exc_info=True)
+        return jsonify({"error": f"Error al actualizar: {str(e)}"}), 500
+
     finally:
         if conn:
             conn.close()

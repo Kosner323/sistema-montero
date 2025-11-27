@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-tutelas.py - ACTUALIZADO con logging
+tutelas.py - REFACTORIZADO con SQLAlchemy ORM
 ====================================================
 Maneja la lógica para registrar y consultar tutelas legales.
 """
-
 import os
-import sqlite3
 from datetime import datetime
+from flask import Blueprint, jsonify, request, session
 
-from flask import Blueprint, g, jsonify, request, session
-from werkzeug.utils import secure_filename
-
-# --- IMPORTAR UTILIDADES Y LOGGER ---
+from extensions import db
+from models.orm_models import Tutela, Usuario, Empresa
+from utils import login_required, USER_DATA_FOLDER, sanitize_and_save_file, validate_upload
 from logger import logger
-from utils import USER_DATA_FOLDER, log_file_upload, login_required, sanitize_and_save_file, validate_upload
 
-# ==================== DEFINICIÓN DEL BLUEPRINT ====================
 bp_tutelas = Blueprint("bp_tutelas", __name__, url_prefix="/api/tutelas")
 
-
-# ==================== FUNCIONES AUXILIARES ====================
 def _get_user_tutela_folder(numero_id):
     """Obtiene/crea la carpeta de tutelas para un usuario."""
     try:
@@ -31,229 +25,83 @@ def _get_user_tutela_folder(numero_id):
         logger.error(f"Error creando carpeta de tutela para {numero_id}: {e}", exc_info=True)
         raise
 
-
-# ==================== ENDPOINTS DE TUTELAS ====================
-
-
 @bp_tutelas.route("", methods=["GET"])
 @login_required
 def get_tutelas():
-    """Obtiene todos los registros de tutelas."""
+    """Obtiene todos los registros de tutelas usando ORM."""
     try:
-        # Filtros opcionales
+        query = db.session.query(Tutela, Usuario, Empresa).join(Usuario, Tutela.usuario_id == Usuario.numeroId).join(Empresa, Tutela.empresa_nit == Empresa.nit)
+
         usuario_id = request.args.get("usuario_id")
-        empresa_nit = request.args.get("empresa_nit")
-
-        conn = g.db
-        query = (
-            "SELECT t.*, u.primerNombre, u.primerApellido, e.nombre_empresa FROM tutelas t "
-            "LEFT JOIN usuarios u ON t.usuario_id = u.numeroId "
-            "LEFT JOIN empresas e ON u.empresa_nit = e.nit"
-        )
-
-        conditions = []
-        params = []
-
         if usuario_id and usuario_id != "todos":
-            conditions.append("t.usuario_id = ?")
-            params.append(usuario_id)
+            query = query.filter(Tutela.usuario_id == usuario_id)
 
+        empresa_nit = request.args.get("empresa_nit")
         if empresa_nit and empresa_nit != "todos":
-            conditions.append("u.empresa_nit = ?")
-            params.append(empresa_nit)
+            query = query.filter(Tutela.empresa_nit == empresa_nit)
 
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
+        results = query.order_by(Tutela.fecha_radicacion.desc()).all()
 
-        query += " ORDER BY t.fecha_inicio DESC"
+        tutelas_list = []
+        for tutela, usuario, empresa in results:
+            tut_dict = tutela.to_dict()
+            tut_dict['usuario_nombre'] = f"{usuario.primerNombre} {usuario.primerApellido}".strip()
+            tut_dict['empresa_nombre'] = empresa.nombre_empresa
+            tutelas_list.append(tut_dict)
 
-        tutelas = conn.execute(query, tuple(params)).fetchall()
-
-        logger.debug(f"Se consultaron {len(tutelas)} tutelas")
-        return jsonify([dict(row) for row in tutelas])
+        logger.debug(f"Se consultaron {len(tutelas_list)} tutelas")
+        return jsonify(tutelas_list)
 
     except Exception as e:
         logger.error(f"Error obteniendo lista de tutelas: {e}", exc_info=True)
         return jsonify({"error": "No se pudo obtener la lista de tutelas."}), 500
-    # g.db se cierra automáticamente por app.after_request
-
 
 @bp_tutelas.route("", methods=["POST"])
 @login_required
 def add_tutela():
-    """Añade un nuevo registro de tutela y sube el soporte."""
-    conn = None
-    numero_id = request.form.get("usuario_id")  # Para logging
+    """Añade un nuevo registro de tutela usando ORM."""
+    numero_id = request.form.get("usuario_id")
     try:
         data = request.form
-
-        # Validación de datos
-        required_fields = ["usuario_id", "motivo", "fecha_inicio"]
+        required_fields = ["empresa_nit", "usuario_id", "motivo", "fecha_radicacion"]
         if not all(field in data for field in required_fields):
-            logger.warning(f"Intento de agregar tutela con campos faltantes. Usuario: {numero_id}")
-            return (
-                jsonify({"error": "Faltan campos obligatorios (usuario_id, motivo, fecha_inicio)."}),
-                400,
-            )
+            return jsonify({"error": "Faltan campos obligatorios."}), 400
 
-        if "soporte_pdf" not in request.files:
-            logger.warning(f"Intento de agregar tutela sin soporte PDF. Usuario: {numero_id}")
+        if "archivos_info" not in request.files:
             return jsonify({"error": "No se incluyó el archivo PDF de soporte."}), 400
 
-        file = request.files["soporte_pdf"]
+        file = request.files["archivos_info"]
         if file.filename == "":
             return jsonify({"error": "El archivo de soporte no tiene nombre."}), 400
-
-        # Validar el archivo PDF
+        
         is_valid, error_msg = validate_upload(file, file_type="document")
         if not is_valid:
-            logger.warning(f"Archivo de tutela inválido para {numero_id}: {error_msg}")
             return jsonify({"error": error_msg}), 400
 
-        # Obtener ruta de guardado
-        try:
-            upload_path = _get_user_tutela_folder(numero_id)
-        except Exception as folder_err:
-            logger.error(
-                f"No se pudo crear el directorio de tutela para {numero_id}: {folder_err}",
-                exc_info=True,
-            )
-            return (
-                jsonify({"error": f"No se pudo crear el directorio del usuario: {folder_err}"}),
-                500,
-            )
+        upload_path = _get_user_tutela_folder(numero_id)
+        filepath = sanitize_and_save_file(file, upload_path)
+        ruta_guardada = os.path.relpath(filepath, USER_DATA_FOLDER)
 
-        # Guardar el archivo PDF
-        user_session_id = session.get("user_id", "unknown")
-        try:
-            ts = datetime.now().strftime("%Y%m%d")
-            custom_name = f"tutela_{data['motivo']}_{data['fecha_inicio']}_{ts}.pdf".replace(" ", "_")
-
-            filepath = sanitize_and_save_file(file, upload_path, custom_name)
-            ruta_guardada = os.path.relpath(filepath, USER_DATA_FOLDER)
-            log_file_upload(file.filename, user_session_id, success=True)
-
-        except (ValueError, IOError) as e:
-            logger.error(
-                f"Error al guardar soporte de tutela para {numero_id}: {e}",
-                exc_info=True,
-            )
-            log_file_upload(file.filename, user_session_id, success=False, error=str(e))
-            return jsonify({"error": f"Error al guardar el archivo PDF: {str(e)}"}), 500
-
-        # Guardar en base de datos
-        conn = g.db
-        try:
-            cur = conn.cursor()
-            cur.execute(
-                """
-                INSERT INTO tutelas (
-                    usuario_id, motivo, fecha_inicio, estado,
-                    descripcion, ruta_soporte_pdf
-                ) VALUES (?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    numero_id,
-                    data["motivo"],
-                    data["fecha_inicio"],
-                    "Registrada",  # Estado inicial
-                    data.get("descripcion"),
-                    ruta_guardada,
-                ),
-            )
-            conn.commit()
-
-            nuevo_id = cur.lastrowid
-            logger.info(f"Nueva tutela registrada con ID: {nuevo_id} para usuario {numero_id} por user_id: {user_session_id}")
-
-            nuevo_registro = conn.execute("SELECT * FROM tutelas WHERE id = ?", (nuevo_id,)).fetchone()
-            return jsonify(dict(nuevo_registro)), 201
-
-        except sqlite3.IntegrityError as ie:
-            conn.rollback()
-            logger.error(
-                f"Error de integridad al guardar tutela para {numero_id}: {ie}",
-                exc_info=True,
-            )
-            return (
-                jsonify({"error": "Error de integridad, verifique que el ID de usuario exista."}),
-                409,
-            )
-        except Exception as db_err:
-            conn.rollback()
-            logger.error(
-                f"Error de DB al guardar tutela para {numero_id}: {db_err}",
-                exc_info=True,
-            )
-            return (
-                jsonify({"error": f"Error al guardar en base de datos: {str(db_err)}"}),
-                500,
-            )
-        # g.db se cierra automáticamente por app.after_request
-
-    except Exception as e:
-        logger.error(
-            f"Error general en add_tutela (Usuario: {numero_id}): {e}",
-            exc_info=True,
+        # Crear nueva tutela con ORM
+        nueva_tutela = Tutela(
+            empresa_nit=data["empresa_nit"],
+            usuario_id=numero_id,
+            motivo=data["motivo"],
+            fecha_radicacion=datetime.strptime(data["fecha_radicacion"], '%Y-%m-%d'),
+            estado="Registrada",
+            archivos_info=ruta_guardada,
+            # Campos adicionales del modelo que pueden venir del formulario
+            empresa_nombre=data.get("empresa_nombre"),
+            usuario_nombre=data.get("usuario_nombre")
         )
+
+        db.session.add(nueva_tutela)
+        db.session.commit()
+
+        logger.info(f"Nueva tutela registrada con ID: {nueva_tutela.id} para usuario {numero_id}")
+        return jsonify(nueva_tutela.to_dict()), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error general en add_tutela (Usuario: {numero_id}): {e}", exc_info=True)
         return jsonify({"error": f"Error inesperado en el servidor: {str(e)}"}), 500
-
-
-# --- INICIO DE BLOQUE AÑADIDO (PARA CORREGIR ERROR 404) ---
-
-
-@bp_tutelas.route("/empresas_list", methods=["GET"])
-@login_required
-def get_empresas_list():
-    """Obtiene una lista simple de todas las empresas (NIT y Nombre) para dropdowns."""
-    try:
-        conn = g.db
-        # Seleccionamos las columnas que necesita el dropdown del frontend
-        empresas = conn.execute("SELECT nit, nombre_empresa FROM empresas ORDER BY nombre_empresa ASC").fetchall()
-
-        logger.debug(f"Se consultaron {len(empresas)} empresas para la lista.")
-        # Devolvemos la lista en un formato JSON que el frontend pueda consumir
-        return jsonify([dict(row) for row in empresas])
-
-    except Exception as e:
-        logger.error(f"Error obteniendo lista de empresas: {e}", exc_info=True)
-        return jsonify({"error": "No se pudo obtener la lista de empresas."}), 500
-    # g.db se cierra automáticamente por app.after_request
-
-
-# --- FIN DE BLOQUE AÑADIDO ---
-
-
-# --- INICIO DE BLOQUE AÑADIDO (PARA AUTOCOMPLETAR) ---
-
-
-@bp_tutelas.route("/usuario_global/<string:numero_id>", methods=["GET"])
-@login_required
-def get_usuario_por_id(numero_id):
-    """
-    Busca un usuario en la tabla 'usuarios' por su numeroId.
-    Optimizado para autocompletar en el modal de tutelas.
-    """
-    try:
-        # Nota: Esta búsqueda es simple y no usa tipoId,
-        # si necesitas que sea por tipoId Y numeroId, ajusta la consulta
-        conn = g.db
-        usuario = conn.execute(
-            "SELECT primerNombre, primerApellido FROM usuarios WHERE numeroId = ?",
-            (numero_id,),
-        ).fetchone()
-
-        if usuario:
-            logger.debug(f"Usuario (para tutela) encontrado por ID: {numero_id}")
-            return jsonify(dict(usuario))
-        else:
-            logger.warning(f"Usuario (para tutela) no encontrado por ID: {numero_id}")
-            return jsonify({"error": "Usuario no encontrado"}), 404
-
-    except Exception as e:
-        logger.error(f"Error buscando usuario (para tutela): {e}", exc_info=True)
-        return jsonify({"error": "Error interno del servidor"}), 500
-    # g.db se cierra automáticamente por app.after_request
-
-
-# --- FIN DE BLOQUE AÑADIDO ---

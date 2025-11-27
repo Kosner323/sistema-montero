@@ -14,8 +14,9 @@ from logger import logger  # Importa el logger global
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DB_PATH = os.path.join(DATA_DIR, "mi_sistema.db")
-USER_DATA_FOLDER = os.path.join(BASE_DIR, "..", "MONTERO_TOTAL", "USUARIOS")
-COMPANY_DATA_FOLDER = os.path.join(BASE_DIR, "..", "MONTERO_TOTAL", "EMPRESAS")
+# En Docker, los datos deben estar dentro de /app/data donde appuser tiene permisos
+USER_DATA_FOLDER = os.path.join(DATA_DIR, "MONTERO_TOTAL", "USUARIOS")
+COMPANY_DATA_FOLDER = os.path.join(DATA_DIR, "MONTERO_TOTAL", "EMPRESAS")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(USER_DATA_FOLDER, exist_ok=True)
@@ -53,26 +54,55 @@ MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB para imágenes
 MAX_DOCUMENT_SIZE = 10 * 1024 * 1024  # 10 MB para documentos
 
 
+# --- CONEXIÓN "SABUESO" (BUSCA LA BD REAL) ---
+def buscar_bd_real():
+    """Busca el archivo mi_sistema.db que tenga datos."""
+    candidatos = [
+        os.path.join(DATA_DIR, "mi_sistema.db"),                    # Opción 1: local data/
+        os.path.abspath(os.path.join(BASE_DIR, "..", "data", "mi_sistema.db")), # Opción 2: src/data
+        os.path.join(os.getcwd(), "data", "mi_sistema.db")          # Opción 3: cwd/data
+    ]
+    
+    for ruta in candidatos:
+        if os.path.exists(ruta) and os.path.getsize(ruta) > 0:
+            logger.debug(f"🔍 BD encontrada: {ruta}")
+            return ruta
+    
+    # Default al primero si no encuentra nada
+    logger.warning(f"⚠️ BD no encontrada, usando default: {candidatos[0]}")
+    return candidatos[0]
+
 # --- Funciones de utilidad básicas ---
 def get_db_connection():
     """
-    Establece conexión con la base de datos SQLite.
-    (CORREGIDO: Usa g.db si está disponible, sino crea una nueva)
+    Establece conexión con la base de datos SQLite UNIFICADA.
+    Usa lógica de búsqueda inteligente para encontrar la BD real.
     """
     try:
-        # Si estamos en un contexto de request, g.db ya existe
         if "db" in g:
             return g.db
 
-        # Si no (ej. script, test), crea una conexión
-        # Nota: En testing, la 'app' fixture sobrescribe DATABASE_PATH
-        db_path = current_app.config.get("DATABASE_PATH", DB_PATH)
+        # Primero intentar usar la configuración de Flask
+        db_path = current_app.config.get("DATABASE_PATH")
+        
+        if not db_path:
+            # Usar función sabueso para encontrar la BD real
+            db_path = buscar_bd_real()
+            logger.debug(f"🔌 Conexión Centralizada (sabueso): {db_path}")
+        else:
+            logger.debug(f"🔌 Conexión desde config: {db_path}")
+
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
+
+        if hasattr(g, 'db'):
+            g.db = conn
+
         return conn
+
     except Exception as e:
-        logger.error(f"Error al conectar a la base de datos: {e}")
-        raise
+        logger.critical(f"❌ ERROR CRÍTICO al intentar conectar a la base de datos: {e}", exc_info=True)
+        raise Exception("Fallo en la conexión a la base de datos.")
 
 
 def login_required(f):
@@ -451,7 +481,175 @@ def log_file_upload(filename, user_id, success=True, error=None):
     if success:
         logger.info(f"[{timestamp}] ✓ UPLOAD EXITOSO - Usuario: {user_id}, Archivo: {filename}")
     else:
-        logger.warning(f"[{timestamp}] Œ UPLOAD FALLIDO - Usuario: {user_id}, Archivo: {filename}, Error: {error}")
+        logger.warning(f"[{timestamp}] Œ UPLOAD FALLIDO - Usuario: {user_id}, Archivo: {filename}, Error: {error}")
+
+
+# ==================== FUNCIONES DE CONFIGURACIÓN CENTRALIZADA DE UPLOADS ====================
+
+def get_upload_folder(subdir=None):
+    """
+    Obtiene la ruta de la carpeta de uploads desde la configuración global.
+    
+    Args:
+        subdir (str, optional): Subcarpeta específica ('docs', 'formularios', 'tutelas', 'impuestos', 'temp')
+    
+    Returns:
+        str: Ruta absoluta a la carpeta de uploads
+    
+    Example:
+        >>> get_upload_folder('docs')
+        '/app/static/uploads/docs'
+    """
+    base_upload = current_app.config.get('UPLOAD_FOLDER', os.path.join(BASE_DIR, 'static', 'uploads'))
+    
+    if subdir:
+        upload_path = os.path.join(base_upload, subdir)
+    else:
+        upload_path = base_upload
+    
+    # Crear carpeta si no existe
+    os.makedirs(upload_path, exist_ok=True)
+    
+    return upload_path
+
+
+def get_max_file_size():
+    """
+    Obtiene el tamaño máximo de archivo permitido desde la configuración global.
+    
+    Returns:
+        int: Tamaño máximo en bytes (por defecto 16MB)
+    
+    Example:
+        >>> get_max_file_size()
+        16777216
+    """
+    return current_app.config.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024)
+
+
+def get_allowed_extensions():
+    """
+    Obtiene el conjunto de extensiones permitidas desde la configuración global.
+    
+    Returns:
+        set: Conjunto de extensiones permitidas
+    
+    Example:
+        >>> get_allowed_extensions()
+        {'pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv'}
+    """
+    return current_app.config.get('ALLOWED_EXTENSIONS', ALLOWED_ALL_EXTENSIONS)
+
+
+def is_file_allowed(filename):
+    """
+    Verifica si un archivo está permitido según la configuración global.
+    
+    Args:
+        filename (str): Nombre del archivo a validar
+    
+    Returns:
+        bool: True si el archivo está permitido, False en caso contrario
+    
+    Example:
+        >>> is_file_allowed('documento.pdf')
+        True
+        >>> is_file_allowed('virus.exe')
+        False
+    """
+    if not filename or '.' not in filename:
+        return False
+    
+    extension = filename.rsplit('.', 1)[1].lower()
+    allowed_extensions = get_allowed_extensions()
+    
+    return extension in allowed_extensions
+
+
+def validate_file_size(file_content):
+    """
+    Valida que el tamaño del archivo no exceda el límite configurado.
+    
+    Args:
+        file_content (bytes): Contenido del archivo en bytes
+    
+    Returns:
+        tuple: (bool, str) - (es_válido, mensaje_error)
+    
+    Example:
+        >>> validate_file_size(b'contenido')
+        (True, None)
+    """
+    max_size = get_max_file_size()
+    file_size = len(file_content)
+    
+    if file_size > max_size:
+        max_mb = max_size / (1024 * 1024)
+        actual_mb = file_size / (1024 * 1024)
+        return False, f"Archivo demasiado grande ({actual_mb:.2f}MB). Máximo permitido: {max_mb:.0f}MB"
+    
+    return True, None
+
+
+def save_uploaded_file(file, subdir, custom_filename=None):
+    """
+    Guarda un archivo subido usando la configuración centralizada.
+    
+    Args:
+        file: Objeto FileStorage de Flask
+        subdir (str): Subcarpeta donde guardar ('docs', 'formularios', 'tutelas', etc.)
+        custom_filename (str, optional): Nombre personalizado para el archivo
+    
+    Returns:
+        tuple: (ruta_completa, ruta_relativa, mensaje_error)
+    
+    Example:
+        >>> save_uploaded_file(file, 'docs', 'informe_2024.pdf')
+        ('/app/static/uploads/docs/informe_2024.pdf', 'uploads/docs/informe_2024.pdf', None)
+    """
+    try:
+        # Validar que el archivo existe
+        if not file or not file.filename:
+            return None, None, "Archivo no válido"
+        
+        # Validar extensión
+        if not is_file_allowed(file.filename):
+            return None, None, f"Tipo de archivo no permitido. Extensiones válidas: {', '.join(get_allowed_extensions())}"
+        
+        # Leer contenido para validar tamaño
+        file_content = file.read()
+        is_valid, error_msg = validate_file_size(file_content)
+        if not is_valid:
+            return None, None, error_msg
+        
+        # Resetear puntero del archivo
+        file.seek(0)
+        
+        # Obtener carpeta de destino
+        upload_folder = get_upload_folder(subdir)
+        
+        # Determinar nombre del archivo
+        if custom_filename:
+            filename = secure_filename(custom_filename)
+        else:
+            filename = secure_filename(file.filename)
+        
+        # Construir ruta completa
+        filepath = os.path.join(upload_folder, filename)
+        
+        # Guardar archivo
+        file.save(filepath)
+        
+        # Calcular ruta relativa desde static/
+        relative_path = os.path.relpath(filepath, os.path.join(BASE_DIR, 'static'))
+        
+        logger.info(f"Archivo guardado exitosamente: {filepath}")
+        return filepath, relative_path, None
+        
+    except Exception as e:
+        logger.error(f"Error al guardar archivo: {e}", exc_info=True)
+        return None, None, str(e)
 
 
 # (El resto de tu archivo utils.py de 13.000 líneas iría aquí...)
+

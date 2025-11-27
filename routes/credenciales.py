@@ -1,28 +1,27 @@
-# -*- coding: utf-8 -*-
 """
 Blueprint para la gestión de credenciales de plataformas.
 Permite a los usuarios guardar, ver, editar y eliminar de forma segura
 las credenciales (usuario/contraseña) para diferentes servicios.
 """
-
 import sqlite3
 import traceback
 from datetime import datetime
 
-from flask import Blueprint, g, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, current_app
 
+from logger import logger
 from encryption import FernetEncryptor
-from utils import get_db_connection, login_required
 
-# (CORREGIDO: Importa la instancia global 'logger')
-# from logger import logger
+# --- IMPORTACIÓN CENTRALIZADA ---
+# Intentamos importar desde nivel superior o local, SIN crear fallbacks locales
+try:
+    from ..utils import get_db_connection, login_required
+except (ImportError, ValueError):
+    from utils import get_db_connection, login_required
+# -------------------------------
 
 # --- Configuración del Blueprint ---
 credenciales_bp = Blueprint("credenciales", __name__, url_prefix="/api/credenciales")
-
-# --- Inicialización ---
-# (CORREGIDO: No es necesario llamar a get_logger())
-from logger import logger
 
 # Inicializar el encriptador
 try:

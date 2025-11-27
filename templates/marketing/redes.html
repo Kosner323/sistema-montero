@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <title>Gestión de Redes Sociales | Portal Montero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="page-header-title">
+                        <h5 class="mb-0 font-medium">Hub de Enlaces - Redes Sociales</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#!">Marketing</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Redes Sociales</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <!-- Tabla de Redes Sociales -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Enlaces y Presencia Digital</h5>
+                    <button class="btn btn-primary btn-sm" onclick="actualizarMetricas()">
+                        <i data-feather="refresh-cw" class="me-1"></i>
+                        Actualizar Métricas
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered text-sm whitespace-nowrap" id="tablaRedes">
+                            <thead>
+                                <tr>
+                                    <th>Plataforma</th>
+                                    <th>URL</th>
+                                    <th>Seguidores</th>
+                                    <th>Estado</th>
+                                    <th>Descripción</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyRedes">
+                                <!-- Datos cargados dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    
+    {% include '_theme_config.html' %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            cargarRedes();
+        });
+
+        // Función para mostrar alertas
+        function showAlert(message, type = 'success') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.getElementById('alertContainer').innerHTML = alertHtml;
+            feather.replace();
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+
+        // Cargar redes sociales
+        async function cargarRedes() {
+            try {
+                const response = await fetch('/marketing/api/redes', {
+                    credentials: 'include'
+                });
+                const redes = await response.json();
+                
+                const tbody = document.getElementById('bodyRedes');
+                tbody.innerHTML = '';
+                
+                redes.forEach(red => {
+                    const badge = red.estado === 'Activo' 
+                        ? '<span class="badge bg-success">Activo</span>' 
+                        : '<span class="badge bg-secondary">Inactivo</span>';
+                    
+                    const icon = getIconForPlatform(red.plataforma);
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <i data-feather="${icon}" class="me-2" style="width:16px;height:16px;"></i>
+                                <strong>${red.plataforma}</strong>
+                            </td>
+                            <td>
+                                <a href="${red.url}" target="_blank" class="text-primary">
+                                    ${red.url.substring(0, 40)}...
+                                    <i data-feather="external-link" class="ms-1" style="width:14px;height:14px;"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">${red.seguidores.toLocaleString()}</span>
+                            </td>
+                            <td>${badge}</td>
+                            <td>${red.descripcion || 'Sin descripción'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarRed(${red.id})">
+                                    <i data-feather="edit-2" style="width:14px;height:14px;"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                feather.replace();
+            } catch (error) {
+                console.error('Error al cargar redes:', error);
+                showAlert('Error al cargar las redes sociales', 'danger');
+            }
+        }
+
+        // Obtener icono según plataforma
+        function getIconForPlatform(plataforma) {
+            const icons = {
+                'Facebook': 'facebook',
+                'Instagram': 'instagram',
+                'LinkedIn': 'linkedin',
+                'TikTok': 'video',
+                'Web': 'globe',
+                'YouTube': 'youtube',
+                'Twitter': 'twitter'
+            };
+            return icons[plataforma] || 'link';
+        }
+
+        // Actualizar métricas (simulado)
+        function actualizarMetricas() {
+            showAlert('Métricas actualizadas correctamente. Funcionalidad completa próximamente.', 'info');
+        }
+
+        // Editar red (placeholder)
+        function editarRed(id) {
+            showAlert(`Edición de red #${id} - Funcionalidad en desarrollo`, 'info');
+        }
+    </script>
+</body>
+</html>

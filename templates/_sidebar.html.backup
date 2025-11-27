@@ -1,0 +1,62 @@
+﻿<nav class="pc-sidebar">
+  <div class="navbar-wrapper">
+    <div class="m-header flex items-center py-4 px-6 h-header-height">
+      <a href="/dashboard" class="b-brand flex items-center gap-3">
+        <img src="/assets/images/logo-white.svg" class="img-fluid logo logo-lg" alt="logo" />
+        <img src="/assets/images/favicon.svg" class="img-fluid logo logo-sm" alt="logo" />
+      </a>
+    </div>
+    <div class="navbar-content h-[calc(100vh_-_80px)] py-2.5 overflow-y-auto">
+      <ul class="pc-navbar">
+        <li class="pc-item pc-caption"><label>NAVIGATION</label></li>
+        <li class="pc-item"><a href="/dashboard" class="pc-link"><span class="pc-micon"><i data-feather="home"></i></span><span class="pc-mtext">DASHBOARD</span></a></li>
+
+        <li class="pc-item pc-caption"><label>ADMINISTRACIÃ“N Y FINANZAS</label><i data-feather="settings"></i></li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"><span class="pc-micon"><i data-feather="database"></i></span><span class="pc-mtext">BASE DE DATOS</span><span class="pc-arrow"><i class="ti ti-chevron-right"></i></span></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/usuarios/gestion">USUARIOS</a></li>
+            <li class="pc-item"><a class="pc-link" href="/empresas/ingresar">EMPRESAS</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link"><span class="pc-micon"><i data-feather="book-open"></i></span><span class="pc-mtext">CONTABILIDAD</span><span class="pc-arrow"><i class="ti ti-chevron-right"></i></span></a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/pagos/recaudo">PAGOS</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/control">TABLA</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/planillas">PAGO DE PLANILLAS</a></li>
+            <li class="pc-item"><a class="pc-link" href="/planillas/enviar">ENVIAR PLANILLAS</a></li>
+          </ul>
+        </li>
+
+         <li class="pc-item pc-caption"><label>GESTIÓN OPERATIVA</label><i data-feather="bar-chart-2"></i></li>
+         <li class="pc-item"><a href="/novedades" class="pc-link"><span class="pc-micon"><i data-feather="bell"></i></span><span class="pc-mtext">NOVEDADES</span></a></li>
+         <li class="pc-item"><a href="/formularios" class="pc-link"><span class="pc-micon"><i data-feather="align-justify"></i></span><span class="pc-mtext">FORMULARIOS</span></a></li>
+         <li class="pc-item pc-hasmenu">
+           <a href="#!" class="pc-link"><span class="pc-micon"><i data-feather="briefcase"></i></span><span class="pc-mtext">GESTIÓN JURÍDICA</span><span class="pc-arrow"><i class="ti ti-chevron-right"></i></span></a>
+           <ul class="pc-submenu">
+             <li class="pc-item"><a class="pc-link" href="/incapacidades">INCAPACIDADES</a></li>
+             <li class="pc-item"><a class="pc-link" href="/tutelas">TUTELAS</a></li>
+             <li class="pc-item"><a class="pc-link" href="/depuraciones">DEPURACIONES</a></li>
+           </ul>
+         </li>
+
+         <li class="pc-item pc-caption"><label>DOCUMENTACIÃ“N Y SERVICIO</label><i data-feather="file-text"></i></li>
+         <li class="pc-item pc-hasmenu">
+           <a href="#!" class="pc-link"><span class="pc-micon"><i data-feather="file-text"></i></span><span class="pc-mtext">INFORMACIÓN</span><span class="pc-arrow"><i class="ti ti-chevron-right"></i></span></a>
+           <ul class="pc-submenu">
+             <li class="pc-item"><a href="/informacion/clientes" class="pc-link">INFORMACIÓN PARA CLIENTES</a></li>
+             <li class="pc-item"><a href="/informacion/empleados" class="pc-link">INFORMACIÓN PARA EMPLEADOS</a></li>
+             <li class="pc-item"><a href="/cotizaciones" class="pc-link">COTIZACIONES</a></li>
+             <li class="pc-item"><a class="pc-link" href="/pagos/impuestos">PAGO DE IMPUESTOS</a></li>
+           </ul>
+         </li>
+
+         <li class="pc-item pc-caption"><label>GUÍAS Y ACCESO</label><i data-feather="lock"></i></li>
+         <li class="pc-item"><a href="/credenciales" class="pc-link"><span class="pc-micon"><i data-feather="key"></i></span><span class="pc-mtext">USUARIOS Y CONTRASEÑA</span></a></li>
+         <li class="pc-item"><a href="#" class="pc-link"><span class="pc-micon"><i data-feather="plus-circle"></i></span><span class="pc-mtext">GUÃA CREACIÃ“N EMPRESA</span></a></li>
+         <li class="pc-item"><a href="#" class="pc-link"><span class="pc-micon"><i data-feather="x-circle"></i></span><span class="pc-mtext">GUÃA DE CERRAR EMPRESAS</span></a></li>
+      </ul>
+    </div>
+  </div>
+</nav>

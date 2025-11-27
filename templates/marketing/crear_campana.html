@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Nueva Campaña | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+</head>
+<body>
+  <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]" style="display:none"></div>
+  {% include '_sidebar.html' %}
+  {% include '_header.html' %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+      <div class="page-header">
+        <div class="page-block">
+          <div class="page-header-title">
+            <h5 class="mb-0 font-medium">Nueva Campaña</h5>
+          </div>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item"><a href="/marketing/campanas">Campañas</a></li>
+            <li class="breadcrumb-item" aria-current="page">Crear</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12 lg:col-span-9">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+              <h5 class="mb-0"><i data-feather="flag" class="me-2"></i>Datos de la Campaña</h5>
+            </div>
+            <div class="card-body">
+              <form id="formCampana" class="row g-3">
+                <div class="col-md-8">
+                  <label class="form-label">Nombre *</label>
+                  <input type="text" class="form-control" id="nombre" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Estado *</label>
+                  <select id="estado" class="form-select" required>
+                    <option value="planeacion">Planificación</option>
+                    <option value="activa">Activa</option>
+                    <option value="pausada">Pausada</option>
+                    <option value="finalizada">Finalizada</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Presupuesto (COP) *</label>
+                  <input type="number" step="0.01" class="form-control" id="presupuesto" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Canal *</label>
+                  <select id="canal" class="form-select" required>
+                    <option value="Redes">Redes Sociales</option>
+                    <option value="Email">Email Marketing</option>
+                    <option value="SEO">SEO/Contenido</option>
+                    <option value="SEM">Pauta (SEM)</option>
+                    <option value="Eventos">Eventos</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Fecha Inicio *</label>
+                  <input type="date" class="form-control" id="fecha_inicio" required />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Fecha Fin</label>
+                  <input type="date" class="form-control" id="fecha_fin" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Objetivo *</label>
+                  <textarea id="objetivo" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Descripción</label>
+                  <textarea id="descripcion" class="form-control" rows="3"></textarea>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-end gap-2">
+              <a href="/marketing/campanas" class="btn btn-light">Cancelar</a>
+              <button id="btnGuardarCampana" class="btn btn-primary">
+                <i data-feather="save" class="me-1"></i>Guardar Campaña
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% include '_footer.html' %}
+
+  <script src="/assets/js/plugins/feather.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      const btn = document.getElementById('btnGuardarCampana');
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        const data = {
+          nombre: document.getElementById('nombre').value.trim(),
+          estado: document.getElementById('estado').value,
+          presupuesto: parseFloat(document.getElementById('presupuesto').value || '0'),
+          canal: document.getElementById('canal').value,
+          fecha_inicio: document.getElementById('fecha_inicio').value,
+          fecha_fin: document.getElementById('fecha_fin').value || null,
+          objetivo: document.getElementById('objetivo').value.trim(),
+          descripcion: document.getElementById('descripcion').value.trim()
+        };
+        if (!data.nombre || !data.estado || !data.presupuesto || !data.canal || !data.fecha_inicio || !data.objetivo) {
+          alert('Complete los campos obligatorios'); btn.disabled = false; return;
+        }
+        try {
+          const resp = await fetch('/marketing/api/campanas', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
+          });
+          const result = await resp.json();
+          if (resp.ok) { window.location.href = '/marketing/campanas'; }
+          else { alert(result.error || 'Error al guardar'); btn.disabled = false; }
+        } catch (e) { console.error(e); alert('Error de red'); btn.disabled = false; }
+      });
+    });
+  </script>
+</body>
+</html>

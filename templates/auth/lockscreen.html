@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Sesión Bloqueada | Sistema Montero</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/fonts/feather.css">
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link">
+    <link rel="stylesheet" href="/assets/css/style-preset.css">
+    <style>
+        body {
+            background: #e9ecef;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .lock-card {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .avatar-lock {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+        .lock-icon {
+            font-size: 48px;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="lock-card">
+        <img src="/assets/images/user/avatar-1.jpg" alt="User" class="avatar-lock">
+        <h4 class="mb-1 text-dark font-weight-bold">{{ session.get('user_name', 'Usuario') }}</h4>
+        <p class="text-muted mb-4">
+            <i class="feather icon-lock me-1"></i> Sesión Bloqueada
+        </p>
+
+        <form id="unlock-form">
+            <div class="form-group mb-3">
+                <input type="password" class="form-control form-control-lg text-center" id="password" placeholder="Contraseña para desbloquear" required autofocus>
+            </div>
+            <button class="btn btn-dark btn-block w-100" type="submit" id="btn-unlock">
+                Desbloquear
+            </button>
+        </form>
+
+        <div class="mt-4">
+            <a href="/api/logout" class="text-muted small">¿No eres tú? <b>Cerrar Sesión</b></a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // 1. BLOQUEAR BOTÓN ATRÁS (Seguridad)
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () { history.go(1); };
+
+        // 2. LÓGICA DE DESBLOQUEO
+        document.getElementById('unlock-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-unlock');
+            const pass = document.getElementById('password').value;
+
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/verify-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() if csrf_token else "" }}'
+                    },
+                    body: JSON.stringify({ password: pass })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    // Volver al Dashboard
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Desbloqueado!',
+                        text: 'Redirigiendo...',
+                        timer: 1000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '/dashboard';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acceso Denegado',
+                        text: 'Contraseña incorrecta',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    document.getElementById('password').value = '';
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', 'Fallo de conexión con el servidor', 'error');
+            } finally {
+                btn.innerHTML = 'Desbloquear';
+                btn.disabled = false;
+            }
+        });
+
+        // 3. DESHABILITAR F12, CTRL+U, CTRL+SHIFT+I (Seguridad adicional)
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // CTRL+SHIFT+I, CTRL+SHIFT+J, CTRL+U
+            if ((e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // 4. DESHABILITAR CLICK DERECHO
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>

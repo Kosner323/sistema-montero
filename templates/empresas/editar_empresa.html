@@ -1,0 +1,506 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %}
+Editar Empresa - Sistema Montero
+{% endblock %}
+
+{% block stylesheets %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    :root {
+        --color-primario: #007bff;
+        --color-exito: #28a745;
+        --color-gris-claro: #f8f9fa;
+        --color-gris-medio: #dee2e6;
+        --color-gris-oscuro: #495057;
+        --color-texto: #2c3e50;
+    }
+
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--color-texto);
+    }
+
+    .container-formulario {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb-ejecutivo {
+        background-color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb-ejecutivo .breadcrumb {
+        margin-bottom: 0;
+    }
+
+    .breadcrumb-ejecutivo .breadcrumb-item a {
+        color: var(--color-primario);
+        text-decoration: none;
+    }
+
+    .breadcrumb-ejecutivo .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    /* Tarjeta del formulario */
+    .card-formulario {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-gris-medio);
+    }
+
+    .card-formulario-header {
+        background-color: var(--color-gris-claro);
+        border-bottom: 2px solid var(--color-primario);
+        padding: 1.25rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .card-formulario-header h4 {
+        margin: 0;
+        color: var(--color-texto);
+        font-weight: 600;
+        font-size: 1.15rem;
+    }
+
+    .card-formulario-body {
+        padding: 2rem 1.5rem;
+    }
+
+    /* Grupos de formulario */
+    .seccion-titulo {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--color-gris-medio);
+    }
+
+    .seccion-titulo:first-child {
+        margin-top: 0;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-gris-oscuro);
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid var(--color-gris-medio);
+        border-radius: 5px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.15);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        font-size: 0.85rem;
+    }
+
+    /* Botones */
+    .btn-ejecutivo {
+        padding: 0.7rem 1.75rem;
+        border-radius: 5px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-guardar {
+        background-color: var(--color-exito);
+        color: white;
+    }
+
+    .btn-guardar:hover {
+        background-color: #218838;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+    }
+
+    .btn-cancelar {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-cancelar:hover {
+        background-color: #5a6268;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(108,117,125,0.3);
+    }
+
+    .botones-formulario {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--color-gris-medio);
+    }
+
+    /* Loading spinner */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .botones-formulario {
+            flex-direction: column;
+        }
+
+        .btn-ejecutivo {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-formulario">
+    
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-ejecutivo">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="/api/unificacion/panel">Unificación</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Editar Empresa</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Formulario -->
+    <div class="card-formulario">
+        <div class="card-formulario-header">
+            <h4>
+                <i class="feather icon-briefcase me-2"></i>
+                Editar Empresa
+            </h4>
+        </div>
+        <div class="card-formulario-body">
+            <form id="formEditarEmpresa">
+                
+                <!-- Información Básica -->
+                <div class="seccion-titulo">
+                    <i class="feather icon-file-text me-1"></i>
+                    Información Básica
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="nit" class="form-label">NIT *</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="nit" 
+                            name="nit" 
+                            value="{{ empresa.nit }}"
+                            readonly
+                            style="background-color: #e9ecef;"
+                        >
+                    </div>
+                    <div class="col-md-8">
+                        <label for="nombre_empresa" class="form-label">Nombre de la Empresa *</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="nombre_empresa" 
+                            name="nombre_empresa" 
+                            value="{{ empresa.nombre_empresa }}"
+                            required
+                        >
+                        <div class="invalid-feedback">El nombre de la empresa es requerido.</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="tipo_empresa" class="form-label">Tipo de Empresa</label>
+                        <select class="form-select" id="tipo_empresa" name="tipo_empresa">
+                            <option value="">Seleccionar...</option>
+                            <option value="Privada" {% if empresa.tipo_empresa == 'Privada' %}selected{% endif %}>Privada</option>
+                            <option value="Pública" {% if empresa.tipo_empresa == 'Pública' %}selected{% endif %}>Pública</option>
+                            <option value="Mixta" {% if empresa.tipo_empresa == 'Mixta' %}selected{% endif %}>Mixta</option>
+                            <option value="ONG" {% if empresa.tipo_empresa == 'ONG' %}selected{% endif %}>ONG</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="sector_economico" class="form-label">Sector Económico</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="sector_economico" 
+                            name="sector_economico" 
+                            value="{{ empresa.sector_economico or '' }}"
+                        >
+                    </div>
+                </div>
+
+                <!-- Representante Legal -->
+                <div class="seccion-titulo">
+                    <i class="feather icon-user-check me-1"></i>
+                    Representante Legal
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="rep_legal_tipo_id" class="form-label">Tipo ID</label>
+                        <select class="form-select" id="rep_legal_tipo_id" name="rep_legal_tipo_id">
+                            <option value="">Seleccionar...</option>
+                            <option value="CC" {% if empresa.rep_legal_tipo_id == 'CC' %}selected{% endif %}>CC</option>
+                            <option value="CE" {% if empresa.rep_legal_tipo_id == 'CE' %}selected{% endif %}>CE</option>
+                            <option value="PA" {% if empresa.rep_legal_tipo_id == 'PA' %}selected{% endif %}>PA</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rep_legal_numero_id" class="form-label">Número ID</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="rep_legal_numero_id" 
+                            name="rep_legal_numero_id" 
+                            value="{{ empresa.rep_legal_numero_id or '' }}"
+                        >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="rep_legal_nombre" class="form-label">Nombre Completo</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="rep_legal_nombre" 
+                            name="rep_legal_nombre" 
+                            value="{{ empresa.rep_legal_nombre or '' }}"
+                        >
+                    </div>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="seccion-titulo">
+                    <i class="feather icon-phone me-1"></i>
+                    Información de Contacto
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="direccion" 
+                            name="direccion" 
+                            value="{{ empresa.direccion or '' }}"
+                        >
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="ciudad" class="form-label">Ciudad</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="ciudad" 
+                            name="ciudad" 
+                            value="{{ empresa.ciudad or '' }}"
+                        >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="departamento" class="form-label">Departamento</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="departamento" 
+                            name="departamento" 
+                            value="{{ empresa.departamento or '' }}"
+                        >
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="telefono" 
+                            name="telefono" 
+                            value="{{ empresa.telefono or '' }}"
+                        >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="correo" class="form-label">Correo Electrónico</label>
+                        <input 
+                            type="email" 
+                            class="form-control" 
+                            id="correo" 
+                            name="correo" 
+                            value="{{ empresa.correo or '' }}"
+                        >
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="seccion-titulo">
+                    <i class="feather icon-info me-1"></i>
+                    Información Adicional
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="num_empleados" class="form-label">Número de Empleados</label>
+                        <input 
+                            type="number" 
+                            class="form-control" 
+                            id="num_empleados" 
+                            name="num_empleados" 
+                            value="{{ empresa.num_empleados or '' }}"
+                            min="0"
+                        >
+                    </div>
+                    <div class="col-md-4">
+                        <label for="fecha_constitucion" class="form-label">Fecha de Constitución</label>
+                        <input 
+                            type="date" 
+                            class="form-control" 
+                            id="fecha_constitucion" 
+                            name="fecha_constitucion" 
+                            value="{{ empresa.fecha_constitucion or '' }}"
+                        >
+                    </div>
+                    <div class="col-md-4">
+                        <label for="estado" class="form-label">Estado</label>
+                        <select class="form-select" id="estado" name="estado">
+                            <option value="ACTIVA" {% if empresa.estado == 'ACTIVA' %}selected{% endif %}>Activa</option>
+                            <option value="INACTIVA" {% if empresa.estado == 'INACTIVA' %}selected{% endif %}>Inactiva</option>
+                            <option value="SUSPENDIDA" {% if empresa.estado == 'SUSPENDIDA' %}selected{% endif %}>Suspendida</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="botones-formulario">
+                    <button type="submit" class="btn-ejecutivo btn-guardar" id="btnGuardar">
+                        <i class="feather icon-save"></i>
+                        <span>Guardar Cambios</span>
+                    </button>
+                    <a href="/api/unificacion/panel" class="btn-ejecutivo btn-cancelar">
+                        <i class="feather icon-x"></i>
+                        <span>Cancelar</span>
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://unpkg.com/feather-icons"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Inicializar Feather Icons
+    feather.replace();
+
+    // Manejo del formulario
+    const form = document.getElementById('formEditarEmpresa');
+    const btnGuardar = document.getElementById('btnGuardar');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Validación básica
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            return;
+        }
+
+        // Deshabilitar botón
+        btnGuardar.disabled = true;
+        const textoOriginal = btnGuardar.innerHTML;
+        btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+        try {
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Convertir FormData a objeto, excluyendo campos vacíos opcionales
+            formData.forEach((value, key) => {
+                if (key !== 'nit') { // NIT no se puede modificar
+                    data[key] = value || null;
+                }
+            });
+
+            const nit = document.getElementById('nit').value;
+
+            const response = await fetch(`/api/empresas/${nit}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'La empresa ha sido actualizada correctamente.',
+                    confirmButtonColor: '#28a745'
+                });
+
+                // Redirigir de vuelta
+                window.location.href = '/api/unificacion/panel';
+            } else {
+                throw new Error(result.error || 'Error al actualizar la empresa');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'No se pudo actualizar la empresa. Por favor, intente nuevamente.',
+                confirmButtonColor: '#007bff'
+            });
+        } finally {
+            // Rehabilitar botón
+            btnGuardar.disabled = false;
+            btnGuardar.innerHTML = textoOriginal;
+            feather.replace();
+        }
+    });
+</script>
+{% endblock %}

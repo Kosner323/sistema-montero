@@ -1,0 +1,599 @@
+﻿<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Gestión de Incapacidades | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Gestión de incapacidades médicas de empleados." />
+    <meta name="author" content="Montero y Negocio" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+      /* Ajuste para que el modal respete el menú lateral izquierdo */
+      #agregarIncapacidadModal .modal-dialog {
+          margin-left: 300px;
+          margin-right: auto;
+          transform: none;
+      }
+      /* Ajuste vertical */
+      #agregarIncapacidadModal .modal-dialog {
+          margin-top: 50px;
+          margin-bottom: 50px;
+      }
+      /* Estilo para mensajes de feedback */
+      #feedbackMessageIncapacidades {
+          margin-top: 15px;
+          font-size: 0.9em;
+      }
+      .loading-placeholder td {
+          color: #999;
+          font-style: italic;
+      }
+      .error-placeholder td {
+          color: #dc3545; /* Rojo Bootstrap */
+          font-weight: bold;
+      }
+       /* Clases para badges de estado */
+       .badge-status-en-proceso { background-color: #ffc107; color: #000; } /* Amarillo */
+       .badge-status-pagada { background-color: #28a745; color: #fff; } /* Verde */
+       .badge-status-rechazada { background-color: #dc3545; color: #fff; } /* Rojo */
+    </style>
+
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="page-header-title">
+              <h5 class="mb-0 font-medium">Gestión de Incapacidades</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Jurídica</a></li>
+              <li class="breadcrumb-item" aria-current="page">Incapacidades</li>
+            </ul>
+          </div>
+        </div>
+        <div id="feedbackMessageIncapacidades" class="mb-4"></div>
+
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12">
+            <div class="card">
+              <div class="card-header flex justify-between items-center">
+                <h5>Filtros de Búsqueda y Acciones</h5>
+                <a href="/incapacidades/crear" class="btn btn-primary btn-sm">
+                    <i data-feather="plus" class="me-1"></i>
+                    AGREGAR INCAPACIDAD
+                </a>
+              </div>
+              <div class="card-body">
+                <form id="formFiltros">
+                    <h6 class="mb-3">Filtros</h6>
+                    <div class="grid grid-cols-12 gap-x-6 gap-y-4 mb-4">
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEmpresa" class="form-label">Empresa:</label>
+                            <select class="form-select" id="filtroEmpresa">
+                                <option value="">Cargando empresas...</option>
+                                </select>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroIDUsuario" class="form-label">ID Usuario:</label>
+                            <input type="text" class="form-control" id="filtroIDUsuario" placeholder="Número de Cédula/ID">
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEstado" class="form-label">Estado:</label>
+                            <select class="form-select" id="filtroEstado">
+                                <option value="">Todos los Estados</option>
+                                <option value="En Proceso">En Proceso</option>
+                                <option value="Pagada">Pagada</option>
+                                <option value="Rechazada">Rechazada</option>
+                            </select>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroFecha" class="form-label">Fecha de Inicio (Desde):</label>
+                            <input type="date" class="form-control" id="filtroFecha">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 mt-4">
+                        <div class="col-span-12 flex justify-end">
+                             <button type="button" id="btnLimpiarFiltros" class="btn btn-outline-secondary me-2">Limpiar Filtros</button>
+                             <button type="button" id="btnAplicarFiltros" class="btn btn-secondary">
+                                <span class="spinner-border spinner-border-sm me-1 d-none" role="status" aria-hidden="true"></span>
+                                APLICAR FILTROS
+                             </button>
+                        </div>
+                    </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Incapacidades Registradas</h5>
+                    <p class="text-muted m-0">Detalle de las incapacidades del sistema.</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tablaIncapacidades">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Empresa</th>
+                                    <th>Empleado</th>
+                                    <th>ID Empleado</th>
+                                    <th>Diagnóstico</th>
+                                    <th>Inicio</th>
+                                    <th>Fin</th>
+                                    <th>Estado</th>
+                                    <th>Archivos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="loading-placeholder"><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm"></span> Cargando incapacidades...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
+</div>
+
+    {% include '_footer.html' %}
+
+    {# Modal removido - ahora usando página dedicada /incapacidades/crear #}
+
+<div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+</div>
+
+<script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+
+    <script>
+        // --- Variables Globales ---
+        const API_URL = '/api'; // FIX: Revert to simple relative path
+        const feedbackDiv = document.getElementById('feedbackMessageIncapacidades');
+        let allCompanies = []; // Para poblar selects
+        let allUsers = null; // Para poblar select de usuario y buscar nombres
+        let currentIncapacidades = []; // Para almacenar los datos actuales de la tabla
+
+        // --- Funciones Utilitarias ---
+        function showMessage(message, type = 'info') {
+             if (feedbackDiv) {
+                 feedbackDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                           ${message}
+                                           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>`;
+             } else { alert(message); } // Fallback
+        }
+
+        function toggleSpinner(buttonId, show) {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                const spinner = button.querySelector('.spinner-border');
+                if (spinner) spinner.classList.toggle('d-none', !show);
+                button.disabled = show;
+            }
+        }
+
+        // FIX: Renamed function for clarity
+        function tryInitializeFeatherIcons() {
+             // Check if feather exists before calling replace
+             setTimeout(() => { // Pequeño delay puede ayudar con timing
+                 if (typeof feather !== 'undefined' && feather && typeof feather.replace === 'function') {
+                     try {
+                         feather.replace();
+                         // console.log("Feather Icons re-initialized."); // Log opcional
+                     } catch (e) {
+                         console.error("Error calling feather.replace() inside timeout:", e);
+                     }
+                 } else {
+                     // Log the error but don't prevent other JS from running
+                     console.error("Feather Icons (feather object) still not defined in tryInitializeFeatherIcons. Check script loading order.");
+                 }
+             }, 150); // Aumentar ligeramente el delay si es necesario
+        }
+
+
+        function getUserName(usuario_id) {
+            if (!allUsers) return `ID ${usuario_id}`;
+            const user = allUsers.find(u => u.numeroId == usuario_id); // Comparar como string
+            return user ? `${user.primerNombre || ''} ${user.primerApellido || ''}`.trim() : `ID ${usuario_id}`;
+        }
+
+        function getCompanyName(empresa_nit) {
+            const company = allCompanies.find(c => c.nit == empresa_nit); // Comparar como string
+            return company ? company.nombre_empresa : `NIT ${empresa_nit}`;
+        }
+
+        // --- Carga de Datos Iniciales (Empresas y Usuarios) ---
+        async function loadInitialData() {
+             const loader = document.querySelector('.loader-bg');
+             if (loader) loader.style.display = 'flex';
+             showMessage('Cargando datos iniciales...', 'info');
+
+             try {
+                 // FIX: Revert to simple relative paths for fetch
+                 const [compRes, userRes] = await Promise.all([
+                     fetch(`${API_URL}/empresas`, { credentials: 'include' }),
+                     // Cargar todos los usuarios una vez
+                     allUsers === null ? fetch(`${API_URL}/usuarios`, { credentials: 'include' }) : Promise.resolve(null)
+                 ]);
+
+                 if (!compRes.ok) throw new Error(`Error ${compRes.status} cargando empresas`);
+                 allCompanies = await compRes.json();
+
+                 if (userRes && !userRes.ok) throw new Error(`Error ${userRes.status} cargando usuarios`);
+                 if (userRes) {
+                     allUsers = await userRes.json();
+                     console.log(`Usuarios cargados: ${allUsers.length}`);
+                 } else {
+                     console.log(`Usuarios ya estaban en memoria: ${allUsers ? allUsers.length : 0}`);
+                 }
+
+
+                 populateCompanySelects(); // Poblar selects de empresa
+                 showMessage('Datos iniciales cargados.', 'success');
+
+             } catch (error) {
+                 console.error('Error cargando datos iniciales:', error);
+                 showMessage(`Error al cargar datos: ${error.message}. Funcionalidad limitada.`, 'danger');
+                 allUsers = []; // Evitar errores si falló la carga
+                 // Reset selects if loading failed
+                 const filtroSelect = document.getElementById('filtroEmpresa');
+                 const modalSelect = document.getElementById('modalEmpresa');
+                 if (filtroSelect) filtroSelect.innerHTML = '<option value="">Error al cargar</option>';
+                 if (modalSelect) modalSelect.innerHTML = '<option value="">Error al cargar</option>';
+             } finally {
+                 if (loader) loader.style.display = 'none';
+             }
+        }
+
+        // --- Poblar Selects de Empresa ---
+        function populateCompanySelects() {
+            const filtroSelect = document.getElementById('filtroEmpresa');
+            const modalSelect = document.getElementById('modalEmpresa');
+
+            if (filtroSelect) {
+                filtroSelect.innerHTML = '<option value="">Todas las Empresas</option>';
+                allCompanies.forEach(emp => filtroSelect.add(new Option(emp.nombre_empresa, emp.nit)));
+            }
+            if (modalSelect) {
+                modalSelect.innerHTML = '<option value="">Seleccione la Empresa...</option>';
+                allCompanies.forEach(emp => modalSelect.add(new Option(emp.nombre_empresa, emp.nit)));
+            }
+        }
+
+        // --- Poblar Select de Usuarios (Modal) al cambiar Empresa ---
+        function populateUserSelect(selectedNit) {
+            const modalUsuarioSelect = document.getElementById('modalUsuario');
+            if (!modalUsuarioSelect) return;
+            // Handle case where allUsers might not be loaded yet
+            if (!allUsers) {
+                modalUsuarioSelect.innerHTML = '<option value="">Error al cargar usuarios</option>';
+                modalUsuarioSelect.disabled = true;
+                return;
+            }
+
+
+            modalUsuarioSelect.innerHTML = '<option value="">Cargando usuarios...</option>';
+            modalUsuarioSelect.disabled = true;
+
+            const usuariosDeEmpresa = allUsers.filter(u => u.empresa_nit == selectedNit); // Comparar como string
+
+            modalUsuarioSelect.innerHTML = '<option value="">Seleccione un usuario...</option>';
+            if (usuariosDeEmpresa.length > 0) {
+                 usuariosDeEmpresa.forEach(u => {
+                     modalUsuarioSelect.add(new Option(`${u.primerNombre || ''} ${u.primerApellido || ''} (${u.numeroId})`, u.numeroId)); // Usar numeroId como value
+                 });
+                 modalUsuarioSelect.disabled = false;
+            } else {
+                 modalUsuarioSelect.innerHTML = '<option value="">No hay usuarios para esta empresa</option>';
+                 modalUsuarioSelect.disabled = true;
+            }
+        }
+
+
+        // --- Renderizar Tabla de Incapacidades ---
+        function renderTable(data) {
+            const tbody = document.getElementById('tablaIncapacidades').querySelector('tbody');
+            tbody.innerHTML = ''; // Limpiar tabla
+            currentIncapacidades = data; // Guardar datos actuales
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No se encontraron incapacidades con los filtros aplicados.</td></tr>';
+                return;
+            }
+
+            data.forEach(inc => {
+                const statusClass = `badge badge-status-${inc.estado.toLowerCase().replace(' ', '-')}`;
+                // Intenta parsear archivos_info, si falla o es null/undefined, usa 0
+                let fileCount = 0;
+                try {
+                    // Check if archivos_info is a string before parsing
+                    if (typeof inc.archivos_info === 'string') {
+                        const files = JSON.parse(inc.archivos_info || '[]');
+                        fileCount = Array.isArray(files) ? files.length : 0;
+                    } else if (Array.isArray(inc.archivos_info)) {
+                        // Handle case where it might already be an array (though unlikely from DB)
+                        fileCount = inc.archivos_info.length;
+                    }
+                } catch (e) {
+                    console.warn("Could not parse archivos_info:", inc.archivos_info, e);
+                    fileCount = 0; // Default a 0 si hay error de parseo
+                }
+
+
+                const row = `
+                    <tr data-id="${inc.id}">
+                        <td>${inc.id}</td>
+                        <td>${getCompanyName(inc.empresa_nit)}</td>
+                        <td>${getUserName(inc.usuario_id)}</td>
+                        <td>${inc.usuario_id || 'N/A'}</td>
+                        <td>${inc.diagnostico || 'N/A'}</td>
+                        <td>${inc.fecha_inicio || 'N/A'}</td>
+                        <td>${inc.fecha_fin || 'N/A'}</td>
+                        <td><span class="${statusClass}">${inc.estado || 'N/A'}</span></td>
+                        <td>${fileCount}</td>
+                        <td>
+                            <button class="btn btn-sm btn-icon btn-outline-info btn-view" title="Ver Detalle (próximamente)"><i data-feather="eye"></i></button>
+                            ${inc.estado !== 'Rechazada' ? `<button class="btn btn-sm btn-icon btn-outline-danger btn-reject" title="Rechazar"><i data-feather="x-circle"></i></button>` : ''}
+                            ${inc.estado === 'En Proceso' ? `<button class="btn btn-sm btn-icon btn-outline-success btn-pay" title="Marcar como Pagada"><i data-feather="check-circle"></i></button>` : ''}
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+            tryInitializeFeatherIcons(); // FIX: Call the robust function
+        }
+
+        // --- Cargar Incapacidades desde API (con filtros) ---
+        async function loadIncapacidades() {
+            toggleSpinner('btnAplicarFiltros', true);
+            const tbody = document.getElementById('tablaIncapacidades').querySelector('tbody');
+            tbody.innerHTML = '<tr class="loading-placeholder"><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm"></span> Cargando...</td></tr>';
+
+            // Construir parámetros de URL para filtros
+            const params = new URLSearchParams();
+            const empresa = document.getElementById('filtroEmpresa').value;
+            const usuarioId = document.getElementById('filtroIDUsuario').value.trim();
+            const estado = document.getElementById('filtroEstado').value;
+            const fecha = document.getElementById('filtroFecha').value;
+
+            if (empresa) params.append('empresa_nit', empresa);
+            if (usuarioId) params.append('usuario_id', usuarioId);
+            if (estado) params.append('estado', estado);
+            if (fecha) params.append('fecha_inicio', fecha);
+
+            try {
+                // FIX: Revert to relative URL
+                const response = await fetch(`${API_URL}/incapacidades?${params.toString()}`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`Error ${response.status} al cargar incapacidades.`);
+                const data = await response.json();
+                renderTable(data);
+                showMessage(`Mostrando ${data.length} incapacidades.`, 'success');
+            } catch (error) {
+                 console.error("Error al cargar incapacidades:", error);
+                 tbody.innerHTML = `<tr class="error-placeholder"><td colspan="10" class="text-center">Error al cargar datos: ${error.message}</td></tr>`;
+                 showMessage(`Error al cargar incapacidades: ${error.message}`, 'danger');
+            } finally {
+                 toggleSpinner('btnAplicarFiltros', false);
+            }
+        }
+
+        // --- Registrar Nueva Incapacidad ---
+        async function registerIncapacidad(event) {
+            event.preventDefault();
+            const form = document.getElementById('formIncapacidad');
+            const modalElement = document.getElementById('agregarIncapacidadModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+
+
+            // Validar fechas
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            if (fechaInicio && fechaFin && new Date(fechaFin) < new Date(fechaInicio)) {
+                 showMessage('La fecha de fin no puede ser anterior a la fecha de inicio.', 'warning');
+                 return;
+            }
+
+            toggleSpinner('btnRegistrar', true);
+            showMessage('Registrando incapacidad...', 'info');
+
+            const formData = new FormData(form);
+
+            try {
+                // FIX: Revert to relative URL
+                const response = await fetch(`${API_URL}/incapacidades`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
+                
+                let successMessage = `✅ Incapacidad ${result.id} registrada con éxito.`;
+                if (result.mensaje_advertencia) {
+                    successMessage += ` Advertencia: ${result.mensaje_advertencia}`;
+                }
+
+                showMessage(successMessage, 'success');
+                form.reset();
+                 // FIX: Ensure modal instance exists before hiding
+                 if (modal) {
+                     modal.hide();
+                 } else if (modalElement) {
+                     // Fallback if getInstance failed but element exists
+                     new bootstrap.Modal(modalElement).hide();
+                 }
+                loadIncapacidades(); // Recargar tabla
+
+            } catch (error) {
+                 console.error("Error al registrar incapacidad:", error);
+                 showMessage(`❌ Error al registrar: ${error.message}`, 'danger');
+            } finally {
+                 toggleSpinner('btnRegistrar', false);
+            }
+        }
+
+        // --- Actualizar Estado de Incapacidad ---
+        async function updateIncapacidadStatus(id, newStatus) {
+            const confirmationText = newStatus === 'Pagada'
+                ? `¿Marcar la incapacidad ${id} como PAGADA?`
+                : `¿Marcar la incapacidad ${id} como RECHAZADA?`;
+
+            if (!confirm(confirmationText)) return;
+
+            showMessage(`Actualizando estado de incapacidad ${id}...`, 'info');
+
+            try {
+                 // FIX: Revert to relative URL
+                 const response = await fetch(`${API_URL}/incapacidades/${id}`, {
+                     method: 'PUT',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ estado: newStatus }),
+                     credentials: 'include'
+                 });
+                 const result = await response.json();
+                 if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
+
+                 showMessage(`✅ Estado de incapacidad ${id} actualizado a ${newStatus}.`, 'success');
+                 loadIncapacidades(); // Recargar tabla para reflejar el cambio
+
+            } catch (error) {
+                 console.error(`Error actualizando estado a ${newStatus}:`, error);
+                 showMessage(`❌ Error al actualizar estado: ${error.message}`, 'danger');
+            }
+        }
+
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', async () => {
+             await loadInitialData(); // Cargar empresas y usuarios primero
+             loadIncapacidades(); // Cargar la tabla inicial
+
+             // Listeners de filtros
+             document.getElementById('btnAplicarFiltros').addEventListener('click', loadIncapacidades);
+             document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
+                 document.getElementById('formFiltros').reset();
+                 loadIncapacidades();
+             });
+
+             // Listener para cambio de empresa en modal
+             const modalEmpresaSelect = document.getElementById('modalEmpresa');
+             if (modalEmpresaSelect) {
+                 modalEmpresaSelect.addEventListener('change', (e) => {
+                     populateUserSelect(e.target.value);
+                 });
+             }
+
+             // Listener para submit del formulario modal
+             const formIncapacidad = document.getElementById('formIncapacidad');
+             if (formIncapacidad) {
+                 formIncapacidad.addEventListener('submit', registerIncapacidad);
+             }
+
+             // Listener para acciones en la tabla (delegación de eventos)
+             const tablaTbody = document.getElementById('tablaIncapacidades').querySelector('tbody');
+             tablaTbody.addEventListener('click', (e) => {
+                 const target = e.target.closest('button');
+                 if (!target) return;
+
+                 const row = target.closest('tr');
+                 const id = row ? row.dataset.id : null;
+                 if (!id) return;
+
+                 if (target.classList.contains('btn-view')) {
+                     // Lógica para ver detalle (puede ser un modal nuevo)
+                     const incapacidad = currentIncapacidades.find(inc => inc.id == id); // Comparar como string/número
+                     if (incapacidad) {
+                          // Por ahora, solo log, reemplazar con modal
+                          console.log("Detalle:", incapacidad);
+                          // Intenta parsear archivos_info para mostrar en el log
+                          let fileNames = "No hay archivos o error al leer.";
+                          try {
+                              // FIX: Handle parsing non-string or invalid JSON
+                              if (typeof incapacidad.archivos_info === 'string') {
+                                 const files = JSON.parse(incapacidad.archivos_info || '[]');
+                                 if (Array.isArray(files) && files.length > 0) {
+                                     fileNames = files.join(', ');
+                                 } else if (Array.isArray(files) && files.length === 0) {
+                                     fileNames = "Ninguno adjunto.";
+                                 }
+                              } else if (Array.isArray(incapacidad.archivos_info)) {
+                                  fileNames = incapacidad.archivos_info.length > 0 ? incapacidad.archivos_info.join(', ') : "Ninguno adjunto.";
+                              }
+                          } catch(e) { /* Mantener mensaje de error */ console.warn("Error parsing files for log:", e); }
+                          console.log("Archivos:", fileNames);
+                          showMessage(`Detalles de Incapacidad ${id} mostrados en consola. Archivos: ${fileNames}. (Implementar modal)`, 'info');
+                     }
+                 } else if (target.classList.contains('btn-reject')) {
+                     updateIncapacidadStatus(id, 'Rechazada');
+                 } else if (target.classList.contains('btn-pay')) {
+                     updateIncapacidadStatus(id, 'Pagada');
+                 }
+             });
+
+             // Scripts de configuración de tema
+             tryInitializeFeatherIcons(); // FIX: Call the robust function
+             if (typeof layout_change === 'function') layout_change('false');
+             if (typeof layout_theme_sidebar_change === 'function') layout_theme_sidebar_change('dark');
+             if (typeof change_box_container === 'function') change_box_container('false');
+             if (typeof layout_caption_change === 'function') layout_caption_change('true');
+             if (typeof layout_rtl_change === 'function') layout_rtl_change('false');
+             if (typeof preset_change === 'function') preset_change('preset-1');
+             if (typeof main_layout_change === 'function') main_layout_change('vertical');
+
+             // FIX: Call Feather Icons again after everything else is likely done
+             tryInitializeFeatherIcons();
+        });
+    </script>
+
+  </body>
+</html>

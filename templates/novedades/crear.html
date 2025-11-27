@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <title>Crear Nueva Novedad | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+        .form-section-header {
+            background-color: #f0f4f8;
+            padding: 12px 15px;
+            border-left: 4px solid #4680ff;
+            margin-top: 25px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="/novedades">Novedades</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Nueva Novedad</li>
+                    </ul>
+                    <div class="page-header-title">
+                        <h5 class="mb-0">Registrar Nueva Novedad</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="newCaseFeedbackMessage" class="mb-3"></div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i data-feather="file-plus" class="w-5 h-5 inline mr-2"></i>Información de la Novedad</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="newCaseForm" class="form-standarized">
+                                <input type="hidden" id="editCaseIndex" value="">
+
+                                <!-- Información Básica del Caso -->
+                                <h6 class="form-section-header">Información Básica del Caso</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label for="client" class="form-label">Empresa / Cliente <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="client" name="client" list="empresasDataList" placeholder="Escriba o seleccione la empresa" required>
+                                        <datalist id="empresasDataList"></datalist>
+                                        <div class="invalid-feedback">Este campo es obligatorio.</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="clientNit" class="form-label">NIT (Opcional)</label>
+                                        <input type="text" class="form-control" id="clientNit" name="clientNit" placeholder="NIT (si aplica)">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="subject" class="form-label">Asunto / Tipo Novedad <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="subject" name="subject" placeholder="Ej: Error en pago, Solicitud afiliación" required>
+                                        <div class="invalid-feedback">Este campo es obligatorio.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="priority" class="form-label">Prioridad <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="priority" name="priority" required>
+                                            <option value="baja" selected>Baja</option>
+                                            <option value="media">Media</option>
+                                            <option value="alta">Alta</option>
+                                            <option value="critica">Crítica</option>
+                                        </select>
+                                        <div class="invalid-feedback">Seleccione una prioridad.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="status" class="form-label">Estado <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="status" name="status" required>
+                                            <option value="Nuevo" selected>Nuevo</option>
+                                            <option value="En Progreso">En Progreso</option>
+                                            <option value="Pendiente">Pendiente</option>
+                                            <option value="Resuelto">Resuelto</option>
+                                        </select>
+                                        <div class="invalid-feedback">Seleccione un estado.</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="description" class="form-label">Descripción Detallada <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="description" name="description" rows="4" placeholder="Describa la novedad o solicitud..." required minlength="10" maxlength="5000"></textarea>
+                                        <div class="invalid-feedback">Este campo es obligatorio (mínimo 10 caracteres).</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="radicado" class="form-label">Número Radicado (Opcional)</label>
+                                        <input type="text" class="form-control" id="radicado" name="radicado" placeholder="Si aplica">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="assignedTo" class="form-label">Asignado A</label>
+                                        <input type="text" class="form-control" id="assignedTo" name="assignedTo" value="Sistema">
+                                    </div>
+                                </div>
+
+                                <!-- Datos del Usuario Afectado -->
+                                <h6 class="form-section-header">Datos del Usuario Afectado (Opcional)</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="idType" class="form-label">Tipo ID</label>
+                                        <select class="form-select" id="idType" name="idType">
+                                            <option value="">Seleccione...</option>
+                                            <option value="CC">Cédula Ciudadanía</option>
+                                            <option value="CE">Cédula Extranjería</option>
+                                            <option value="PA">Pasaporte</option>
+                                            <option value="TI">Tarjeta Identidad</option>
+                                            <option value="PT">Permiso Temporal</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="idNumber" class="form-label">Número ID (Presione Enter/Tab)</label>
+                                        <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="Buscará y autocompletará datos">
+                                        <div class="invalid-feedback">Usuario no encontrado.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="firstName" class="form-label">Nombres</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="lastName" class="form-label">Apellidos</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="nationality" class="form-label">Nacionalidad</label>
+                                        <input type="text" class="form-control" id="nationality" name="nationality" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="gender" class="form-label">Género</label>
+                                        <input type="text" class="form-control" id="gender" name="gender" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="birthDate" class="form-label">Fecha Nacimiento</label>
+                                        <input type="date" class="form-control" id="birthDate" name="birthDate" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label">Teléfono</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="department" class="form-label">Departamento</label>
+                                        <input type="text" class="form-control" id="department" name="department" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="city" class="form-label">Ciudad</label>
+                                        <input type="text" class="form-control" id="city" name="city" readonly>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="address" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="address" name="address" readonly>
+                                    </div>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div class="mt-4 d-flex justify-content-between gap-2">
+                                    <a href="/novedades" class="btn btn-secondary">
+                                        <i data-feather="x" class="w-4 h-4 inline mr-1"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="submitButton">
+                                        <i data-feather="save" class="w-4 h-4 inline mr-1"></i> Guardar Novedad
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <!-- Scripts de Novedades (reutilizando lógica existente) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/novedades-config.js"></script>
+    <script src="/assets/js/novedades-api.js"></script>
+    <script src="/assets/js/novedades-autocomplete.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+
+            // Reutilizar funcionalidad de autocompletado y guardado
+            // (Los scripts novedades-api.js y novedades-autocomplete.js ya manejan esto)
+
+            const form = document.getElementById('newCaseForm');
+            const submitButton = document.getElementById('submitButton');
+            const feedbackDiv = document.getElementById('newCaseFeedbackMessage');
+
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+
+                    try {
+                        // Aquí va la lógica de guardado que ya existe en novedades-api.js
+                        // o puedes implementarla directamente aquí
+
+                        // Redirigir después de guardar
+                        setTimeout(() => {
+                            window.location.href = '/novedades';
+                        }, 1500);
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        feedbackDiv.innerHTML = '<div class="alert alert-danger">Error al guardar la novedad</div>';
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i data-feather="save" class="w-4 h-4 inline mr-1"></i> Guardar Novedad';
+                        feather.replace();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

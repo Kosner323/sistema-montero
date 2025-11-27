@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Vinculación Laboral - {{ usuario.primerNombre }} {{ usuario.primerApellido }} | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+  <link rel="stylesheet" href="/assets/css/style-preset.css" />
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 0;
+    }
+    .form-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .card-header-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px 10px 0 0 !important;
+      padding: 1.5rem;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    .section-title {
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.5rem;
+      color: #667eea;
+      font-weight: 600;
+    }
+    .btn-guardar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-guardar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .info-badge {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 1rem;
+      border-radius: 5px;
+      margin-bottom: 1.5rem;
+    }
+    .readonly-field {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="form-container">
+    <!-- Card Principal -->
+    <div class="card shadow-lg">
+      
+      <!-- Header -->
+      <div class="card-header-custom">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-1">
+              <i class="feather icon-link me-2"></i>
+              Gestión de Vinculación Laboral
+            </h3>
+            <p class="mb-0 opacity-75">
+              <i class="feather icon-user me-1"></i>
+              {{ usuario.primerNombre }} {{ usuario.segundoNombre or '' }} {{ usuario.primerApellido }} {{ usuario.segundoApellido or '' }}
+            </p>
+          </div>
+          <button type="button" class="btn btn-light btn-sm" onclick="window.close()">
+            <i class="feather icon-x me-1"></i>Cerrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body p-4">
+        
+        <!-- Info Badge -->
+        <div class="info-badge">
+          <i class="feather icon-info me-2"></i>
+          <strong>Importante:</strong> Los cambios realizados afectarán inmediatamente la vinculación laboral del empleado en el sistema.
+        </div>
+
+        <!-- Formulario -->
+        <form id="formVinculacion">
+          <!-- Campo oculto para ID -->
+          <input type="hidden" id="userId" value="{{ usuario.id }}">
+
+          <div class="row">
+            
+            <!-- ========== COLUMNA IZQUIERDA: DATOS PERSONALES ========== -->
+            <div class="col-md-6">
+              <h5 class="section-title">
+                <i class="feather icon-user me-2"></i>Datos Personales
+              </h5>
+
+              <!-- Primer Nombre -->
+              <div class="mb-3">
+                <label for="primerNombre" class="form-label">
+                  Primer Nombre <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="primerNombre" 
+                  value="{{ usuario.primerNombre }}" 
+                  required
+                >
+              </div>
+
+              <!-- Segundo Nombre -->
+              <div class="mb-3">
+                <label for="segundoNombre" class="form-label">
+                  Segundo Nombre
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="segundoNombre" 
+                  value="{{ usuario.segundoNombre or '' }}"
+                >
+              </div>
+
+              <!-- Primer Apellido -->
+              <div class="mb-3">
+                <label for="primerApellido" class="form-label">
+                  Primer Apellido <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="primerApellido" 
+                  value="{{ usuario.primerApellido }}" 
+                  required
+                >
+              </div>
+
+              <!-- Segundo Apellido -->
+              <div class="mb-3">
+                <label for="segundoApellido" class="form-label">
+                  Segundo Apellido
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="segundoApellido" 
+                  value="{{ usuario.segundoApellido or '' }}"
+                >
+              </div>
+
+              <!-- Número de Identificación -->
+              <div class="mb-3">
+                <label for="numeroId" class="form-label">
+                  Número de Identificación <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  class="form-control readonly-field" 
+                  id="numeroId" 
+                  value="{{ usuario.numeroId }}" 
+                  readonly
+                >
+                <small class="text-muted">
+                  <i class="feather icon-lock me-1" style="font-size: 0.7rem;"></i>
+                  Campo de solo lectura
+                </small>
+              </div>
+
+              <!-- Correo Electrónico -->
+              <div class="mb-3">
+                <label for="correoElectronico" class="form-label">
+                  Correo Electrónico <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  id="correoElectronico" 
+                  value="{{ usuario.correoElectronico or '' }}" 
+                  required
+                >
+              </div>
+            </div>
+
+            <!-- ========== COLUMNA DERECHA: VINCULACIÓN LABORAL ========== -->
+            <div class="col-md-6">
+              <h5 class="section-title">
+                <i class="feather icon-briefcase me-2"></i>Vinculación Laboral
+              </h5>
+
+              <!-- Empresa -->
+              <div class="mb-3">
+                <label for="empresaNit" class="form-label">
+                  Empresa <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="empresaNit" required>
+                  <option value="">🚫 Sin Empresa (Desvinculado)</option>
+                  {% for empresa in empresas %}
+                  <option value="{{ empresa.nit }}" {% if usuario.empresa_nit == empresa.nit %}selected{% endif %}>
+                    {{ empresa.nombre_empresa }} - {{ empresa.nit }}
+                  </option>
+                  {% endfor %}
+                </select>
+                <small class="text-muted">
+                  <i class="feather icon-info me-1" style="font-size: 0.7rem;"></i>
+                  Seleccione "Sin Empresa" para desvincular al empleado
+                </small>
+              </div>
+
+              <!-- Estado Actual -->
+              <div class="mb-3">
+                <label class="form-label d-block">
+                  Estado Actual
+                </label>
+                <div class="alert alert-{{ 'success' if usuario.empresa_nit else 'warning' }} py-2 mb-3">
+                  <i class="feather icon-{{ 'check-circle' if usuario.empresa_nit else 'alert-circle' }} me-2"></i>
+                  <strong>
+                    {% if usuario.empresa_nit %}
+                      VINCULADO - {{ usuario.nombre_empresa }}
+                    {% else %}
+                      DESVINCULADO - Sin empresa asignada
+                    {% endif %}
+                  </strong>
+                </div>
+              </div>
+
+              <!-- Estado del Empleado -->
+              <div class="mb-3">
+                <label for="estado" class="form-label">
+                  Estado del Empleado <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="estado" required>
+                  <option value="activo" {% if usuario.estado == 'activo' %}selected{% endif %}>
+                    ✅ Activo
+                  </option>
+                  <option value="inactivo" {% if usuario.estado == 'inactivo' %}selected{% endif %}>
+                    ❌ Inactivo
+                  </option>
+                  <option value="suspendido">
+                    ⏸️ Suspendido
+                  </option>
+                  <option value="retirado">
+                    🚪 Retirado
+                  </option>
+                </select>
+              </div>
+
+              <!-- Rol -->
+              <div class="mb-3">
+                <label for="role" class="form-label">
+                  Rol / Cargo <span class="text-danger">*</span>
+                </label>
+                <select class="form-select" id="role" required>
+                  <option value="empleado" {% if usuario.role == 'empleado' %}selected{% endif %}>
+                    👤 Empleado
+                  </option>
+                  <option value="afiliado" {% if usuario.role == 'afiliado' %}selected{% endif %}>
+                    🏢 Afiliado
+                  </option>
+                  <option value="operativo" {% if usuario.role == 'operativo' %}selected{% endif %}>
+                    ⚙️ Operativo
+                  </option>
+                  <option value="contratista" {% if usuario.role == 'contratista' %}selected{% endif %}>
+                    📋 Contratista
+                  </option>
+                  <option value="practicante" {% if usuario.role == 'practicante' %}selected{% endif %}>
+                    🎓 Practicante
+                  </option>
+                </select>
+              </div>
+
+              <!-- Información Adicional -->
+              <div class="alert alert-light border">
+                <h6 class="alert-heading mb-2">
+                  <i class="feather icon-info me-2"></i>Información Adicional
+                </h6>
+                <small class="text-muted">
+                  <strong>ID Usuario:</strong> {{ usuario.id }}<br>
+                  <strong>Documento:</strong> {{ usuario.numeroId }}
+                </small>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="row mt-4">
+            <div class="col-12">
+              <hr class="mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-secondary" onclick="window.close()">
+                  <i class="feather icon-x me-2"></i>Cancelar y Cerrar
+                </button>
+                <button type="submit" class="btn btn-primary btn-guardar">
+                  <i class="feather icon-save me-2"></i>Guardar Cambios
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/plugins/feather.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // Inicializar iconos Feather
+    if (typeof feather !== 'undefined') {
+      feather.replace();
+    }
+
+    // Manejar envío del formulario
+    document.getElementById('formVinculacion').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Obtener valores del formulario
+      const userId = document.getElementById('userId').value;
+      const primerNombre = document.getElementById('primerNombre').value.trim();
+      const segundoNombre = document.getElementById('segundoNombre').value.trim();
+      const primerApellido = document.getElementById('primerApellido').value.trim();
+      const segundoApellido = document.getElementById('segundoApellido').value.trim();
+      const numeroId = document.getElementById('numeroId').value.trim();
+      const correoElectronico = document.getElementById('correoElectronico').value.trim();
+      const empresaNit = document.getElementById('empresaNit').value;
+      const estado = document.getElementById('estado').value;
+      const role = document.getElementById('role').value;
+
+      // Validación básica
+      if (!primerNombre || !primerApellido || !correoElectronico || !estado || !role) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos Incompletos',
+          text: 'Por favor, complete todos los campos obligatorios.',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      // Validar email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correoElectronico)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Email Inválido',
+          text: 'Por favor, ingrese un correo electrónico válido.',
+          confirmButtonText: 'OK'
+        });
+        return;
+      }
+
+      // Determinar nombre de empresa para confirmación
+      const selectEmpresa = document.getElementById('empresaNit');
+      const nombreEmpresa = selectEmpresa.options[selectEmpresa.selectedIndex].text;
+
+      // Confirmar cambios
+      const confirmResult = await Swal.fire({
+        title: '¿Confirmar Vinculación?',
+        html: `
+          <div class="text-start">
+            <h6 class="border-bottom pb-2 mb-3">Datos Personales</h6>
+            <p class="mb-1"><strong>Nombre Completo:</strong> ${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}</p>
+            <p class="mb-1"><strong>Documento:</strong> ${numeroId}</p>
+            <p class="mb-3"><strong>Email:</strong> ${correoElectronico}</p>
+            
+            <h6 class="border-bottom pb-2 mb-3">Vinculación Laboral</h6>
+            <p class="mb-1"><strong>Empresa:</strong> <span class="badge bg-${empresaNit ? 'success' : 'warning'}">${nombreEmpresa}</span></p>
+            <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-${estado === 'activo' ? 'success' : 'danger'}">${estado.toUpperCase()}</span></p>
+            <p class="mb-1"><strong>Rol:</strong> <span class="badge bg-info">${role.toUpperCase()}</span></p>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '✅ Confirmar y Guardar',
+        cancelButtonText: '❌ Cancelar',
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#6c757d',
+        width: '600px'
+      });
+
+      if (!confirmResult.isConfirmed) {
+        return;
+      }
+
+      // Preparar payload
+      const payload = {
+        user_id: parseInt(userId),
+        primerNombre: primerNombre,
+        primerApellido: primerApellido,
+        numeroId: numeroId,
+        correoElectronico: correoElectronico,
+        role: role,
+        estado: estado,
+        empresa_nit: empresaNit || ""
+      };
+
+      // Mostrar loading
+      Swal.fire({
+        title: 'Guardando...',
+        html: '<div class="spinner-border text-primary mb-3"></div><p>Actualizando vinculación laboral...</p>',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        // Enviar petición PUT
+        const response = await fetch('/api/unificacion/update_vinculacion', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || `Error HTTP ${response.status}`);
+        }
+
+        // Éxito
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Vinculación Actualizada!',
+          html: `
+            <p class="mb-3">${data.message}</p>
+            <p class="text-muted small">Los cambios han sido guardados correctamente en el sistema.</p>
+          `,
+          confirmButtonText: 'Cerrar Pestaña',
+          confirmButtonColor: '#667eea',
+          showCancelButton: true,
+          cancelButtonText: 'Mantener Abierto',
+          cancelButtonColor: '#6c757d'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.close();
+          }
+        });
+
+      } catch (error) {
+        console.error('Error al guardar:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al Guardar',
+          html: `
+            <p>No se pudo actualizar la vinculación laboral.</p>
+            <p class="text-muted small">${error.message}</p>
+          `,
+          confirmButtonText: 'Cerrar',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  </script>
+</body>
+</html>

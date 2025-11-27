@@ -1,0 +1,514 @@
+﻿<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Usuarios y Contraseñas | Montero y Negocio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Gestión de credenciales de plataformas para empresas." />
+    <meta name="author" content="Montero y Negocio" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+      /* --- CSS CORREGIDO PARA CENTRADO EXPLÍCITO --- */
+      #modalNuevoRegistro .modal-dialog {
+          max-width: 700px; /* Ancho deseado del modal */
+          margin-left: auto;  /* Fuerza el centrado horizontal */
+          margin-right: auto; /* Fuerza el centrado horizontal */
+          margin-top: 50px;   /* Mantiene el margen superior */
+          margin-bottom: 50px;/* Mantiene el margen inferior */
+          /* 'transform: none;' ya no es necesario aquí */
+      }
+      /* --- Fin Corrección --- */
+
+      .password-cell {
+          position: relative;
+      }
+      .btn-show-password {
+          position: absolute;
+          right: 5px;
+          top: 50%;
+          transform: translateY(-50%);
+          padding: 0.1rem 0.3rem;
+          line-height: 1;
+      }
+       /* Estilo para feedback */
+      #feedbackMessage {
+          margin-bottom: 1rem;
+      }
+    </style>
+
+    </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+{% include '_sidebar.html' %}
+
+{% include '_header.html' %}
+<main class="pc-container h-full">
+    <div class="pc-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="grid grid-cols-12">
+                    <div class="col-span-12">
+                        <ul class="breadcrumb flex flex-wrap items-center pt-2 gap-2 text-sm text-gray-500 dark:text-gray-300">
+                            <li class="breadcrumb-item">
+                                <a href="/dashboard">Home</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="javascript: void(0)">Guías y Acceso</a>
+                            </li>
+                            <li class="breadcrumb-item" aria-current="page">
+                                Usuarios y Contraseñas de Plataforma
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-span-12">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center mb-0">
+                                <h1 class="page-header-title text-2xl font-semibold">
+                                    Usuarios y Contraseñas de Plataforma
+                                </h1>
+                            </div>
+                            <div class="flex items-center mb-0">
+                                <div class="dropdown ml-4">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="empresaFilterButton">
+                                        <i class="ti ti-building mr-2"></i></button>
+                                    <ul class="dropdown-menu" id="empresaDropdownMenu">
+                                        </ul>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary ml-4" data-bs-toggle="modal" data-bs-target="#modalNuevoRegistro">
+                                    <i class="ti ti-plus mr-2"></i>Añadir Nuevo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-12">
+            <div class="col-span-12">
+                 <div id="feedbackMessage"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Acceso a Plataformas <span id="empresaFiltradaNombre" class="text-primary-500"></span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Empresa</th>
+                                        <th>Plataforma</th>
+                                        <th>URL de Acceso</th>
+                                        <th>Usuario</th>
+                                        <th>Contraseña</th>
+                                        <th>Notas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="credencialesTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+</main>
+
+<div class="modal fade" id="modalNuevoRegistro" tabindex="-1" aria-labelledby="modalNuevoRegistroLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNuevoRegistroLabel">Registrar Nueva Credencial de Plataforma</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                 <div id="modalFeedbackMessage"></div>
+                <form id="formNuevaCredencial">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12">
+                             <label for="modalSelectEmpresa" class="form-label">Empresa Asociada</label>
+                             <select class="form-select" id="modalSelectEmpresa" name="empresa_nit" required>
+                                 <option value="" selected disabled>Seleccione una empresa...</option>
+                                 </select>
+                         </div>
+                         <hr class="col-span-12 my-2"/>
+
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="inputPlataforma" class="form-label">Nombre de la Plataforma</label>
+                            <input type="text" class="form-control" id="inputPlataforma" name="plataforma" required>
+                        </div>
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="inputURL" class="form-label">URL de Acceso (Link)</label>
+                            <input type="url" class="form-control" id="inputURL" name="url" placeholder="https://..." required>
+                        </div>
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="inputUsuario" class="form-label">Nombre de Usuario / NIT</label>
+                            <input type="text" class="form-control" id="inputUsuario" name="usuario" required>
+                        </div>
+                        <div class="col-span-12 md:col-span-6">
+                            <label for="inputContrasena" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="inputContrasena" name="contrasena" required>
+                            <div class="form-check mt-1">
+                                <input class="form-check-input" type="checkbox" value="" id="checkMostrarContrasena">
+                                <label class="form-check-label text-xs" for="checkMostrarContrasena">
+                                    Mostrar Contraseña temporalmente
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-span-12">
+                            <label for="inputNotas" class="form-label">Notas Adicionales (Token, Vencimiento, Contacto)</label>
+                            <textarea class="form-control" id="inputNotas" name="notas" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formNuevaCredencial" class="btn btn-primary" id="btnGuardarCredencial">
+                    <i data-feather="save" class="me-2"></i>Guardar Credencial
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {% include '_footer.html' %}
+
+    <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+    </div>
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/plugins/bootstrap.bundle.min.js"></script>
+    
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const API_URL = '/api';
+        let currentFilterNit = 'todos';
+        let companiesMap = {};
+
+        const tbody = document.getElementById('credencialesTableBody');
+        const empresaDropdown = document.getElementById('empresaDropdownMenu');
+        const modalSelectEmpresa = document.getElementById('modalSelectEmpresa');
+        const formNuevaCredencial = document.getElementById('formNuevaCredencial');
+        const modalElement = document.getElementById('modalNuevoRegistro');
+        
+        // Requiere que Bootstrap ya esté cargado.
+        const modalInstance = new bootstrap.Modal(modalElement); 
+        
+        const feedbackDiv = document.getElementById('feedbackMessage');
+        const modalFeedbackDiv = document.getElementById('modalFeedbackMessage');
+        const btnGuardarCredencial = document.getElementById('btnGuardarCredencial');
+        const empresaFilterButton = document.getElementById('empresaFilterButton');
+        const empresaFiltradaNombreSpan = document.getElementById('empresaFiltradaNombre');
+        const inputContrasena = document.getElementById('inputContrasena');
+        const checkMostrarContrasena = document.getElementById('checkMostrarContrasena');
+        
+        // --- Nuevo elemento para manejar el texto del botón de filtro (Corrección del problema previo) ---
+        let filterButtonTextNode = document.createTextNode('Consultar Empresa');
+        empresaFilterButton.appendChild(filterButtonTextNode);
+        // ------------------------------------------------------------------
+
+
+        function showMessage(message, type = 'info', container = feedbackDiv) {
+            if (container) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+                container.innerHTML = alertHtml;
+                 if(type === 'success' && container === feedbackDiv) {
+                     setTimeout(() => {
+                        const alert = container.querySelector('.alert-success');
+                        if(alert) bootstrap.Alert.getOrCreateInstance(alert).close();
+                    }, 4000);
+                }
+            } else { alert(message); }
+        }
+
+        async function loadCompanies() {
+            try {
+                const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Error al cargar empresas');
+                const empresas = await response.json();
+
+                empresaDropdown.innerHTML = '<li><h6 class="dropdown-header">Empresas Activas</h6></li>';
+                modalSelectEmpresa.innerHTML = '<option value="" selected disabled>Seleccione una empresa...</option>';
+                companiesMap = {};
+
+                empresas.forEach(emp => {
+                    if (emp.nombre_empresa && emp.nit) {
+                        companiesMap[emp.nit] = emp.nombre_empresa;
+                        empresaDropdown.insertAdjacentHTML('beforeend', `<li><a class="dropdown-item filter-empresa-item" href="#" data-nit="${emp.nit}">${emp.nombre_empresa}</a></li>`);
+                         modalSelectEmpresa.add(new Option(emp.nombre_empresa, emp.nit));
+                    }
+                });
+                empresaDropdown.insertAdjacentHTML('beforeend', '<li><hr class="dropdown-divider"></li><li><a class="dropdown-item filter-empresa-item" href="#" data-nit="todos">Ver todas...</a></li>');
+
+            } catch (error) {
+                console.error(error);
+                showMessage('Error al cargar la lista de empresas.', 'danger');
+            }
+        }
+
+        async function loadCredentials(nit = 'todos') {
+            currentFilterNit = nit;
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Cargando credenciales...</td></tr>';
+
+             // Manipular el nodo de texto sin destruir la estructura del botón
+             if (nit === 'todos') {
+                 empresaFiltradaNombreSpan.textContent = '';
+                 filterButtonTextNode.nodeValue = 'Consultar Empresa';
+             } else {
+                 empresaFiltradaNombreSpan.textContent = `de ${companiesMap[nit] || nit}`;
+                 filterButtonTextNode.nodeValue = companiesMap[nit] || nit;
+             }
+             // ---------------------------------------------------------------------------------
+
+
+            try {
+                const response = await fetch(`${API_URL}/credenciales?empresa_nit=${nit}`, { credentials: 'include' });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || 'Error al cargar credenciales');
+                }
+                const data = await response.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Error en loadCredentials:', error);
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+                showMessage(`Error al cargar credenciales: ${error.message}`, 'danger');
+            }
+        }
+
+        function renderTable(data) {
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                 const message = (currentFilterNit === 'todos')
+                    ? 'No hay credenciales registradas.'
+                    : 'No hay credenciales registradas para esta empresa.';
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">${message}</td></tr>`;
+                return;
+            }
+
+            data.forEach(cred => {
+                const row = document.createElement('tr');
+                row.dataset.id = cred.id;
+                row.innerHTML = `
+                    <td>${cred.nombre_empresa || cred.empresa_nit}</td>
+                    <td>${cred.plataforma}</td>
+                    <td><a href="${cred.url}" target="_blank" title="${cred.url}">${cred.url.length > 30 ? cred.url.substring(0, 27) + '...' : cred.url}</a></td>
+                    <td>${cred.usuario}</td>
+                    <td class="password-cell">
+                        <span class="password-mask mr-2" data-password="${cred.contrasena}">***********</span>
+                        <button type="button" class="btn btn-sm btn-icon btn-primary btn-show-password" title="Mostrar Contraseña">
+                            <i data-feather="eye" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                    <td>${cred.notas || ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-icon btn-outline-danger btn-delete" title="Eliminar"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            feather.replace();
+        }
+
+        empresaDropdown.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = e.target.closest('.filter-empresa-item');
+            if (target) {
+                const nit = target.dataset.nit;
+                loadCredentials(nit);
+            }
+        });
+
+        formNuevaCredencial.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const originalBtnHtml = btnGuardarCredencial.innerHTML;
+            btnGuardarCredencial.disabled = true;
+            btnGuardarCredencial.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Guardando...';
+            modalFeedbackDiv.innerHTML = '';
+
+            const formData = {
+                empresa_nit: modalSelectEmpresa.value,
+                plataforma: document.getElementById('inputPlataforma').value,
+                url: document.getElementById('inputURL').value,
+                usuario: document.getElementById('inputUsuario').value,
+                contrasena: inputContrasena.value,
+                notas: document.getElementById('inputNotas').value
+            };
+
+            if (!formData.empresa_nit) {
+                 showMessage('Debe seleccionar una empresa.', 'warning', modalFeedbackDiv);
+                 btnGuardarCredencial.disabled = false;
+                 btnGuardarCredencial.innerHTML = originalBtnHtml;
+                 feather.replace();
+                 return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/credenciales`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Error al guardar');
+                }
+
+                showMessage('Credencial guardada con éxito.', 'success');
+                modalInstance.hide();
+                loadCredentials(currentFilterNit);
+
+            } catch (error) {
+                console.error('Error al guardar credencial:', error);
+                showMessage(`Error al guardar: ${error.message}`, 'danger', modalFeedbackDiv);
+            } finally {
+                 btnGuardarCredencial.disabled = false;
+                 btnGuardarCredencial.innerHTML = originalBtnHtml;
+                 feather.replace();
+            }
+        });
+
+        tbody.addEventListener('click', async function(e) {
+            const showBtn = e.target.closest('.btn-show-password');
+            const deleteBtn = e.target.closest('.btn-delete');
+
+            if (showBtn) {
+                const passMask = showBtn.previousElementSibling;
+                const isMasked = passMask.textContent.includes('*');
+                if (isMasked) {
+                    passMask.textContent = passMask.dataset.password;
+                    showBtn.innerHTML = '<i data-feather="eye-off" class="w-4 h-4"></i>';
+                } else {
+                    passMask.textContent = '***********';
+                    showBtn.innerHTML = '<i data-feather="eye" class="w-4 h-4"></i>';
+                }
+                feather.replace();
+            }
+
+            if (deleteBtn) {
+                const row = deleteBtn.closest('tr');
+                const id = row.dataset.id;
+                const plataforma = row.cells[1].textContent;
+                const empresa = row.cells[0].textContent;
+
+                if (confirm(`¿Está seguro de que desea eliminar la credencial para '${plataforma}' de la empresa '${empresa}'?`)) {
+                    deleteBtn.disabled = true;
+                    try {
+                        const response = await fetch(`${API_URL}/credenciales/${id}`, {
+                            method: 'DELETE',
+                            credentials: 'include'
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.error || 'Error al eliminar');
+                        }
+
+                        showMessage('Credencial eliminada.', 'success');
+                        row.remove();
+
+                    } catch (error) {
+                         console.error('Error al eliminar:', error);
+                         showMessage(`Error al eliminar: ${error.message}`, 'danger');
+                         deleteBtn.disabled = false;
+                    }
+                }
+            }
+        });
+
+        checkMostrarContrasena.addEventListener('change', () => {
+            inputContrasena.type = checkMostrarContrasena.checked ? 'text' : 'password';
+        });
+
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            formNuevaCredencial.reset();
+            inputContrasena.type = 'password';
+            checkMostrarContrasena.checked = false;
+            modalFeedbackDiv.innerHTML = '';
+        });
+        
+         // --- Logout Logic ---
+        const logoutButtons = document.querySelectorAll('#btnLogout, #btnLogout2');
+        logoutButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+                } catch (error) {
+                    console.error('Error en logout:', error);
+                }
+                window.location.href = '/ingresoportal.html';
+            });
+        });
+
+
+        async function initializePage() {
+            // Eliminar el nodo de texto inicial del HTML si existe (para evitar duplicidad)
+            const initialText = empresaFilterButton.childNodes[1];
+            if (initialText && initialText.nodeType === 3) {
+                 empresaFilterButton.removeChild(initialText);
+            }
+            
+            await loadCompanies();
+            loadCredentials();
+        }
+
+        initializePage();
+
+        feather.replace();
+        layout_change('false');
+        layout_theme_sidebar_change('dark');
+        change_box_container('false');
+        layout_caption_change('true');
+        layout_rtl_change('false');
+        preset_change('preset-1');
+        main_layout_change('vertical');
+      });
+    </script>
+
+  </body>
+  </html>
+}
+siguiente gem

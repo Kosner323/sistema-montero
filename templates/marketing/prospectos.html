@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>CRM de Prospectos | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+    <style>
+        .stat-card {
+            border-left: 4px solid;
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .stat-card.primary { border-left-color: #4680ff; }
+        .stat-card.success { border-left-color: #2ca87f; }
+        .stat-card.warning { border-left-color: #f4bd4f; }
+        .stat-card.danger { border-left-color: #e85347; }
+
+        .icon-shape {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+        .bg-primary-light { background-color: rgba(70, 128, 255, 0.1); }
+        .bg-success-light { background-color: rgba(44, 168, 127, 0.1); }
+        .bg-warning-light { background-color: rgba(244, 189, 79, 0.1); }
+        .bg-danger-light { background-color: rgba(232, 83, 71, 0.1); }
+    </style>
+</head>
+<body>
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="page-header-title">
+                        <h5 class="mb-1">CRM de Prospectos</h5>
+                        <small class="text-muted">Gestión de Leads y Embudo de Ventas</small>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#!">Marketing</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Prospectos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <!-- KPI Cards -->
+            <div class="row mb-4">
+                <!-- Total Prospectos -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card primary">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-primary-light">
+                                    <i data-feather="users" class="text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Total Prospectos</h6>
+                                    <h3 class="mb-0" id="statTotal">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calificados -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-success-light">
+                                    <i data-feather="check-circle" class="text-success"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Calificados</h6>
+                                    <h3 class="mb-0" id="statCalificados">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descartados -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-danger-light">
+                                    <i data-feather="x-circle" class="text-danger"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Descartados</h6>
+                                    <h3 class="mb-0" id="statDescartados">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nuevos Hoy -->
+                <div class="col-xl-3 col-md-6">
+                    <div class="card stat-card warning">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-warning-light">
+                                    <i data-feather="star" class="text-warning"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0 text-muted">Nuevos Hoy</h6>
+                                    <h3 class="mb-0" id="statNuevos">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón Nuevo Prospecto -->
+            <div class="text-end mb-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoProspecto">
+                    <i data-feather="plus-circle" class="me-2"></i>
+                    Nuevo Prospecto
+                </button>
+            </div>
+
+            <!-- Tabla de Prospectos con DataTables -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="database" class="me-2"></i>
+                        Lista Maestra de Prospectos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="tablaProspectos">
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Contacto</th>
+                                    <th>Teléfono</th>
+                                    <th>Correo</th>
+                                    <th>Origen</th>
+                                    <th>Servicio</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyProspectos">
+                                <!-- Datos cargados dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Nuevo Prospecto -->
+    <div class="modal fade" id="modalNuevoProspecto" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i data-feather="plus-circle" class="me-2"></i>
+                        Registrar Nuevo Prospecto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevoProspecto">
+                        <div class="row g-3">
+                            <!-- Información de la Empresa -->
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i data-feather="briefcase" class="me-2"></i>
+                                    Información de la Empresa
+                                </h6>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="nombre_empresa" class="form-label">Nombre de la Empresa <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombre_empresa" required placeholder="Ej: Distribuidora ABC S.A.S">
+                            </div>
+
+                            <!-- Información del Contacto -->
+                            <div class="col-12 mt-4">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i data-feather="user" class="me-2"></i>
+                                    Información del Contacto Principal
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nombre_contacto" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombre_contacto" required placeholder="Ej: María González">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono_contacto" class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" id="telefono_contacto" placeholder="Ej: 3001234567">
+                            </div>
+                            <div class="col-md-12">
+                                <label for="correo_contacto" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="correo_contacto" placeholder="Ej: contacto@empresa.com">
+                            </div>
+
+                            <!-- Clasificación del Lead -->
+                            <div class="col-12 mt-4">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i data-feather="tag" class="me-2"></i>
+                                    Clasificación del Lead
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="origen" class="form-label">Origen del Lead</label>
+                                <select class="form-select" id="origen">
+                                    <option value="Web">Web</option>
+                                    <option value="Referido">Referido</option>
+                                    <option value="Llamada">Llamada</option>
+                                    <option value="Redes Sociales">Redes Sociales</option>
+                                    <option value="WhatsApp">WhatsApp</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="interes_servicio" class="form-label">Servicio de Interés</label>
+                                <select class="form-select" id="interes_servicio">
+                                    <option value="">-- Seleccionar --</option>
+                                    <option value="Nómina">Nómina</option>
+                                    <option value="Seguridad Social">Seguridad Social</option>
+                                    <option value="Contabilidad">Contabilidad</option>
+                                    <option value="Asesoría Integral">Asesoría Integral</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="notas" class="form-label">Notas / Observaciones</label>
+                                <textarea class="form-control" id="notas" rows="3" placeholder="Información adicional del prospecto..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="crearProspecto()">
+                        <i data-feather="save" class="me-1"></i>
+                        Guardar Prospecto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <script>
+        let dataTable;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            cargarEstadisticas();
+            cargarProspectos();
+        });
+
+        // ==================== ALERTAS ====================
+        function showAlert(message, type = 'success') {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i data-feather="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.getElementById('alertContainer').innerHTML = alertHtml;
+            feather.replace();
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) alert.remove();
+            }, 5000);
+        }
+
+        // ==================== CARGAR ESTADÍSTICAS ====================
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/marketing/api/prospectos', { credentials: 'include' });
+                const prospectos = await response.json();
+
+                document.getElementById('statTotal').textContent = prospectos.length;
+
+                const calificados = prospectos.filter(p => p.estado === 'Calificado').length;
+                const descartados = prospectos.filter(p => p.estado === 'Descartado').length;
+
+                // Nuevos hoy
+                const hoy = new Date().toISOString().split('T')[0];
+                const nuevosHoy = prospectos.filter(p => p.fecha_registro && p.fecha_registro.startsWith(hoy)).length;
+
+                document.getElementById('statCalificados').textContent = calificados;
+                document.getElementById('statDescartados').textContent = descartados;
+                document.getElementById('statNuevos').textContent = nuevosHoy;
+
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        // ==================== CARGAR PROSPECTOS ====================
+        async function cargarProspectos() {
+            try {
+                const response = await fetch('/marketing/api/prospectos', { credentials: 'include' });
+                const prospectos = await response.json();
+
+                const tbody = document.getElementById('bodyProspectos');
+                tbody.innerHTML = '';
+
+                prospectos.forEach(p => {
+                    const estadoBadge = getBadgeEstado(p.estado);
+                    const origenBadge = getBadgeOrigen(p.origen);
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${p.nombre_empresa || 'N/A'}</strong></td>
+                        <td>${p.nombre_contacto || 'N/A'}</td>
+                        <td>${p.telefono_contacto || '-'}</td>
+                        <td>${p.correo_contacto || '-'}</td>
+                        <td>${origenBadge}</td>
+                        <td>${p.interes_servicio || '-'}</td>
+                        <td>${estadoBadge}</td>
+                        <td>${formatDateTime(p.fecha_registro)}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-warning" onclick="cambiarEstado(${p.id}, 'Contactado')" title="Marcar como Contactado">
+                                    <i data-feather="phone" style="width:14px;height:14px;"></i>
+                                </button>
+                                <button class="btn btn-outline-success" onclick="cambiarEstado(${p.id}, 'Calificado')" title="Calificar Lead">
+                                    <i data-feather="check-circle" style="width:14px;height:14px;"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="cambiarEstado(${p.id}, 'Descartado')" title="Descartar">
+                                    <i data-feather="x-circle" style="width:14px;height:14px;"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                feather.replace();
+
+                // Inicializar DataTables
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#tablaProspectos').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    },
+                    order: [[7, 'desc']],
+                    pageLength: 25
+                });
+
+            } catch (error) {
+                console.error('Error al cargar prospectos:', error);
+                showAlert('Error al cargar los prospectos', 'danger');
+            }
+        }
+
+        // ==================== CREAR NUEVO PROSPECTO ====================
+        async function crearProspecto() {
+            const data = {
+                nombre_empresa: document.getElementById('nombre_empresa').value,
+                nombre_contacto: document.getElementById('nombre_contacto').value,
+                telefono_contacto: document.getElementById('telefono_contacto').value,
+                correo_contacto: document.getElementById('correo_contacto').value,
+                origen: document.getElementById('origen').value,
+                interes_servicio: document.getElementById('interes_servicio').value,
+                notas: document.getElementById('notas').value
+            };
+
+            // Validaciones
+            if (!data.nombre_empresa || !data.nombre_contacto) {
+                showAlert('El nombre de la empresa y el contacto son obligatorios', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch('/marketing/api/prospectos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('¡Prospecto creado exitosamente!', 'success');
+                    document.getElementById('formNuevoProspecto').reset();
+                    bootstrap.Modal.getInstance(document.getElementById('modalNuevoProspecto')).hide();
+                    cargarProspectos();
+                    cargarEstadisticas();
+                } else {
+                    showAlert(result.error || 'Error al crear el prospecto', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al crear el prospecto', 'danger');
+            }
+        }
+
+        // ==================== CAMBIAR ESTADO ====================
+        async function cambiarEstado(id, nuevoEstado) {
+            try {
+                const response = await fetch(`/marketing/api/prospectos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(`Prospecto marcado como ${nuevoEstado}`, 'success');
+                    cargarProspectos();
+                    cargarEstadisticas();
+                } else {
+                    showAlert(result.error || 'Error al actualizar', 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Error al actualizar el prospecto', 'danger');
+            }
+        }
+
+        // ==================== FUNCIONES AUXILIARES ====================
+        function getBadgeEstado(estado) {
+            const badges = {
+                'Nuevo': '<span class="badge bg-primary">Nuevo</span>',
+                'Contactado': '<span class="badge bg-warning text-dark">Contactado</span>',
+                'Calificado': '<span class="badge bg-success">Calificado</span>',
+                'Descartado': '<span class="badge bg-danger">Descartado</span>',
+                'Convertido': '<span class="badge bg-info">Convertido</span>'
+            };
+            return badges[estado] || '<span class="badge bg-secondary">Desconocido</span>';
+        }
+
+        function getBadgeOrigen(origen) {
+            const badges = {
+                'Web': '<span class="badge bg-light text-dark">🌐 Web</span>',
+                'Redes Sociales': '<span class="badge bg-info">📱 Redes</span>',
+                'Referido': '<span class="badge bg-success">👥 Referido</span>',
+                'WhatsApp': '<span class="badge text-white" style="background-color: #25D366;">💬 WhatsApp</span>',
+                'Llamada': '<span class="badge bg-primary">📞 Llamada</span>'
+            };
+            return badges[origen] || '<span class="badge bg-secondary">' + origen + '</span>';
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

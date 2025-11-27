@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dropdown Bootstrap 5</title>
+    
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    
+    <style>
+        body { 
+            padding: 50px; 
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .dropdown {
+            display: inline-block;
+            margin: 20px;
+        }
+        .test-result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔍 Test de Dropdowns Bootstrap 5</h1>
+        <p>Este archivo prueba si los dropdowns funcionan correctamente con la configuración actual.</p>
+        
+        <hr>
+        
+        <h3>Test 1: Dropdown Básico (botón)</h3>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownBasic" data-bs-toggle="dropdown" aria-expanded="false">
+                Dropdown Básico
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownBasic">
+                <li><a class="dropdown-item" href="#">Opción 1</a></li>
+                <li><a class="dropdown-item" href="#">Opción 2</a></li>
+                <li><a class="dropdown-item" href="#">Opción 3</a></li>
+            </ul>
+        </div>
+        
+        <h3>Test 2: Dropdown con Ícono (como en header)</h3>
+        <div class="dropdown">
+            <a class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="feather icon-sun"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+                <a href="#!" class="dropdown-item"><i class="feather icon-moon"></i> Oscuro</a>
+                <a href="#!" class="dropdown-item"><i class="feather icon-sun"></i> Claro</a>
+            </div>
+        </div>
+        
+        <h3>Test 3: Dropdown Posición Relativa (como en header)</h3>
+        <div class="dropdown position-relative" style="display: inline-block;">
+            <a class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="feather icon-bell"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end" style="position: absolute !important; z-index: 1050 !important;">
+                <div class="dropdown-header">Notificaciones</div>
+                <a href="#!" class="dropdown-item">Notificación 1</a>
+                <a href="#!" class="dropdown-item">Notificación 2</a>
+            </div>
+        </div>
+        
+        <div class="test-result">
+            <h4>📊 Estado de Carga:</h4>
+            <ul id="loadStatus">
+                <li>⏳ Verificando scripts...</li>
+            </ul>
+            <h4>🎯 Resultado del Test:</h4>
+            <p id="testResult">Haz clic en los dropdowns arriba para probar.</p>
+        </div>
+    </div>
+    
+    <!-- Scripts en el orden correcto -->
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/plugins/bootstrap.min.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    
+    <script>
+        // Verificar que todo se cargó correctamente
+        window.addEventListener('DOMContentLoaded', function() {
+            const loadStatus = document.getElementById('loadStatus');
+            const testResult = document.getElementById('testResult');
+            
+            let status = [];
+            
+            // Verificar Popper
+            if (typeof Popper !== 'undefined') {
+                status.push('✅ Popper.js cargado correctamente');
+            } else {
+                status.push('❌ Popper.js NO encontrado');
+            }
+            
+            // Verificar Bootstrap
+            if (typeof bootstrap !== 'undefined') {
+                status.push('✅ Bootstrap 5 cargado correctamente');
+                
+                // Verificar que Bootstrap.Dropdown existe
+                if (bootstrap.Dropdown) {
+                    status.push('✅ Bootstrap.Dropdown disponible');
+                } else {
+                    status.push('❌ Bootstrap.Dropdown NO disponible');
+                }
+            } else {
+                status.push('❌ Bootstrap NO encontrado');
+            }
+            
+            // Verificar Feather
+            if (typeof feather !== 'undefined') {
+                status.push('✅ Feather Icons cargado');
+                feather.replace();
+            } else {
+                status.push('⚠️ Feather Icons NO encontrado');
+            }
+            
+            // Mostrar estado
+            loadStatus.innerHTML = status.map(s => `<li>${s}</li>`).join('');
+            
+            // Agregar listeners para detectar clics en dropdowns
+            const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            status.push(`📋 Encontrados ${dropdowns.length} elementos dropdown`);
+            
+            dropdowns.forEach((dropdown, index) => {
+                dropdown.addEventListener('click', function(e) {
+                    console.log(`🖱️ Click en dropdown #${index + 1}`);
+                    testResult.innerHTML = `<strong>✅ Dropdown #${index + 1} clickeado!</strong><br>Si el menú se abre, Bootstrap está funcionando correctamente.`;
+                });
+                
+                // Eventos de Bootstrap
+                dropdown.addEventListener('show.bs.dropdown', function() {
+                    console.log(`📂 Dropdown #${index + 1} ABRIENDO (evento Bootstrap)`);
+                    testResult.innerHTML = `<strong>🎉 ¡ÉXITO!</strong><br>Dropdown #${index + 1} se está abriendo. Bootstrap está funcionando perfectamente.`;
+                });
+                
+                dropdown.addEventListener('shown.bs.dropdown', function() {
+                    console.log(`✅ Dropdown #${index + 1} ABIERTO (evento Bootstrap)`);
+                });
+                
+                dropdown.addEventListener('hide.bs.dropdown', function() {
+                    console.log(`📁 Dropdown #${index + 1} CERRANDO (evento Bootstrap)`);
+                });
+            });
+            
+            loadStatus.innerHTML = status.map(s => `<li>${s}</li>`).join('');
+        });
+    </script>
+</body>
+</html>

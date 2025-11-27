@@ -1,0 +1,195 @@
+﻿<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Información para Clientes | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="description"
+      content="Información y recursos para clientes - Portal Montero y Negocio"
+    />
+    <meta
+      name="keywords"
+      content="clientes, información, servicios, Portal Montero, Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard"
+    />
+    <meta name="author" content="Portal Montero" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+  <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+    <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+  </div>
+</div>
+
+{% include '_sidebar.html' %}
+{% include '_header.html' %}
+
+<div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="page-header-title">
+              <h5 class="mb-0 font-medium">Información y Guías para Clientes</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+              <li class="breadcrumb-item"><a href="#!">Documentación y Servicio</a></li>
+              <li class="breadcrumb-item" aria-current="page">Información para Clientes</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-x-6">
+          
+          <div class="col-span-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Guía Rápida para la Administración de Servicios</h5>
+                </div>
+                <div class="card-body">
+                    
+                    <ul class="nav nav-tabs" id="clientInfoTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="proceso-tab" data-bs-toggle="tab" data-bs-target="#proceso" type="button" role="tab" aria-controls="proceso" aria-selected="true">
+                                <i data-feather="briefcase" class="mr-2"></i> Proceso de Contratación
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pagos-tab" data-bs-toggle="tab" data-bs-target="#pagos" type="button" role="tab" aria-controls="pagos" aria-selected="false">
+                                <i data-feather="credit-card" class="mr-2"></i> Facturación y Pagos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="soporte-tab" data-bs-toggle="tab" data-bs-target="#soporte" type="button" role="tab" aria-controls="soporte" aria-selected="false">
+                                <i data-feather="life-buoy" class="mr-2"></i> Soporte y Contacto
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="clientInfoTabContent">
+                        <div class="tab-pane fade show active" id="proceso" role="tabpanel" aria-labelledby="proceso-tab">
+                            <h6 class="mt-4 mb-3 text-primary-600">Documentos Requeridos para Iniciar el Servicio:</h6>
+                            <ol class="list-decimal list-inside ml-4">
+                                <li>Copia del RUT actualizado de la empresa.</li>
+                                <li>Cámara de Comercio no mayor a 30 días.</li>
+                                <li>Fotocopia de la cédula del representante legal.</li>
+                                <li>Registro de las Entidades de Seguridad Social (EPS, ARL, Fondos de Pensión y Caja de Compensación) con las que operará.</li>
+                                <li>Formulario de afiliación de servicios diligenciado y firmado.</li>
+                            </ol>
+                            <div class="alert alert-info mt-4" role="alert">
+                                **Tiempo estimado de activación:** Una vez recibida la documentación completa, el servicio se activa en 48 horas hábiles.
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary mt-3" id="btnDescargarAfiliacion">Descargar Formulario de Afiliación</button>
+                        </div>
+
+                        <div class="tab-pane fade" id="pagos" role="tabpanel" aria-labelledby="pagos-tab">
+                            <h6 class="mt-4 mb-3 text-primary-600">Ciclos y Métodos de Pago:</h6>
+                            <ul class="list-unstyled space-y-3">
+                                <li class="flex items-start">
+                                    <i data-feather="calendar" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Corte de Facturación:</p>
+                                        <p class="text-muted text-sm">El corte se realiza el día 25 de cada mes.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i data-feather="dollar-sign" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Plazos de Pago:</p>
+                                        <p class="text-muted text-sm">Las facturas deben ser canceladas antes del día 5 del mes siguiente.</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i data-feather="check-circle" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Métodos Aceptados:</p>
+                                        <p class="text-muted text-sm">Transferencia electrónica (Bancolombia, Davivienda) o Pago en línea PSE.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <button class="btn btn-sm btn-success mt-3" id="btnIrAPagos"><i data-feather="link" class="mr-2"></i> Ir a Portal de Pagos PSE</button>
+                        </div>
+
+                        <div class="tab-pane fade" id="soporte" role="tabpanel" aria-labelledby="soporte-tab">
+                            <h6 class="mt-4 mb-3 text-primary-600">Canales y Horarios de Atención:</h6>
+                             <ul class="list-unstyled space-y-3">
+                                <li class="flex items-start">
+                                    <i data-feather="mail" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Consultas Generales:</p>
+                                        <p class="text-muted text-sm">correo@suempresa.com (Respuesta en 2 horas)</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i data-feather="phone" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Línea de Asistencia Técnica:</p>
+                                        <p class="text-muted text-sm">+57 601 555 5555 (Lun-Vie 8:00 AM - 5:00 PM)</p>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <i data-feather="alert-octagon" class="text-secondary-500 mr-2 mt-1"></i> 
+                                    <div>
+                                        <p class="mb-0 font-semibold">Reporte de Emergencias (24/7):</p>
+                                        <p class="text-muted text-sm">Solo para incidentes críticos de nómina o legales.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+          </div>
+        </div>
+        </div>
+</div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          document.getElementById('btnDescargarAfiliacion').addEventListener('click', function() {
+              alert('Simulación: Se iniciaría la descarga del formulario de afiliación en formato PDF.');
+          });
+          
+          document.getElementById('btnIrAPagos').addEventListener('click', function() {
+              window.open('https://www.pse.com.co/persona', '_blank');
+          });
+
+          // Unificar scripts de configuración
+          feather.replace();
+          layout_change('false');
+          layout_theme_sidebar_change('dark');
+          change_box_container('false');
+          layout_caption_change('true');
+          layout_rtl_change('false');
+          preset_change('preset-1');
+          main_layout_change('vertical');
+      });
+    </script>
+
+  </body>
+</html>
+}
+siguiente gem

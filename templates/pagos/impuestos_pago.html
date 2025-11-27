@@ -1,0 +1,531 @@
+﻿<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Pago de Impuestos | Montero y Negocio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="description"
+      content="Sistema de gestión de pago de impuestos de Montero y Negocio."
+    />
+    <meta name="author" content="Montero y Negocio" /> 
+    
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    
+    <script>
+      (async function checkAuthentication() {
+        const loader = document.querySelector('.loader-bg');
+        if (loader) loader.style.display = 'flex'; // Mostrar loader
+
+        try {
+          console.log('🔍 Verificando autenticación (pago-impuestos)...');
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          const response = await fetch('/api/check_auth', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include' 
+          });
+
+          console.log('📡 Respuesta check_auth:', response.status);
+
+          if (!response.ok) {
+            console.error('❌ Error del servidor:', response.status, response.statusText);
+            window.location.href = '/login';
+            return;
+          }
+
+          const data = await response.json();
+          console.log('📦 Datos check_auth:', data);
+
+          if (!data.authenticated) {
+            console.log('🚫 Usuario no autenticado, redirigiendo...');
+            window.location.href = '/login';
+          } else { 
+            console.log('✅ Usuario autenticado:', data.user_name);
+            if (loader) loader.style.display = 'none'; // Ocultar loader
+            sessionStorage.setItem('userName', data.user_name); 
+
+            // Actualizar nombre de usuario
+            document.addEventListener('DOMContentLoaded', () => {
+                 const userNameDisplay = document.getElementById('userNameDisplay');
+                 if(userNameDisplay) userNameDisplay.textContent = data.user_name;
+             });
+          }
+        } catch (error) { 
+          console.error('❌ Error de red en check_auth:', error);
+          window.location.href = '/login';
+        }
+      })();
+    </script>
+    
+    <style>
+      #newFormularioModal .modal-dialog {
+          max-width: 450px !important; 
+          margin-left: auto;
+          margin-right: 10rem;
+          transform: none;
+      }
+      /* Estilo para feedback */
+      #feedbackMessage {
+          margin-bottom: 1rem;
+      }
+    </style>
+
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+    
+    {% include '_sidebar.html' %}
+    
+    {% include '_header.html' %}
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="page-header-title">
+              <h5 class="mb-0 font-medium">Gestión de Pago de Impuestos</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Operativa</a></li>
+              <li class="breadcrumb-item" aria-current="page">Pago de Impuestos</li>
+            </ul>
+          </div>
+        </div>
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12">
+            <div id="feedbackMessage"></div>
+
+            <div class="card">
+              <div class="card-header flex items-center justify-between">
+                <h5>Archivos y Pagos de Impuestos Pendientes</h5>
+                <button
+                  type="button"
+                  class="btn btn-primary flex items-center"
+                  data-bs-toggle="modal"
+                  data-bs-target="#newFormularioModal"
+                >
+                  <i data-feather="upload" class="mr-2"></i> Subir Nuevo Formulario
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="grid grid-cols-12 gap-x-3 mb-4">
+                    <div class="col-span-12 sm:col-span-6 md:col-span-4">
+                        <label for="filterEmpresa" class="form-label font-medium">Empresa:</label>
+                        <select class="form-select" id="filterEmpresa">
+                            <option value="todos" selected>Todas las Empresas</option>
+                            </select>
+                    </div>
+                    <div class="col-span-12 sm:col-span-6 md:col-span-4">
+                        <label for="filterImpuesto" class="form-label font-medium">Impuesto:</label>
+                        <select class="form-select" id="filterImpuesto">
+                            <option value="todos" selected>TODOS</option>
+                            <option value="IVA">IVA</option>
+                            <option value="Retefuente">Retefuente</option>
+                            <option value="Industria y Comercio (ICA)">Industria y Comercio (ICA)</option>
+                            <option value="Impuesto de Renta">Impuesto de Renta</option>
+                            <option value="Cree">Cree</option>
+                            <option value="Predial">Predial</option>
+                        </select>
+                    </div>
+                    <div class="col-span-12 md:col-span-4 self-end mt-4 md:mt-0">
+                        <button type="button" class="btn btn-primary w-full" id="btnAplicarFiltros">
+                            <i data-feather="filter" class="me-2"></i>Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <p>
+                  Esta sección muestra los formularios subidos según los filtros de **Empresa** e **Impuesto** seleccionados.
+                </p>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>NIT</th>
+                                <th>Empresa</th>
+                                <th>Tipo de Impuesto</th>
+                                <th>Periodo</th>
+                                <th>Fecha Límite Pago</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaImpuestosBody">
+                            </tbody>
+                    </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="newFormularioModal" tabindex="-1" aria-labelledby="newFormularioModalLabel" aria-hidden="true">
+        <div class="modal-dialog"> 
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newFormularioModalLabel">Subir Nuevo Formulario de Impuestos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevoImpuesto" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="inputEmpresa" class="form-label">Empresa</label>
+                            <select class="form-select" id="inputEmpresa" name="empresa_nit" required>
+                                <option selected disabled value="">Seleccione la Empresa...</option>
+                                </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputImpuesto" class="form-label">Tipo de Impuesto</label>
+                            <select class="form-select" id="inputImpuesto" name="tipo_impuesto" required>
+                                <option selected disabled value="">Seleccione el Impuesto...</option> 
+                                <option>IVA</option>
+                                <option>Retefuente</option>
+                                <option>Industria y Comercio (ICA)</option>
+                                <option>Impuesto de Renta</option>
+                                <option>Cree</option>
+                                <option>Predial</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPeriodo" class="form-label">Período Fiscal</label>
+                            <input type="text" class="form-control" id="inputPeriodo" name="periodo" placeholder="Ej: Bimestre 3, Año 2025" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputFechaLimite" class="form-label">Fecha Límite de Pago</label>
+                            <input type="date" class="form-control" id="inputFechaLimite" name="fecha_limite" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">Cargar Archivo (PDF)</label>
+                            <input class="form-control" type="file" id="fileUpload" name="archivo" accept=".pdf" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnSubirFormulario">
+                        <i data-feather="upload-cloud" class="me-2"></i>Subir Formulario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+    </div>
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    {% include '_theme_config.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_URL = '/api';
+            
+            const tablaTbody = document.getElementById('tablaImpuestosBody');
+            const filtroEmpresaSelect = document.getElementById('filterEmpresa');
+            const modalEmpresaSelect = document.getElementById('inputEmpresa');
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            const btnSubir = document.getElementById('btnSubirFormulario');
+            const formNuevoImpuesto = document.getElementById('formNuevoImpuesto');
+            const modalElement = document.getElementById('newFormularioModal');
+            const modalInstance = new bootstrap.Modal(modalElement);
+
+            // --- Funciones de Feedback ---
+            function showMessage(message, type = 'info', container = feedbackDiv) {
+                if (container) {
+                    const alertHtml = `
+                        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                    container.innerHTML = alertHtml;
+                    if(type === 'success') {
+                         setTimeout(() => {
+                            const alert = container.querySelector('.alert-success');
+                            if(alert) new bootstrap.Alert(alert).close();
+                        }, 4000);
+                    }
+                } else {
+                    alert(message);
+                }
+            }
+
+            // --- Funciones de API ---
+
+            // Cargar y mostrar registros de impuestos
+            async function loadImpuestos() {
+                tablaTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Cargando registros...</td></tr>';
+                
+                const empresaNit = filtroEmpresaSelect.value;
+                const tipoImpuesto = document.getElementById('filterImpuesto').value;
+                
+                try {
+                    const response = await fetch(`${API_URL}/impuestos?empresa_nit=${empresaNit}&tipo_impuesto=${tipoImpuesto}`, { 
+                        credentials: 'include' 
+                    });
+                    
+                    if (!response.ok) {
+                         const err = await response.json();
+                         throw new Error(err.error || 'Error al cargar registros');
+                    }
+                    const data = await response.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Error en loadImpuestos:', error);
+                    tablaTbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+                } finally {
+                    feather.replace(); // Recargar iconos
+                }
+            }
+
+            // Cargar empresas en los dos selectores
+            async function loadEmpresas() {
+                try {
+                    const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
+                    if (!response.ok) throw new Error('Error al cargar empresas');
+                    
+                    const empresas = await response.json(); 
+                    
+                    // Limpiar selects (excepto la opción 'Todos' y 'Seleccione')
+                    filtroEmpresaSelect.innerHTML = '<option value="todos" selected>Todas las Empresas</option>';
+                    modalEmpresaSelect.innerHTML = '<option selected disabled value="">Seleccione la Empresa...</option>';
+
+                    empresas.forEach(emp => {
+                        if(emp.nombre_empresa && emp.nit) {
+                            filtroEmpresaSelect.add(new Option(`${emp.nombre_empresa} (${emp.nit})`, emp.nit));
+                            modalEmpresaSelect.add(new Option(`${emp.nombre_empresa} (${emp.nit})`, emp.nit));
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error en loadEmpresas:', error);
+                    showMessage('Error al cargar la lista de empresas.', 'danger');
+                }
+            }
+
+            // Marcar un impuesto como pagado
+            window.marcarComoPagado = async function(id) {
+                const row = document.querySelector(`button[onclick="marcarComoPagado('${id}')"]`).closest('tr');
+                const empresaNombre = row.cells[1].innerText;
+                
+                if (confirm(`¿Confirma que desea marcar el impuesto de ${empresaNombre} como 'Pagado'?`)) {
+                    try {
+                        const response = await fetch(`${API_URL}/impuestos/${id}/pagar`, {
+                            method: 'PUT',
+                            credentials: 'include'
+                        });
+
+                        if (!response.ok) {
+                            const err = await response.json();
+                            throw new Error(err.error || 'Error al actualizar');
+                        }
+                        
+                        showMessage('El estado del impuesto ha sido actualizado a "Pagado".', 'success');
+                        loadImpuestos(); // Recargar la tabla
+                        
+                    } catch (error) {
+                        console.error('Error al marcar como pagado:', error);
+                        showMessage(`Error al actualizar: ${error.message}`, 'danger');
+                    }
+                }
+            }
+            
+            // Ver el formulario (requiere un endpoint en backend)
+            window.verFormulario = function(id) {
+                // TODO: El backend necesita una ruta como /api/impuestos/<id>/archivo
+                alert('Funcionalidad para ver el PDF no implementada en el backend.');
+            }
+
+            // --- Funciones de Renderizado y Eventos ---
+            
+            function renderTable(data) {
+                tablaTbody.innerHTML = '';
+                if (data.length === 0) {
+                    tablaTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No se encontraron registros de impuestos para los filtros seleccionados.</td></tr>';
+                    return;
+                }
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                data.forEach(imp => {
+                    // Formatear fecha de JS (YYYY-MM-DD) para compararla
+                    const [year, month, day] = imp.fecha_limite.split('-').map(Number);
+                    const deadlineDate = new Date(year, month - 1, day);
+                    deadlineDate.setHours(0, 0, 0, 0); // Normalizar
+                    
+                    let estado = imp.estado;
+                    let badgeClass = 'bg-warning';
+                    
+                    if (estado === 'Pendiente de Pago' && deadlineDate < today) {
+                        estado = '¡VENCIDO!';
+                        badgeClass = 'bg-danger';
+                    } else if (estado === 'Pagado') {
+                        badgeClass = 'bg-success';
+                    }
+
+                    const row = document.createElement('tr');
+                    if(estado === '¡VENCIDO!') row.classList.add('table-danger');
+                    
+                    row.innerHTML = `
+                        <td>${imp.empresa_nit}</td>
+                        <td>${imp.empresa_nombre}</td>
+                        <td>${imp.tipo_impuesto}</td>
+                        <td>${imp.periodo}</td>
+                        <td>${imp.fecha_limite}</td>
+                        <td><span class="badge ${badgeClass}">${estado}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-icon btn-outline-info" title="Ver Formulario" onclick="verFormulario(${imp.id})"><i data-feather="eye"></i></button>
+                            ${estado !== 'Pagado' ? 
+                                `<button class="btn btn-sm btn-icon btn-outline-success" title="Marcar como Pagado" onclick="marcarComoPagado(${imp.id})"><i data-feather="check-circle"></i></button>` : 
+                                `<button class="btn btn-sm btn-icon btn-outline-secondary" title="Ver Soporte de Pago" onclick="alert('Funcionalidad para ver soporte de pago no implementada.')"><i data-feather="paperclip"></i></button>`
+                            }
+                        </td>
+                    `;
+                    tablaTbody.appendChild(row);
+                });
+            }
+
+            // Botón de aplicar filtros
+            document.getElementById('btnAplicarFiltros').addEventListener('click', loadImpuestos);
+
+            // Botón de subir formulario
+            btnSubir.addEventListener('click', async () => {
+                if (!formNuevoImpuesto.checkValidity()) {
+                    formNuevoImpuesto.reportValidity();
+                    return;
+                }
+                
+                const fileInput = document.getElementById('fileUpload');
+                if (fileInput.files.length === 0) {
+                    showMessage('Debe seleccionar un archivo PDF.', 'warning', modalElement.querySelector('.modal-body'));
+                    return;
+                }
+
+                const formData = new FormData(formNuevoImpuesto);
+                const originalBtnHtml = btnSubir.innerHTML;
+                btnSubir.disabled = true;
+                btnSubir.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Subiendo...';
+
+                try {
+                    const response = await fetch(`${API_URL}/impuestos`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error al subir el archivo');
+                    }
+
+                    showMessage(`Registro de impuesto para ${result.empresa_nombre} agregado.`, 'success');
+                    formNuevoImpuesto.reset();
+                    modalInstance.hide();
+                    loadImpuestos(); // Recargar la tabla
+
+                } catch (error) {
+                    console.error('Error al subir formulario:', error);
+                    showMessage(`Error: ${error.message}`, 'danger', modalElement.querySelector('.modal-body'));
+                } finally {
+                    btnSubir.disabled = false;
+                    btnSubir.innerHTML = originalBtnHtml;
+                    feather.replace(); // Restaurar icono del botón
+                }
+            });
+            
+            // --- LÓGICA DE LOGOUT AÑADIDA (de index.html) ---
+            async function handleLogout() {
+              try {
+                console.log('🚪 Intentando logout...');
+                const response = await fetch('/api/logout', { 
+                  method: 'POST',
+                  headers: { 'Accept': 'application/json' },
+                  credentials: 'include' 
+                });
+
+                console.log('📡 Respuesta logout:', response.status);
+                const result = await response.json();
+                console.log('📦 Resultado logout:', result);
+
+                if(response.ok) {
+                  console.log('✅ Logout exitoso');
+                  sessionStorage.removeItem('userName'); 
+                  window.location.href = '/login'; 
+                } else {
+                  console.error('❌ Error al hacer logout:', result.error);
+                  alert('Error al cerrar sesión: ' + (result.error || 'Error desconocido'));
+                  sessionStorage.removeItem('userName');
+                  window.location.href = '/login';
+                }
+              } catch (error) {
+                console.error('❌ Error de red al hacer logout:', error);
+                alert('Error de conexión al cerrar sesión.');
+                 sessionStorage.removeItem('userName');
+                window.location.href = '/login';
+              }
+            }
+
+            // Asignar evento a los botones de logout
+            // (los IDs #logoutButton y #logoutButton2 vienen de la nueva cabecera)
+            const logoutButton1 = document.getElementById('logoutButton');
+            const logoutButton2 = document.getElementById('logoutButton2');
+            if(logoutButton1) logoutButton1.addEventListener('click', handleLogout);
+            if(logoutButton2) logoutButton2.addEventListener('click', handleLogout);
+            
+            // --- FIN DE LÓGICA DE LOGOUT ---
+
+            // --- Mostrar Nombre de Usuario (leído desde sessionStorage) ---
+            const storedUserName = sessionStorage.getItem('userName');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if (userNameDisplay && storedUserName) {
+              userNameDisplay.textContent = storedUserName;
+            }
+
+            // --- Carga inicial ---
+            loadEmpresas();
+            loadImpuestos();
+            
+
+        });
+    </script>
+
+  </body>
+</html>

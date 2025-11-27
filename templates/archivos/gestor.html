@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Gestor Documental Centralizado | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+        /* Estilos para el área de Drag & Drop */
+        .upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f9fafb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-zone:hover,
+        .upload-zone.drag-over {
+            border-color: #4680ff;
+            background-color: #eff6ff;
+        }
+        .upload-zone.drag-over {
+            transform: scale(1.02);
+        }
+        .upload-icon {
+            font-size: 48px;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+        .file-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+        .badge-file {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        .table-actions button {
+            padding: 4px 8px;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="page-header-title">
+                        <h5 class="mb-0 font-medium">Gestor Documental Centralizado</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Administración</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Gestor de Archivos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="feedbackMessage"></div>
+
+            <!-- Card de Subida de Archivos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i data-feather="upload-cloud" class="w-5 h-5 inline mr-2"></i>Subir Nuevo Documento</h5>
+                </div>
+                <div class="card-body">
+                    <form id="formUpload" enctype="multipart/form-data">
+                        <!-- Drag & Drop Zone -->
+                        <div class="upload-zone mb-3" id="uploadZone">
+                            <div class="upload-icon">
+                                <i data-feather="upload-cloud"></i>
+                            </div>
+                            <p class="mb-2"><strong>Arrastra y suelta tu archivo aquí</strong></p>
+                            <p class="text-muted mb-3">o haz clic para seleccionar</p>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnSelectFile">
+                                <i data-feather="file" class="w-4 h-4 mr-1"></i> Seleccionar Archivo
+                            </button>
+                            <input type="file" id="fileInput" name="archivo" class="d-none" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.txt">
+                            <p class="text-muted mt-3 mb-0" style="font-size: 0.875rem;">
+                                Formatos permitidos: PDF, JPG, PNG, DOC, DOCX, XLS, XLSX, TXT (Máx. 10 MB)
+                            </p>
+                        </div>
+
+                        <!-- Información del archivo seleccionado -->
+                        <div id="selectedFileInfo" class="alert alert-info d-none mb-3">
+                            <i data-feather="file-text" class="w-4 h-4 inline mr-2"></i>
+                            Archivo seleccionado: <strong id="selectedFileName">-</strong>
+                            (<span id="selectedFileSize">-</span>)
+                        </div>
+
+                        <!-- Campos adicionales -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="categoria" class="form-label">Categoría <span class="text-danger">*</span></label>
+                                <select class="form-select" id="categoria" name="categoria" required>
+                                    <option value="">-- Seleccionar Categoría --</option>
+                                    <option value="Legal">Legal</option>
+                                    <option value="Contable">Contable</option>
+                                    <option value="RRHH">Recursos Humanos</option>
+                                    <option value="Operativo">Operativo</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="descripcion" class="form-label">Descripción (Opcional)</label>
+                                <input type="text" class="form-control" id="descripcion" name="descripcion" placeholder="Breve descripción del documento">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" id="btnCancelUpload">
+                                <i data-feather="x" class="w-4 h-4 mr-1"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="btnUpload">
+                                <i data-feather="upload" class="w-4 h-4 mr-1"></i> Subir Documento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Card de Listado de Archivos -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5><i data-feather="folder" class="w-5 h-5 inline mr-2"></i>Documentos Almacenados</h5>
+                        <div>
+                            <select class="form-select form-select-sm" id="filterCategoria" style="width: auto; display: inline-block;">
+                                <option value="todos">Todas las Categorías</option>
+                                <option value="Legal">Legal</option>
+                                <option value="Contable">Contable</option>
+                                <option value="RRHH">Recursos Humanos</option>
+                                <option value="Operativo">Operativo</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tableArchivos">
+                            <thead>
+                                <tr>
+                                    <th>Archivo</th>
+                                    <th>Categoría</th>
+                                    <th>Tamaño</th>
+                                    <th>Subido Por</th>
+                                    <th>Fecha</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyArchivos">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        <i data-feather="loader" class="animate-spin w-5 h-5 inline mr-2"></i>
+                                        Cargando documentos...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_URL = '/api/archivos';
+
+            // Referencias a elementos del DOM
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            const btnSelectFile = document.getElementById('btnSelectFile');
+            const formUpload = document.getElementById('formUpload');
+            const btnUpload = document.getElementById('btnUpload');
+            const btnCancelUpload = document.getElementById('btnCancelUpload');
+            const selectedFileInfo = document.getElementById('selectedFileInfo');
+            const selectedFileName = document.getElementById('selectedFileName');
+            const selectedFileSize = document.getElementById('selectedFileSize');
+            const tbodyArchivos = document.getElementById('tbodyArchivos');
+            const filterCategoria = document.getElementById('filterCategoria');
+
+            let selectedFile = null;
+
+            // --- Funciones de Feedback ---
+            function showMessage(message, type = 'info') {
+                if (feedbackDiv) {
+                    const alertHtml = `
+                        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                    feedbackDiv.innerHTML = alertHtml;
+
+                    if(type === 'success') {
+                        setTimeout(() => {
+                            const alert = feedbackDiv.querySelector('.alert-success');
+                            if(alert) new bootstrap.Alert(alert).close();
+                        }, 5000);
+                    }
+
+                    feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // --- Función para formatear tamaño ---
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            // --- Función para obtener icono según extensión ---
+            function getFileIcon(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                const iconMap = {
+                    'pdf': 'file-text',
+                    'doc': 'file-text',
+                    'docx': 'file-text',
+                    'xls': 'file',
+                    'xlsx': 'file',
+                    'jpg': 'image',
+                    'jpeg': 'image',
+                    'png': 'image',
+                    'txt': 'file-text'
+                };
+                return iconMap[ext] || 'file';
+            }
+
+            // --- Función para obtener badge de categoría ---
+            function getCategoryBadge(categoria) {
+                const badgeMap = {
+                    'Legal': 'bg-danger',
+                    'Contable': 'bg-success',
+                    'RRHH': 'bg-warning',
+                    'Operativo': 'bg-info',
+                    'Otro': 'bg-secondary'
+                };
+                return `<span class="badge ${badgeMap[categoria] || 'bg-secondary'} badge-file">${categoria}</span>`;
+            }
+
+            // --- Drag & Drop Handlers ---
+            uploadZone.addEventListener('click', () => fileInput.click());
+            btnSelectFile.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('drag-over');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+
+                if (e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection();
+                }
+            });
+
+            fileInput.addEventListener('change', handleFileSelection);
+
+            function handleFileSelection() {
+                if (fileInput.files.length > 0) {
+                    selectedFile = fileInput.files[0];
+                    selectedFileName.textContent = selectedFile.name;
+                    selectedFileSize.textContent = formatFileSize(selectedFile.size);
+                    selectedFileInfo.classList.remove('d-none');
+                    feather.replace();
+                }
+            }
+
+            // --- Subir Archivo ---
+            formUpload.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!selectedFile) {
+                    showMessage('Por favor, selecciona un archivo.', 'warning');
+                    return;
+                }
+
+                const categoria = document.getElementById('categoria').value;
+                if (!categoria) {
+                    showMessage('Por favor, selecciona una categoría.', 'warning');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('archivo', selectedFile);
+                formData.append('categoria', categoria);
+                formData.append('descripcion', document.getElementById('descripcion').value);
+
+                const originalBtnHtml = btnUpload.innerHTML;
+                btnUpload.disabled = true;
+                btnUpload.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Subiendo...';
+
+                try {
+                    const response = await fetch(`${API_URL}/subir`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showMessage('✅ Documento subido exitosamente.', 'success');
+                        formUpload.reset();
+                        selectedFile = null;
+                        selectedFileInfo.classList.add('d-none');
+                        loadArchivos();
+                    } else {
+                        showMessage(`❌ ${result.error || 'Error al subir el documento'}`, 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Error al subir archivo:', error);
+                    showMessage('Error de conexión al subir el documento.', 'danger');
+                } finally {
+                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = originalBtnHtml;
+                    feather.replace();
+                }
+            });
+
+            // Botón Cancelar
+            btnCancelUpload.addEventListener('click', () => {
+                formUpload.reset();
+                selectedFile = null;
+                selectedFileInfo.classList.add('d-none');
+                feedbackDiv.innerHTML = '';
+            });
+
+            // --- Cargar Lista de Archivos ---
+            async function loadArchivos(categoria = 'todos') {
+                try {
+                    const url = categoria === 'todos' ? API_URL : `${API_URL}?categoria=${categoria}`;
+                    const response = await fetch(url, { credentials: 'include' });
+
+                    if (!response.ok) {
+                        throw new Error('Error al cargar archivos');
+                    }
+
+                    const archivos = await response.json();
+
+                    if (archivos.length === 0) {
+                        tbodyArchivos.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    <i data-feather="inbox" class="w-5 h-5 inline mr-2"></i>
+                                    No hay documentos para mostrar.
+                                </td>
+                            </tr>`;
+                    } else {
+                        tbodyArchivos.innerHTML = archivos.map(archivo => `
+                            <tr>
+                                <td>
+                                    <i data-feather="${getFileIcon(archivo.nombre_archivo)}" class="file-icon inline"></i>
+                                    <strong>${archivo.nombre_archivo}</strong>
+                                    ${archivo.descripcion ? `<br><small class="text-muted">${archivo.descripcion}</small>` : ''}
+                                </td>
+                                <td>${getCategoryBadge(archivo.categoria)}</td>
+                                <td>${formatFileSize(archivo.tamano_bytes)}</td>
+                                <td>${archivo.subido_por_nombre || 'Desconocido'}</td>
+                                <td>${new Date(archivo.fecha_subida).toLocaleDateString('es-ES')}</td>
+                                <td class="text-end table-actions">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="descargarArchivo(${archivo.id})" title="Descargar">
+                                        <i data-feather="download" class="w-4 h-4"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarArchivo(${archivo.id}, '${archivo.nombre_archivo}')" title="Eliminar">
+                                        <i data-feather="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    feather.replace();
+
+                } catch (error) {
+                    console.error('Error cargando archivos:', error);
+                    tbodyArchivos.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">
+                                <i data-feather="alert-circle" class="w-5 h-5 inline mr-2"></i>
+                                Error al cargar los documentos.
+                            </td>
+                        </tr>`;
+                    feather.replace();
+                }
+            }
+
+            // --- Descargar Archivo ---
+            window.descargarArchivo = function(id) {
+                window.location.href = `${API_URL}/${id}/descargar`;
+            };
+
+            // --- Eliminar Archivo ---
+            window.eliminarArchivo = async function(id, nombre) {
+                if (!confirm(`¿Estás seguro de eliminar el archivo "${nombre}"?`)) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showMessage('✅ Documento eliminado exitosamente.', 'success');
+                        loadArchivos(filterCategoria.value);
+                    } else {
+                        showMessage(`❌ ${result.error || 'Error al eliminar el documento'}`, 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Error eliminando archivo:', error);
+                    showMessage('Error de conexión al eliminar el documento.', 'danger');
+                }
+            };
+
+            // --- Filtro por Categoría ---
+            filterCategoria.addEventListener('change', (e) => {
+                loadArchivos(e.target.value);
+            });
+
+            // --- Carga Inicial ---
+            loadArchivos();
+            feather.replace();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+# =====================================================================
+# .dockerignore - Sistema Montero
+# =====================================================================
+# Archivos y directorios a excluir del contexto de construcción de Docker
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+
+# Documentation
+*.md
+docs/
+README*
+CHANGELOG*
+LICENSE*
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+azure-pipelines.yml
+
+# Node modules (si hay frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos de configuración local
+*.local
+local_settings.py
+
+# Backups
+*.bak
+*.backup
+*.old
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Archivos de sistema
+Thumbs.db
+desktop.ini
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Archivos de migraciones generados (ya están versionados)
+migrations/versions/*.pyc
+
+# Scripts de desarrollo
+scripts/
+dev_scripts/

@@ -1,0 +1,588 @@
+﻿<!doctype html>
+<html lang="en" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Gestión de Tutelas | Portal Montero</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Sistema de gestión de tutelas jurídicas - Portal Montero y Negocio" />
+    <meta
+      name="keywords"
+      content="tutelas, gestión jurídica, Portal Montero, casos legales, Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard"
+    />
+    <meta name="author" content="Portal Montero" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <style>
+      #agregarTutelaModal .modal-dialog {
+          margin-left: 300px; 
+          margin-right: auto;
+          transform: none; 
+          margin-top: 50px; 
+          margin-bottom: 50px;
+      }
+      /* Estilo para spinner de carga */
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, .1);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border-left-color: #09f;
+        animation: spin 1s ease infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+    <div class="pc-container">
+      <div class="pc-content">
+        <div class="page-header">
+          <div class="page-block">
+            <div class="page-header-title">
+              <h5 class="mb-0 font-medium">Gestión de Tutelas</h5>
+            </div>
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+              <li class="breadcrumb-item"><a href="javascript: void(0)">Gestión Jurídica</a></li>
+              <li class="breadcrumb-item" aria-current="page">Tutelas</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-x-6">
+          <div class="col-span-12">
+            <div class="card">
+              <div class="card-header flex justify-between items-center">
+                <h5>Filtros de Búsqueda y Acciones</h5>
+                <a href="/tutelas/crear" class="btn btn-primary btn-sm">
+                    <i data-feather="plus" class="me-1"></i>
+                    AGREGAR TUTELA
+                </a>
+              </div>
+              <div class="card-body">
+                <form id="formFiltros">
+                    <h6 class="mb-3">Filtros</h6>
+                    <div class="grid grid-cols-12 gap-x-6 gap-y-4 mb-4">
+                        
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEmpresa" class="form-label">Empresa:</label>
+                            <select class="form-select" id="filtroEmpresa">
+                                <option value="">Todas las Empresas</option>
+                            </select>
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroTipoID" class="form-label">Tipo de ID Usuario:</label>
+                            <select class="form-select" id="filtroTipoID">
+                                <option value="">Todos</option>
+                                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                                <option value="Pasaporte">Pasaporte</option>
+                                </select>
+                        </div>
+                        
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroIDUsuario" class="form-label">ID Usuario:</label>
+                            <input type="text" class="form-control" id="filtroIDUsuario" placeholder="Número de Cédula/ID">
+                        </div>
+
+                        <div class="col-span-12 md:col-span-3">
+                            <label for="filtroEstado" class="form-label">Estado:</label>
+                            <select class="form-select" id="filtroEstado">
+                                <option value="">Todos los Estados</option>
+                                <option value="En Proceso">En Proceso</option>
+                                <option value="Finalizada">Finalizada</option>
+                                <option value="Anulada">Anulada</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 mt-4">
+                        <div class="col-span-12 flex justify-end">
+                             <button type="button" id="btnLimpiarFiltros" class="btn btn-outline-secondary me-2">Limpiar Filtros</button>
+                             <button type="button" id="btnAplicarFiltros" class="btn btn-secondary">
+                                <span id="filtroSpinner" class="spinner" style="display: none; width: 16px; height: 16px; border-width: 2px; margin-right: 5px;"></span>
+                                APLICAR FILTROS
+                             </button>
+                        </div>
+                    </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-span-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Tutelas Registradas</h5>
+                    <p class="text-muted m-0">Detalle de las tutelas del sistema.</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tablaTutelas">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Empresa</th>
+                                    <th>Usuario (C.C.)</th>
+                                    <th>Motivo</th>
+                                    <th>Fecha Radicación</th>
+                                    <th>Estado</th>
+                                    <th>Archivos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTutelasBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+    {% include '_footer.html' %}
+
+    {# Modal de creación removido - ahora usando página dedicada /tutelas/crear #}
+
+<div class="modal fade" id="detalleTutelaModal" tabindex="-1" aria-labelledby="detalleTutelaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleTutelaModalLabel">Detalle de la Tutela</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="detalleTutelaBody">
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
+</div>
+
+<script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- REFERENCIAS A ELEMENTOS DEL DOM ---
+            const form = document.getElementById('formTutela');
+            const tbody = document.getElementById('tablaTutelasBody');
+            const filtroEmpresaSelect = document.getElementById('filtroEmpresa');
+            const modalEmpresaSelect = document.getElementById('empresa');
+            // Referencias a los nuevos/modificados campos:
+            const modalTipoIdSelect = document.getElementById('modalTipoId'); 
+            const modalNumeroIdInput = document.getElementById('numeroCedula'); 
+            const modalUsuarioNombreInput = document.getElementById('usuarioNombre');
+            const modalUsuarioApellidoInput = document.getElementById('usuarioApellido');
+            const userValidationFeedback = document.getElementById('userValidationFeedback');
+            // --- FIN DE REFERENCIAS ---
+
+            const btnRegistrar = document.getElementById('btnRegistrar');
+            const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+            const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+            
+            const registroSpinner = document.getElementById('registroSpinner');
+            const filtroSpinner = document.getElementById('filtroSpinner');
+            
+            const agregarModalEl = document.getElementById('agregarTutelaModal');
+            const agregarModal = new bootstrap.Modal(agregarModalEl);
+            const detalleModalEl = document.getElementById('detalleTutelaModal');
+            const detalleModal = new bootstrap.Modal(detalleModalEl);
+
+            // Variable para almacenar los datos actuales de la tabla
+            let tutelasData = [];
+
+            // --- FUNCIONES DE RENDERIZADO Y UTILIDAD ---
+
+            /**
+             * Muestra un toast de alerta (requiere que tengas el componente Toast de Bootstrap en tu HTML)
+             * Por ahora, usaremos alert() simple.
+             */
+            function showAlert(message, type = 'success') {
+                // Implementación simple. Puedes mejorar esto con un componente de toast.
+                console.log(`Alerta (${type}): ${message}`);
+                alert(message);
+            }
+
+            /**
+             * Activa/desactiva el spinner en un botón
+             */
+            function toggleSpinner(spinner, button, show) {
+                if (show) {
+                    spinner.style.display = 'inline-block';
+                    button.disabled = true;
+                } else {
+                    spinner.style.display = 'none';
+                    button.disabled = false;
+                }
+            }
+            
+            /**
+             * Limpia los campos de autocompletado del usuario.
+             */
+            function clearUserFields() {
+                modalUsuarioNombreInput.value = '';
+                modalUsuarioApellidoInput.value = '';
+                userValidationFeedback.style.display = 'none';
+            }
+            
+            /**
+             * Busca el usuario globalmente (sin vínculo a la empresa) y autocompleta los campos.
+             */
+            async function buscarUsuarioPorId() {
+                clearUserFields();
+                const id = modalNumeroIdInput.value.trim();
+                
+                if (!id) return;
+                
+                try {
+                    // LLAMADA AL NUEVO ENDPOINT GLOBAL
+                    const response = await fetch(`/api/tutelas/usuario_global/${id}`);
+                    
+                    if (!response.ok) {
+                        userValidationFeedback.style.display = 'block';
+                        modalNumeroIdInput.classList.add('is-invalid');
+                        return;
+                    }
+                    
+                    const usuario = await response.json();
+                    
+                    modalUsuarioNombreInput.value = usuario.primerNombre || '';
+                    modalUsuarioApellidoInput.value = usuario.primerApellido || ''; 
+                    
+                    userValidationFeedback.style.display = 'none';
+                    modalNumeroIdInput.classList.remove('is-invalid');
+
+                } catch (error) {
+                    console.error("Error buscando usuario:", error);
+                    userValidationFeedback.style.display = 'block';
+                    modalNumeroIdInput.classList.add('is-invalid');
+                }
+            }
+
+
+            /**
+             * Dibuja la tabla de tutelas con los datos proporcionados.
+             */
+            function renderTable(data) {
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron tutelas.</td></tr>';
+                    return;
+                }
+                data.forEach(tutela => {
+                    const badgeClass = tutela.estado === 'Finalizada' ? 'bg-success' : (tutela.estado === 'Anulada' ? 'bg-danger' : 'bg-warning');
+                    const row = `
+                        <tr data-id="${tutela.id}">
+                            <td>${tutela.id}</td>
+                            <td>${tutela.empresa_nombre || 'N/A'}</td>
+                            <td>${tutela.usuario_nombre || 'N/A'} (${tutela.usuario_id})</td>
+                            <td>${tutela.motivo}</td>
+                            <td>${tutela.fecha_radicacion}</td>
+                            <td><span class="badge ${badgeClass}">${tutela.estado}</span></td>
+                            <td>${tutela.archivosCount}</td>
+                            <td>
+                                <button class="btn btn-sm btn-icon btn-outline-info btn-view" title="Ver Detalle" data-id="${tutela.id}"><i data-feather="eye"></i></button>
+                                ${tutela.estado !== 'Anulada' ? `<button class="btn btn-sm btn-icon btn-outline-danger btn-cancel" title="Anular" data-id="${tutela.id}"><i data-feather="x-circle"></i></button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                feather.replace(); // Actualizar los iconos de Feather
+            }
+            
+            /**
+             * Rellena un <select> con opciones.
+             */
+            function populateSelect(selectEl, data, defaultOptionText) {
+                 selectEl.innerHTML = `<option value="">${defaultOptionText}</option>`;
+                 data.forEach(item => {
+                    // Asumimos que item tiene 'nit'/'id' y 'nombre'
+                    const value = item.nit || item.id;
+                    selectEl.add(new Option(item.nombre, value));
+                 });
+                 selectEl.disabled = false;
+            }
+
+            // --- FUNCIONES DE API (FETCH) ---
+
+            /**
+             * Carga la lista de empresas desde la API.
+             */
+            async function cargarEmpresas() {
+                try {
+                    const response = await fetch('/api/tutelas/empresas_list');
+                    if (!response.ok) throw new Error('Error al cargar empresas');
+                    const empresas = await response.json();
+                    
+                    populateSelect(filtroEmpresaSelect, empresas, 'Todas las Empresas');
+                    populateSelect(modalEmpresaSelect, empresas, 'Seleccione la Empresa');
+                    
+                } catch (error) {
+                    console.error(error);
+                    showAlert('No se pudieron cargar las empresas. Revise la consola.', 'danger');
+                    modalEmpresaSelect.innerHTML = '<option value="">Error al cargar</option>';
+                }
+            }
+            
+            /**
+             * Carga las tutelas desde la API según los filtros.
+             */
+            async function cargarTutelas(params = {}) {
+                toggleSpinner(filtroSpinner, btnAplicarFiltros, true);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center"><div class="spinner mx-auto"></div></td></tr>';
+                
+                try {
+                    const urlParams = new URLSearchParams(params);
+                    const response = await fetch(`/api/tutelas?${urlParams.toString()}`);
+                    
+                    if (response.status === 401) {
+                        // Si no está autorizado, redirigir al login
+                        window.location.href = '/ingresoportal.html';
+                        return;
+                    }
+                    if (!response.ok) throw new Error('Error al cargar la lista de tutelas');
+                    
+                    tutelasData = await response.json();
+                    renderTable(tutelasData);
+
+                } catch (error) {
+                    console.error(error);
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error al cargar datos: ${error.message}</td></tr>`;
+                } finally {
+                    toggleSpinner(filtroSpinner, btnAplicarFiltros, false);
+                }
+            }
+            
+            /**
+             * Registra una nueva tutela enviando los datos a la API.
+             */
+            async function registrarTutela() {
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                
+                // Validación adicional: Asegurar que se buscó el usuario, o que al menos los campos tienen datos.
+                if (modalNumeroIdInput.value.trim() !== '' && (modalUsuarioNombreInput.value === '' && modalUsuarioApellidoInput.value === '')) {
+                    showAlert('Por favor, ingrese un número ID válido y presione [Tab] o haga clic fuera para autocompletar el nombre.', 'warning');
+                    modalNumeroIdInput.focus();
+                    userValidationFeedback.style.display = 'block';
+                    return;
+                }
+                
+                toggleSpinner(registroSpinner, btnRegistrar, true);
+                
+                // Usamos FormData para enviar archivos y texto
+                const formData = new FormData(form); // Captura todos los campos con atributo name
+                
+                // Nota: Los campos usuarioNombre y usuarioApellido se usan para el autocompletado,
+                // pero el backend DEBE ser modificado para usarlos si el usuario no existe en la BD.
+                // Ya ajustamos tutelas.py para manejar la nueva lógica.
+                
+                try {
+                    const response = await fetch('/api/tutelas', {
+                        method: 'POST',
+                        body: formData // No se pone 'Content-Type', el navegador lo hace solo
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error desconocido al registrar');
+                    }
+                    
+                    let successMessage = `Tutela ${result.id} registrada con éxito.`;
+                    if (result.mensaje_advertencia) {
+                        successMessage += ` Advertencia: ${result.mensaje_advertencia}`;
+                    }
+
+                    showAlert(successMessage, 'success');
+                    agregarModal.hide();
+                    form.reset();
+                    clearUserFields(); // Limpiar campos de usuario
+                    
+                    // Recargar la tabla (o añadir la fila nueva al inicio)
+                    cargarTutelas(); // Forma más simple de recargar
+
+                } catch (error) {
+                    console.error(error);
+                    showAlert(`Error al registrar: ${error.message}`, 'danger');
+                } finally {
+                    toggleSpinner(registroSpinner, btnRegistrar, false);
+                }
+            }
+            
+            /**
+             * Anula una tutela
+             */
+            async function anularTutela(id) {
+                 if (!confirm(`¿Está seguro de que desea anular la tutela ${id}?`)) {
+                    return;
+                 }
+                 
+                 try {
+                    const response = await fetch(`/api/tutelas/${id}/anular`, {
+                        method: 'PUT',
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error al anular');
+                    }
+                    
+                    showAlert(`Tutela ${id} ha sido anulada.`, 'success');
+                    
+                    // Actualizar la fila en la tabla localmente
+                    const index = tutelasData.findIndex(t => t.id == id);
+                    if (index !== -1) {
+                        tutelasData[index] = result; // Reemplazar con datos actualizados
+                        renderTable(tutelasData);
+                    } else {
+                        cargarTutelas(); // Recargar si no se encontró
+                    }
+
+                 } catch (error) {
+                     console.error(error);
+                     showAlert(`Error: ${error.message}`, 'danger');
+                 }
+            }
+
+
+            // --- EVENT LISTENERS ---
+
+            // Listener para autocompletar nombre/apellido al salir del campo Número ID
+            modalNumeroIdInput.addEventListener('blur', buscarUsuarioPorId);
+            modalNumeroIdInput.addEventListener('change', buscarUsuarioPorId); // Por si se selecciona con teclado
+
+            // Registrar tutela
+            btnRegistrar.addEventListener('click', registrarTutela);
+
+            // Aplicar filtros
+            btnAplicarFiltros.addEventListener('click', () => {
+                const params = {
+                    empresa_nit: document.getElementById('filtroEmpresa').value,
+                    tipo_id: document.getElementById('filtroTipoID').value,
+                    usuario_id: document.getElementById('filtroIDUsuario').value.trim(),
+                    estado: document.getElementById('filtroEstado').value
+                };
+                
+                // Limpiar parámetros vacíos
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '') {
+                        delete params[key];
+                    }
+                });
+                
+                cargarTutelas(params);
+            });
+            
+            // Limpiar filtros
+            btnLimpiarFiltros.addEventListener('click', () => {
+                 document.getElementById('formFiltros').reset();
+                 cargarTutelas(); // Cargar todos
+            });
+
+            // Listeners en la tabla para botones 'Ver' y 'Anular' (delegación de eventos)
+            tbody.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const id = target.dataset.id;
+                if (!id) return;
+
+                const tutela = tutelasData.find(t => t.id == id); // Usar == por si acaso (id puede ser string o number)
+                if (!tutela) return;
+
+                if (target.classList.contains('btn-view')) {
+                    // Mostrar detalle en el modal
+                    const body = document.getElementById('detalleTutelaBody');
+                    body.innerHTML = `
+                        <p><strong>ID:</strong> ${tutela.id}</p>
+                        <p><strong>Empresa:</strong> ${tutela.empresa_nombre} (NIT: ${tutela.empresa_nit})</p>
+                        <p><strong>Usuario:</strong> ${tutela.usuario_nombre} (ID: ${tutela.usuario_id})</p>
+                        <p><strong>Motivo:</strong> ${tutela.motivo}</p>
+                        <p><strong>Fecha Radicación:</strong> ${tutela.fecha_radicacion}</p>
+                        <p><strong>Estado:</strong> ${tutela.estado}</p>
+                        <p><strong>Archivos Adjuntos:</strong> ${tutela.archivosCount}</p>
+                        `;
+                    detalleModal.show();
+                    
+                } else if (target.classList.contains('btn-cancel')) {
+                    anularTutela(id);
+                }
+            });
+            
+            // --- CARGA INICIAL ---
+            function init() {
+                // Cargar los selects de empresas
+                cargarEmpresas();
+                
+                // Cargar la tabla inicial (sin filtros)
+                cargarTutelas();
+                
+                // Scripts de configuración de tema (sin cambios)
+                feather.replace(); 
+                layout_change('false');
+                layout_theme_sidebar_change('dark');
+                change_box_container('false');
+                layout_caption_change('true');
+                layout_rtl_change('false');
+                preset_change('preset-1');
+                main_layout_change('vertical');
+            }
+            
+            init();
+        });
+    </script>
+    
+  </body>
+</html>
+}
+siguiente gem

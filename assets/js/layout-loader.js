@@ -156,7 +156,7 @@ function setupLogoutButtons() {
                          e.preventDefault();
                          console.log("Attempting basic logout...");
                          fetch('/api/logout', { method: 'POST', credentials: 'include' })
-                           .finally(() => window.location.href = 'ingresoportal.html');
+                           .finally(() => window.location.href = '/login');
                      });
 
                 }

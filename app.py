@@ -11,521 +11,349 @@ import traceback
 from datetime import timedelta
 
 from dotenv import load_dotenv
-from flask import Flask, current_app, g, jsonify, render_template, request, session
+from flask import (Flask, current_app, g, jsonify, render_template, request,
+                   session, url_for, redirect, send_from_directory) 
 from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect, generate_csrf
+from werkzeug.security import generate_password_hash
 
 from logger import logger
+from extensions import limiter, mail, db, migrate
 
-# En la parte de imports:
-# Asegúrate de que este import se añadió después de ejecutar el script:
+# =============================================================================
+# Carga de Variables de Entorno
+# =============================================================================
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+logger.info(f"Cargando variables de entorno desde: {dotenv_path}")
+
+# =============================================================================
+# Importación de Blueprints (Rutas Modulares)
+# =============================================================================
+from routes.auth import auth_bp as bp_auth
+from routes.index import bp_main
+from routes.empresas import empresas_bp as bp_empresa
+from routes.usuarios import usuarios_bp as bp_empleado
+from routes.pagos import bp_pagos as bp_pago
 from routes.notificaciones_routes import bp_notificaciones
-from utils import login_required  # (CORREGIDO: Importa el decorador)
+from routes.analytics import analytics_bp as bp_api
+from routes.tutelas import bp_tutelas as bp_tutela
+from routes.cotizaciones import bp_cotizaciones as bp_cotizacion
+from routes.incapacidades import bp_incapacidades as bp_incapacidad
+from routes.depuraciones import bp_depuraciones
+from routes.formularios import bp_formularios, bp_formularios_pages
+from routes.pago_impuestos import bp_impuestos
+from routes.unificacion import bp_unificacion
+from routes.envio_planillas import bp_envio_planillas
+from routes.credenciales import credenciales_bp
+from routes.novedades import bp_novedades
+from routes.pages import pages_bp
 
-# ...
+# Nuevos blueprints
+from routes.marketing_routes import bp_marketing
+from routes.automation_routes import automation_bp
+from routes.finance_routes import finance_bp
+from routes.admin_routes import admin_bp
+from routes.user_settings import user_settings_bp
 
 
-def create_app(test_config=None):
-    # ... código de configuración de la app
+# =============================================================================
+# Lógica de Base de Datos (SQLite)
+# =============================================================================
 
-    # === REGISTRO DE BLUEPRINTS ===
-    # El archivo 'notificaciones_routes.py' debe estar importado arriba
-
-    # 🔔 Nuevo: Notificaciones
-    app.register_blueprint(bp_notificaciones)
-
-    # ... código de manejo de errores
-    return app
-
-
-# --- Definición de Rutas Base ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE_PATH = os.getenv("DATABASE_PATH", os.path.join(BASE_DIR, "data", "mi_sistema.db"))
-ASSETS_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "assets"))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")  # <- AÑADIR ESTA LÍNEA
+SCHEMA_PATH = os.getenv("SCHEMA_PATH", os.path.join(BASE_DIR, "data", "schema.sql"))
 
-# ==============================================================================
-# Gestión de la Base de Datos (Funciones Globales)
-# ==============================================================================
+# Configuración de URI para SQLAlchemy
+DATABASE_URI = f"sqlite:///{DATABASE_PATH}"
 
 
-def get_db_connection():
-    """
-    Función auxiliar para obtener una conexión a la base de datos.
-    Esta función está a nivel de módulo para ser mockeable en tests.
-
-    NOTA: En producción, se usa g.db en lugar de esta función.
-    Esta función existe principalmente para compatibilidad con tests legacy.
-    """
-    db_path = DATABASE_PATH
-    if current_app:
-        db_path = current_app.config.get("DATABASE_PATH", DATABASE_PATH)
-
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+def get_db():
+    if "db" not in g:
+        try:
+            os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
+            g.db = sqlite3.connect(
+                DATABASE_PATH, detect_types=sqlite3.PARSE_DECLTYPES
+            )
+            g.db.row_factory = sqlite3.Row
+            logger.debug(f"Conexión a la BBDD establecida en: {DATABASE_PATH}")
+        except sqlite3.Error as e:
+            logger.error(f"Error al conectar con la base de datos: {e}")
+            raise
+    return g.db
 
 
-def initialize_database():
-    """
-    Inicializa la base de datos creando las tablas si no existen.
-    Esta función ahora es segura para ser llamada múltiples veces.
-    """
+def close_db(e=None):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+        logger.debug("Conexión a la BBDD cerrada.")
+
+
+# =============================================================================
+# NOTA: La función initialize_database ha sido ELIMINADA
+# Ahora usamos Flask-SQLAlchemy y Flask-Migrate para gestionar la BD
+# =============================================================================
+
+
+# =============================================================================
+# Fábrica de la Aplicación (create_app)
+# =============================================================================
+
+def create_app(test_config=None):
+    logger.info("======================================================================")
+    logger.info("🚀 CREANDO INSTANCIA DE LA APP MONTERO")
+    logger.info("======================================================================")
+    
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    static_dir = os.path.join(base_dir, 'assets') 
+
+    app = Flask(__name__,
+                instance_relative_config=True,
+                static_folder=static_dir,
+                static_url_path='/assets') 
+                
+    app.config.from_mapping(
+        SECRET_KEY=os.getenv("SECRET_KEY", "default_secret_key_for_dev"),
+        DATABASE=os.path.join(app.instance_path, "mi_sistema.db"),
+
+        # ✅ CONFIGURACIÓN CENTRALIZADA DE BASE DE DATOS
+        DATABASE_PATH=DATABASE_PATH,  # Ruta absoluta a mi_sistema.db
+
+        # ✅ CONFIGURACIÓN FLASK-SQLALCHEMY
+        SQLALCHEMY_DATABASE_URI=DATABASE_URI,
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,  # Desactivar tracking para mejor performance
+        SQLALCHEMY_ECHO=False,  # Cambiar a True para debugging SQL
+
+        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        SESSION_COOKIE_NAME='montero_session',  # ✅ Nombre específico para la cookie
+        SESSION_COOKIE_PATH='/',  # ✅ Cookie válida para toda la aplicación
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+
+        # Configuración de Flask-Mail
+        MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+        MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
+        MAIL_USE_TLS=os.getenv("MAIL_USE_TLS", "True").lower() == "true",
+        MAIL_USE_SSL=os.getenv("MAIL_USE_SSL", "False").lower() == "true",
+        MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+        MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+        MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER", "Sistema Montero <noreply@montero.com>"),
+        MAIL_MAX_EMAILS=os.getenv("MAIL_MAX_EMAILS"),
+        MAIL_ASCII_ATTACHMENTS=os.getenv("MAIL_ASCII_ATTACHMENTS", "False").lower() == "true",
+
+        # Configuración de subida de archivos (centralizada para todos los módulos)
+        UPLOAD_FOLDER=os.path.join(base_dir, 'static', 'uploads'),
+        MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # Límite de 16MB por archivo
+        ALLOWED_EXTENSIONS={'pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv'},
+    )
+
+    # 🔍 LOG para debugging de rutas críticas
+    logger.info(f"📂 DATABASE_PATH configurado: {DATABASE_PATH}")
+    logger.info(f"📂 UPLOAD_FOLDER configurado: {app.config['UPLOAD_FOLDER']}")
+
+    if test_config is None:
+        app.config.from_pyfile("config.py", silent=True)
+    else:
+        app.config.from_mapping(test_config)
+
+    logger.info("Configuración de la aplicación cargada.")
+
     try:
-        # Determinar la ruta de la BD (si estamos en testing, la app.config ya tiene la ruta temporal)
-        db_path = current_app.config.get("DATABASE_PATH", DATABASE_PATH)
+        os.makedirs(app.instance_path, exist_ok=True)
+    except OSError:
+        logger.error(f"No se pudo crear el directorio de instancia en: {app.instance_path}")
 
-        # Asegura que el directorio 'data' exista (si no es en memoria)
-        if db_path != ":memory:":
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    # Crear estructura de carpetas para uploads organizados
+    upload_subdirs = ['docs', 'formularios', 'tutelas', 'impuestos', 'temp']
+    for subdir in upload_subdirs:
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'], subdir)
+        try:
+            os.makedirs(upload_path, exist_ok=True)
+            logger.info(f"Carpeta de uploads creada/verificada: {upload_path}")
+        except OSError as e:
+            logger.error(f"No se pudo crear carpeta {upload_path}: {e}")
 
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+    CORS(app, supports_credentials=True, resources={
+        r"/*": {
+            "origins": ["http://localhost:5000", "http://127.0.0.1:5000"]
+        }
+    })
+    
+    # Inicializar CSRF
+    csrf = CSRFProtect(app)
+    
+    # Configurar WTF_CSRF_CHECK_DEFAULT = False para APIs
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+    app.config['WTF_CSRF_ENABLED'] = True  # Habilitado solo para rutas que lo necesiten
 
-        logger.info(f"Conectado a la base de datos ({db_path}) para inicialización.")
+    # Inicializar Flask-Limiter
+    limiter.init_app(app)
 
-        # --- Creación de Tablas ---
-        # Usar 'CREATE TABLE IF NOT EXISTS' para seguridad
+    # Inicializar Flask-Mail
+    mail.init_app(app)
 
-        # Tabla de Usuarios del Portal
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS portal_users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            telefono TEXT,
-            fecha_nacimiento TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ultimo_acceso TIMESTAMP,
-            rol TEXT DEFAULT 'usuario'
-        );
-        """
-        )
+    # ✅ Inicializar Flask-SQLAlchemy
+    db.init_app(app)
+    logger.info("Flask-SQLAlchemy inicializado correctamente")
 
-        # Tabla de Empresas
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS empresas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_empresa TEXT NOT NULL,
-            tipo_identificacion_empresa TEXT,
-            nit TEXT UNIQUE NOT NULL,
-            direccion_empresa TEXT,
-            telefono_empresa TEXT,
-            correo_empresa TEXT,
-            departamento_empresa TEXT,
-            ciudad_empresa TEXT,
-            ibc_empresa REAL,
-            afp_empresa TEXT,
-            arl_empresa TEXT,
-            rep_legal_nombre TEXT,
-            rep_legal_tipo_id TEXT,
-            rep_legal_numero_id TEXT,
-            fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        )
+    # ✅ Inicializar Flask-Migrate
+    migrate.init_app(app, db)
+    logger.info("Flask-Migrate inicializado correctamente")
 
-        # Tabla de Credenciales
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS credenciales_plataforma (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            plataforma TEXT NOT NULL,
-            usuario TEXT,
-            contrasena TEXT,
-            email TEXT,
-            url TEXT,
-            notas TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            fecha_actualizacion TIMESTAMP,
-            creado_por_id INTEGER,
-            actualizado_por_id INTEGER,
-            FOREIGN KEY (creado_por_id) REFERENCES portal_users(id),
-            FOREIGN KEY (actualizado_por_id) REFERENCES portal_users(id)
-        );
-        """
-        )
+    # ✅ Crear tablas si no existen (solo en desarrollo)
+    with app.app_context():
+        # Importar modelos para que SQLAlchemy los reconozca
+        from models import orm_models
+        db.create_all()
+        logger.info("✅ Tablas de la base de datos verificadas/creadas con SQLAlchemy ORM")
 
-        # Tabla de Usuarios (empleados/afiliados)
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre_completo TEXT,
-            email TEXT,
-            tipo_documento TEXT,
-            numero_documento TEXT,
-            telefono TEXT,
-            cargo TEXT,
-            empresa_nit TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            -- Campos adicionales para formularios
-            tipoId TEXT,
-            numeroId TEXT,
-            primerNombre TEXT,
-            segundoNombre TEXT,
-            primerApellido TEXT,
-            segundoApellido TEXT,
-            sexoBiologico TEXT,
-            sexoIdentificacion TEXT,
-            nacionalidad TEXT,
-            fechaNacimiento TEXT,
-            paisNacimiento TEXT,
-            departamentoNacimiento TEXT,
-            municipioNacimiento TEXT,
-            direccion TEXT,
-            telefonoCelular TEXT,
-            telefonoFijo TEXT,
-            correoElectronico TEXT,
-            comunaBarrio TEXT,
-            afpNombre TEXT,
-            afpCosto REAL,
-            epsNombre TEXT,
-            epsCosto REAL,
-            arlNombre TEXT,
-            arlCosto REAL,
-            ccfNombre TEXT,
-            ccfCosto REAL,
-            administracion TEXT,
-            ibc REAL,
-            claseRiesgoARL TEXT,
-            fechaIngreso TEXT,
-            FOREIGN KEY (empresa_nit) REFERENCES empresas(nit),
-            UNIQUE (tipoId, numeroId)
-        );
-        """
-        )
+    logger.info("CORS, CSRFProtect, Flask-Limiter, Flask-Mail, SQLAlchemy y Migrate inicializados.")
 
-        # Tabla de Formularios Importados
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS formularios_importados (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            nombre_archivo TEXT NOT NULL,
-            ruta_archivo TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        )
+    app.teardown_appcontext(close_db)
+    logger.info("Comandos de la app (teardown) registrados.")
 
-        # Tabla de Novedades
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS novedades (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            client TEXT,
-            subject TEXT NOT NULL,
-            priority TEXT NOT NULL,
-            status TEXT NOT NULL,
-            priorityText TEXT,
-            idType TEXT,
-            idNumber TEXT,
-            firstName TEXT,
-            lastName TEXT,
-            nationality TEXT,
-            gender TEXT,
-            birthDate TEXT,
-            phone TEXT,
-            department TEXT,
-            city TEXT,
-            address TEXT,
-            neighborhood TEXT,
-            email TEXT,
-            beneficiaries TEXT,
-            eps TEXT,
-            arl TEXT,
-            arlClass TEXT,
-            ccf TEXT,
-            pensionFund TEXT,
-            ibc REAL,
-            description TEXT NOT NULL,
-            radicado TEXT,
-            solutionDescription TEXT,
-            creationDate TEXT DEFAULT (date('now')),
-            updateDate TEXT DEFAULT (date('now')),
-            assignedTo TEXT DEFAULT 'Sistema',
-            history TEXT
-        );
-        """
-        )
+    # REGISTRO DE BLUEPRINTS
+    logger.info("Registrando Blueprints de la aplicación...")
+    try:
+        app.register_blueprint(bp_auth)
+        app.register_blueprint(bp_main)
+        app.register_blueprint(bp_empresa)
+        app.register_blueprint(bp_empleado)
+        app.register_blueprint(bp_pago)
+        app.register_blueprint(bp_notificaciones)
+        app.register_blueprint(bp_api)
+        app.register_blueprint(bp_tutela)
+        app.register_blueprint(bp_cotizacion)
+        app.register_blueprint(bp_incapacidad)
+        app.register_blueprint(bp_depuraciones)
+        app.register_blueprint(bp_formularios)
+        app.register_blueprint(bp_formularios_pages)
+        app.register_blueprint(bp_impuestos)
+        app.register_blueprint(bp_unificacion)
+        app.register_blueprint(bp_envio_planillas)
+        app.register_blueprint(credenciales_bp)
+        app.register_blueprint(bp_novedades)
+        app.register_blueprint(pages_bp)
 
-        # Tabla de Pagos
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS pagos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id TEXT NOT NULL,
-            empresa_nit TEXT NOT NULL,
-            monto REAL NOT NULL,
-            tipo_pago TEXT NOT NULL,
-            fecha_pago TEXT DEFAULT (date('now')),
-            referencia TEXT,
-            estado TEXT DEFAULT 'Pendiente',
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios(numeroId),
-            FOREIGN KEY (empresa_nit) REFERENCES empresas(nit)
-        );
-        """
-        )
+        # Nuevos blueprints para Marketing, Automation, Finance y Admin
+        app.register_blueprint(bp_marketing)
+        app.register_blueprint(automation_bp)
+        app.register_blueprint(finance_bp)
+        app.register_blueprint(admin_bp)
+        app.register_blueprint(user_settings_bp)
 
-        # Tabla de Tutelas
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS tutelas (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id TEXT NOT NULL,
-            motivo TEXT NOT NULL,
-            fecha_inicio TEXT NOT NULL,
-            estado TEXT DEFAULT 'Registrada',
-            descripcion TEXT,
-            ruta_soporte_pdf TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios(numeroId)
-        );
-        """
-        )
-
-        # Tabla de Incapacidades
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS incapacidades (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id TEXT NOT NULL,
-            tipo_incapacidad TEXT NOT NULL,
-            fecha_inicio TEXT NOT NULL,
-            fecha_fin TEXT,
-            dias_incapacidad INTEGER,
-            diagnostico TEXT,
-            estado TEXT DEFAULT 'Registrada',
-            ruta_soporte_pdf TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (usuario_id) REFERENCES usuarios(numeroId)
-        );
-        """
-        )
-
-        # Tabla de Depuraciones Pendientes
-        cursor.execute(
-            """
-        CREATE TABLE IF NOT EXISTS depuraciones_pendientes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            entidad_tipo TEXT NOT NULL,
-            entidad_id TEXT NOT NULL,
-            entidad_nombre TEXT NOT NULL,
-            causa TEXT,
-            estado TEXT DEFAULT 'Pendiente',
-            fecha_sugerida TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        )
-
-        # (Añadir aquí otras tablas 'CREATE TABLE IF NOT EXISTS' según sea necesario)
-
-        conn.commit()
-        conn.close()
-        logger.info("✅ Base de datos inicializada correctamente.")
-
+        logger.info("✅ Todos los blueprints han sido registrados exitosamente.")
+        logger.info("✅ Módulos cargados: Auth, RPA (automation_bp), Marketing, Finance, Admin, User Settings")
+        logger.info("✅ Sistema Montero completamente inicializado y listo para producción.")
+        
     except Exception as e:
-        # current_app puede no estar disponible si esto falla muy temprano
-        logger.critical(f"Error fatal al inicializar la base de datos: {e}", exc_info=True)
+        logger.critical(f"Error CRÍTICO al registrar un blueprint: {e}")
         traceback.print_exc()
 
+    # RUTAS DE VERIFICACIÓN Y CSRF
+    @app.route("/hello")
+    def hello():
+        return "¡Hola! El servidor Montero está funcionando."
 
-# ==============================================================================
-# FÁBRICA DE LA APLICACIÓN (APP FACTORY)
-# ==============================================================================
+    @app.route("/health")
+    def health():
+        """Endpoint de health check para Docker y monitoreo."""
+        return jsonify({
+            "status": "healthy",
+            "service": "Sistema Montero",
+            "database": "connected"
+        }), 200
 
+    @app.route('/get-csrf-token', methods=['GET'])
+    def get_csrf_token():
+        token = generate_csrf()
+        return jsonify({'csrf_token': token})
 
-def create_app(config_override=None):
-    """
-    Fábrica de la aplicación Flask.
-    """
-    app = Flask(__name__, static_folder=None, template_folder=TEMPLATE_DIR)
+    # Ruta silenciosa para favicon (evita warnings en logs)
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'assets', 'images'), 'favicon.svg', mimetype='image/svg+xml')
 
-    # --- Configuración de la App ---
-    logger.info("======================================================================")
-    logger.info("🚀 CREANDO INSTANCIA DE LA APP MONTERO (MODO TEST AISLADO)")
-    logger.info("======================================================================")
-
-    # Cargar variables de entorno
-    env_path = os.path.join(BASE_DIR, "_env")
-    if os.path.exists(env_path):
-        load_dotenv(env_path)
-
-    try:
-        # Cargar configuración de seguridad
-        app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-        if not app.config["SECRET_KEY"]:
-            logger.critical("🚨 FATAL: SECRET_KEY no está definida.")
-            raise ValueError("SECRET_KEY no definida en variables de entorno")
-
-        app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=int(os.getenv("SESSION_LIFETIME_MINUTES", 60)))
-        app.config["SESSION_COOKIE_SECURE"] = os.getenv("SESSION_COOKIE_SECURE", "True").lower() == "true"
-        app.config["SESSION_COOKIE_HTTPONLY"] = os.getenv("SESSION_COOKIE_HTTPONLY", "True").lower() == "true"
-        app.config["SESSION_COOKIE_SAMESITE"] = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
-        app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER", "uploads")
-        app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB
-        app.config["DATABASE_PATH"] = os.getenv("DATABASE_PATH", os.path.join(BASE_DIR, "data", "mi_sistema.db"))
-
-        # Aplicar configuraciones de testing (si se proveen)
-        if config_override:
-            app.config.update(config_override)
-            logger.info(f"Configuración de testing aplicada. DATABASE_PATH: {app.config['DATABASE_PATH']}")
-
-        logger.info("Configuración de la aplicación cargada.")
-
-    except Exception as e:
-        logger.critical(f"Error fatal durante la configuración de la app: {e}", exc_info=True)
-
-    # --- Configuración de CORS y CSRF ---
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
-    CSRFProtect(app)
-    logger.info("CORS y CSRFProtect inicializados.")
-
-    # --- Importación y Registro de Blueprints (AISLADO PARA TESTING) ---
-    from routes.auth import auth_bp
-    from routes.credenciales import credenciales_bp
-    from routes.depuraciones import bp_depuraciones as depuraciones_bp
-    from routes.empresas import empresas_bp
-    from routes.formularios import formularios as formularios_bp
-    from routes.incapacidades import bp_incapacidades as incapacidades_bp
-    from routes.novedades import bp_novedades as novedades_bp
-    from routes.pagos import bp_pagos as pagos_bp
-    from routes.tutelas import bp_tutelas as tutelas_bp
-    from routes.usuarios import usuarios_bp
-
-    # (Comentados temporalmente - Pendientes para días posteriores)
-    # from routes.api_docs import api_docs_bp
-    # from routes.cotizaciones import cotizaciones_bp
-    # from routes.pago_impuestos import pago_impuestos_bp
-    # from routes.envio_planillas import envio_planillas_bp
-
-    logger.info("Blueprints (MODO AISLADO) han sido registrados exitosamente.")
-
-    # --- Hooks de la Aplicación (Gestión de Peticiones) ---
-    @app.before_request
-    def before_request():
-        if request.path.startswith("/assets/") or request.path.startswith("/docs/"):
-            return
-        try:
-            if "db" not in g:
-                db_path = current_app.config.get("DATABASE_PATH")
-                g.db = sqlite3.connect(db_path)
-                g.db.row_factory = sqlite3.Row
-        except Exception as e:
-            logger.error(f"Error al conectar a la BD en before_request: {e}", exc_info=True)
-            g.db = None
-            return jsonify({"error": "Error de conexión con la base de datos"}), 503
-        if "user_id" in session:
-            session.permanent = True
-            session.modified = True
-        if request.method == "GET" and not request.path.startswith("/api/"):
-            g.csrf_token = generate_csrf()
-
-    @app.after_request
-    def after_request(response):
-        if request.path.startswith("/assets/") or request.path.startswith("/docs/"):
-            return response
-        db = g.pop("db", None)
-        if db is not None:
-            db.close()
-        if hasattr(g, "csrf_token"):
-            response.set_cookie(
-                "csrf_token",
-                g.csrf_token,
-                secure=app.config.get("SESSION_COOKIE_SECURE", True),
-                httponly=False,
-                samesite=app.config.get("SESSION_COOKIE_SAMESITE", "Lax"),
-            )
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "SAMEORIGIN"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
-        return response
-
-    # --- Registro de Blueprints (AISLADO PARA TESTING) ---
-    try:
-        app.register_blueprint(auth_bp)
-        app.register_blueprint(usuarios_bp)
-        app.register_blueprint(empresas_bp)
-        app.register_blueprint(credenciales_bp)
-        app.register_blueprint(formularios_bp)
-        app.register_blueprint(novedades_bp)
-        app.register_blueprint(pagos_bp)
-        app.register_blueprint(tutelas_bp)
-        app.register_blueprint(incapacidades_bp)
-        app.register_blueprint(depuraciones_bp)
-
-        # (Comentados temporalmente - Pendientes para días posteriores)
-        # app.register_blueprint(api_docs_bp)
-        # app.register_blueprint(cotizaciones_bp)
-        # app.register_blueprint(pago_impuestos_bp)
-        # app.register_blueprint(envio_planillas_bp)
-
-        logger.info("Todos los blueprints (MODO AISLADO) han sido registrados exitosamente.")
-    except Exception as e:
-        logger.critical(f"Error al registrar blueprints: {e}", exc_info=True)
-
-    # --- Rutas Principales y Manejadores de Errores ---
-    @app.route("/")
-    @login_required
-    def index():
-        return render_template("index.html")
-
-    @app.route("/login")
-    def login_page():
-        return render_template("login.html")
-
-    @app.route("/assets/<path:filename>")
-    def serve_assets(filename):
-        # (CORREGIDO: Ruta absoluta a la carpeta de assets)
-        return app.send_static_file(os.path.join(ASSETS_DIR, filename))
-
+    # MANEJADORES DE ERRORES PERSONALIZADOS
     @app.errorhandler(404)
     def not_found_error(error):
-        if request.path.startswith("/api/"):
-            return jsonify({"error": "Recurso no encontrado"}), 404
-        return render_template("404.html"), 404
+        # Ignorar warnings de rutas del navegador y archivos de desarrollo
+        RUTAS_SILENCIOSAS = [
+            '/favicon.ico',
+            '/.well-known/appspecific/com.chrome.devtools.json'
+        ]
+        
+        # Ignorar archivos .map (source maps de desarrollo)
+        if request.path.endswith('.map') or request.path in RUTAS_SILENCIOSAS:
+            return '', 204
+
+        logger.warning(f"⚠️ Ruta no encontrada (404): {request.path}")
+
+        # Si la petición espera JSON (API), devolver JSON
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify({
+                "error": "Recurso no encontrado",
+                "path": request.path,
+                "status": 404
+            }), 404
+
+        # Si la petición espera HTML, mostrar página personalizada
+        return render_template('errors/404.html'), 404
 
     @app.errorhandler(500)
     def internal_error(error):
-        logger.critical(f"Error interno del servidor (500): {error}", exc_info=True)
-        return jsonify({"error": "Error interno del servidor"}), 500
+        # Generar timestamp único para tracking
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+
+        logger.critical(f"❌ Error interno del servidor (500) - ID: {timestamp}")
+        logger.critical(f"Ruta: {request.path}")
+        logger.critical(f"Detalles: {error}", exc_info=True)
+
+        # Si la petición espera JSON (API), devolver JSON
+        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
+            return jsonify({
+                "error": "Error interno del servidor",
+                "error_id": f"ERR-{timestamp}",
+                "status": 500
+            }), 500
+
+        # Si la petición espera HTML, mostrar página personalizada
+        return render_template('errors/500.html', timestamp=timestamp), 500 
 
     @app.errorhandler(401)
     def unauthorized_error(error):
+        logger.warning(f"Acceso no autorizado (401) a: {request.path}")
         return jsonify({"error": "No autorizado"}), 401
 
     @app.errorhandler(403)
     def forbidden_error(error):
+        logger.warning(f"Acceso prohibido (403) a: {request.path}")
         return jsonify({"error": "Prohibido"}), 403
 
     return app
 
 
-# ==============================================================================
-# Punto de Entrada (si se ejecuta 'python app.py')
-# ==============================================================================
+# Crear instancia de app para Gunicorn
+app = create_app()
 
+# PUNTO DE ENTRADA
 if __name__ == "__main__":
-    app = create_app()  # Crea la app usando la fábrica
     try:
-        # Inicializar la base de datos al arrancar (usando el contexto de la app)
-        with app.app_context():
-            initialize_database()
+        # ✅ Ya no necesitamos initialize_database() - SQLAlchemy lo maneja automáticamente
 
-        host = os.getenv("FLASK_HOST", "127.0.0.1")
+        host = os.getenv("FLASK_HOST", "0.0.0.0")
         port = int(os.getenv("FLASK_PORT", 5000))
-        debug_mode = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+        debug_mode = os.getenv("FLASK_DEBUG", "True").lower() == "true"
 
         logger.info(f"Iniciando servidor en http://{host}:{port}/ (Debug: {debug_mode})")
+        logger.info("✅ Sistema usando Flask-SQLAlchemy ORM - SQL manual eliminado")
 
         app.run(host=host, port=port, debug=debug_mode)
 
     except Exception as e:
-        logger.critical(f"No se pudo iniciar el servidor: {e}", exc_info=True)
+        logger.critical(f"No se pudo iniciar el servidor: {e}")
+        traceback.print_exc()

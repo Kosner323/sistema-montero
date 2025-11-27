@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es" data-pc-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Página No Encontrada | Portal Montero</title>
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon">
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Feather Icons -->
+    <link rel="stylesheet" href="/assets/fonts/feather.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animación de fondo flotante */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            from { transform: translate(0, 0); }
+            to { transform: translate(50px, 50px); }
+        }
+
+        .error-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .error-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 4rem 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .error-icon i {
+            font-size: 4rem;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+            }
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .error-description {
+            font-size: 1.1rem;
+            color: #718096;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-path {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #4a5568;
+            word-break: break-all;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.875rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary-custom {
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            color: #4a5568;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            color: #2d3748;
+        }
+
+        .help-text {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        @media (max-width: 576px) {
+            .error-code {
+                font-size: 5rem;
+            }
+
+            .error-title {
+                font-size: 1.5rem;
+            }
+
+            .error-card {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                margin: 0.5rem 0;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-card">
+            <div class="error-icon">
+                <i data-feather="alert-circle"></i>
+            </div>
+
+            <div class="error-code">404</div>
+
+            <h1 class="error-title">Página No Encontrada</h1>
+
+            <p class="error-description">
+                Lo sentimos, la página que intentas visitar no existe o ha sido movida a otra ubicación.
+            </p>
+
+            <div class="error-path">
+                <strong>Ruta solicitada:</strong> <span id="currentPath">{{ request.path }}</span>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-center align-items-center">
+                <a href="/dashboard" class="btn-primary-custom">
+                    <i data-feather="home" style="width: 18px; height: 18px;"></i>
+                    Volver al Inicio
+                </a>
+                <a href="javascript:history.back()" class="btn-secondary-custom">
+                    <i data-feather="arrow-left" style="width: 18px; height: 18px;"></i>
+                    Regresar
+                </a>
+            </div>
+
+            <div class="help-text">
+                ¿Necesitas ayuda? Contacta al equipo de soporte técnico
+            </div>
+        </div>
+    </div>
+
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        // Inicializar iconos Feather
+        feather.replace();
+
+        // Actualizar la ruta actual dinámicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const pathElement = document.getElementById('currentPath');
+            if (pathElement && !pathElement.textContent.trim()) {
+                pathElement.textContent = window.location.pathname;
+            }
+        });
+    </script>
+</body>
+</html>

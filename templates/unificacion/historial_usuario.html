@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Historial de Usuario - Sistema Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+  <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/assets/fonts/material.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+  <style>
+    :root {
+        --color-primario: #007bff;
+        --color-gris-claro: #f8f9fa;
+        --color-gris-medio: #dee2e6;
+        --color-gris-oscuro: #495057;
+        --color-texto: #2c3e50;
+    }
+
+    /* Tarjeta de datos del usuario */
+    .card-usuario {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border: 1px solid var(--color-gris-medio);
+    }
+
+    .card-usuario-header {
+        background-color: var(--color-gris-claro);
+        border-bottom: 2px solid var(--color-primario);
+        padding: 1.25rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .card-usuario-header h4 {
+        margin: 0;
+        color: var(--color-texto);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .card-usuario-body {
+        padding: 1.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--color-gris-oscuro);
+        font-weight: 500;
+        margin-bottom: 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: var(--color-texto);
+        font-weight: 400;
+    }
+
+    .info-value.destacado {
+        font-weight: 600;
+        color: var(--color-primario);
+    }
+
+    /* Tarjeta de historial */
+    .card-historial {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        border: 1px solid var(--color-gris-medio);
+    }
+
+    .card-historial-header {
+        background-color: var(--color-gris-claro);
+        border-bottom: 2px solid var(--color-primario);
+        padding: 1.25rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .card-historial-header h4 {
+        margin: 0;
+        color: var(--color-texto);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Timeline de historial */
+    .timeline-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 2.5rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--color-gris-medio);
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-left: 1.5rem;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -2.5rem;
+        top: 0;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid var(--color-primario);
+        box-shadow: 0 0 0 4px white;
+    }
+
+    .timeline-content {
+        background: var(--color-gris-claro);
+        border-radius: 6px;
+        padding: 1.25rem;
+        border-left: 3px solid var(--color-primario);
+    }
+
+    .timeline-fecha {
+        font-size: 0.85rem;
+        color: var(--color-gris-oscuro);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-accion {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-detalles {
+        font-size: 0.9rem;
+        color: var(--color-gris-oscuro);
+        margin-bottom: 0.25rem;
+    }
+
+    .timeline-detalles strong {
+        color: var(--color-texto);
+    }
+
+    .timeline-observaciones {
+        font-size: 0.88rem;
+        color: var(--color-gris-oscuro);
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+
+    /* Badge de estado */
+    .badge-estado {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-activo {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .badge-inactivo {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Mensaje vacío */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--color-gris-oscuro);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--color-gris-medio);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .timeline {
+            padding-left: 2rem;
+        }
+
+        .timeline-marker {
+            left: -2rem;
+        }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loader -->
+  <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+    <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+      <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+    </div>
+  </div>
+
+  {% include '_sidebar.html' %}
+  {% include '_header.html' %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+
+      <!-- Breadcrumb -->
+      <div class="page-header">
+        <div class="page-block">
+          <div class="page-header-title">
+            <h5 class="mb-0 font-medium">Historial de Usuario</h5>
+          </div>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+            <li class="breadcrumb-item"><a href="/unificacion">Unificación</a></li>
+            <li class="breadcrumb-item" aria-current="page">Historial</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Datos del Usuario -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card-usuario">
+            <div class="card-usuario-header">
+              <h4>
+                <i data-feather="user" class="w-5 h-5 inline-block mr-2"></i>
+                Información del Usuario
+              </h4>
+            </div>
+            <div class="card-usuario-body">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Nombre Completo</span>
+                  <span class="info-value destacado">
+                    {{ usuario.primerNombre or '' }}
+                    {{ usuario.segundoNombre or '' }}
+                    {{ usuario.primerApellido or '' }}
+                    {{ usuario.segundoApellido or '' }}
+                  </span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Tipo y Número de Identificación</span>
+                  <span class="info-value">
+                    {{ usuario.tipoId or 'N/A' }} - {{ usuario.numeroId or 'N/A' }}
+                  </span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Correo Electrónico</span>
+                  <span class="info-value">{{ usuario.correoElectronico or 'N/A' }}</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Rol</span>
+                  <span class="info-value">{{ usuario.role or 'N/A' }}</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Estado</span>
+                  <span class="info-value">
+                    {% if usuario.estado and usuario.estado.lower() == 'activo' %}
+                      <span class="badge-estado badge-activo">Activo</span>
+                    {% else %}
+                      <span class="badge-estado badge-inactivo">Inactivo</span>
+                    {% endif %}
+                  </span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Empresa Actual</span>
+                  <span class="info-value destacado">
+                    {{ usuario.nombre_empresa or 'Sin Empresa Asignada' }}
+                  </span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Fecha de Ingreso</span>
+                  <span class="info-value">{{ usuario.fechaIngreso or 'N/A' }}</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">IBC</span>
+                  <span class="info-value">
+                    {% if usuario.ibc %}
+                      $ {{ "{:,.0f}".format(usuario.ibc) }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Historial -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card-historial">
+            <div class="card-historial-header">
+              <h4>
+                <i data-feather="clock" class="w-5 h-5 inline-block mr-2"></i>
+                Historial de Cambios y Vinculaciones
+              </h4>
+            </div>
+            <div class="timeline-container">
+              {% if historial and historial|length > 0 %}
+                <div class="timeline">
+                  {% for registro in historial %}
+                  <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-fecha">
+                        <i data-feather="calendar" class="w-4 h-4 inline-block"></i>
+                        {{ registro.fecha }}
+                      </div>
+                      <div class="timeline-accion">{{ registro.accion }}</div>
+
+                      {% if registro.empresa_anterior or registro.empresa_nueva %}
+                      <div class="timeline-detalles">
+                        {% if registro.empresa_anterior %}
+                          <strong>Empresa Anterior:</strong> {{ registro.empresa_anterior }}<br>
+                        {% endif %}
+                        {% if registro.empresa_nueva %}
+                          <strong>Empresa Nueva:</strong> {{ registro.empresa_nueva }}<br>
+                        {% endif %}
+                      </div>
+                      {% endif %}
+
+                      <div class="timeline-detalles">
+                        <strong>Responsable:</strong> {{ registro.usuario_responsable }}
+                      </div>
+
+                      {% if registro.observaciones %}
+                      <div class="timeline-observaciones">
+                        <i data-feather="file-text" class="w-4 h-4 inline-block"></i>
+                        {{ registro.observaciones }}
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="empty-state">
+                  <i data-feather="inbox"></i>
+                  <p>No hay registros de historial para este usuario.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de Regreso -->
+      <div class="row">
+        <div class="col-12 text-center">
+          <a href="/unificacion" class="btn btn-primary">
+            <i data-feather="arrow-left" class="w-4 h-4 mr-2"></i>
+            Volver a Unificación
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {% include '_footer.html' %}
+
+  <!-- Scripts en orden correcto -->
+  <script src="/assets/js/plugins/simplebar.min.js"></script>
+  <script src="/assets/js/plugins/popper.min.js"></script>
+  <script src="/assets/js/icon/custom-icon.js"></script>
+  <script src="/assets/js/plugins/feather.min.js"></script>
+  <script src="/assets/js/component.js"></script>
+  <script src="/assets/js/theme.js"></script>
+  <script>
+    // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+    window.layout_change = window.layout_change || function() {};
+    window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+    window.change_box_container = window.change_box_container || function() {};
+    window.layout_caption_change = window.layout_caption_change || function() {};
+    window.layout_rtl_change = window.layout_rtl_change || function() {};
+    window.preset_change = window.preset_change || function() {};
+    window.main_layout_change = window.main_layout_change || function() {};
+  </script>
+
+  <script src="/assets/js/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  {% include '_theme_config.html' %}
+
+  <script>
+    // Inicializar Feather Icons
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
+  </script>
+</body>
+</html>

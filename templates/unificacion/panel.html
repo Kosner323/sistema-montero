@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Vinculación Masiva | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+  <link rel="stylesheet" href="/assets/css/style-preset.css" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    /* ========== ESTILOS PERSONALIZADOS ========== */
+    .bloque-card {
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: box-shadow 0.3s ease;
+    }
+
+    .bloque-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .card-header-numero {
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      color: #2c3e50;
+      padding: 1rem 1.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .numero-bloque {
+      width: 32px;
+      height: 32px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .table-completa {
+      font-size: 0.75rem;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .table-completa thead th {
+      background-color: #f8f9fa;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.5px;
+      padding: 0.75rem 0.5rem;
+      border: 1px solid #dee2e6;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+      color: #495057;
+    }
+
+    .table-completa thead th.grupo-header {
+      background-color: #e9ecef;
+      color: #2c3e50;
+      font-weight: 700;
+      border-bottom: 2px solid #adb5bd;
+    }
+
+    .table-completa tbody td {
+      padding: 0.6rem 0.4rem;
+      border: 1px solid #dee2e6;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .table-completa tbody tr:hover {
+      background-color: rgba(0, 0, 0, 0.025);
+    }
+
+    .checkbox-grande {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .radio-grande {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .badge-moneda {
+      background-color: #28a745;
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+      font-size: 0.7rem;
+    }
+
+    .badge-eps { background-color: #007bff; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.65rem; }
+    .badge-arl { background-color: #fd7e14; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.65rem; }
+    .badge-pension { background-color: #6f42c1; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.65rem; }
+    .badge-caja { background-color: #20c997; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.65rem; }
+
+    .sin-empresa {
+      color: #dc3545;
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .empresa-actual {
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    .zona-resumen {
+      background-color: #f8f9fa;
+      border: 3px dashed #007bff;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .texto-resumen {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .texto-resumen .highlight {
+      color: #007bff;
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+
+    .btn-unificar {
+      font-size: 1.2rem;
+      padding: 1rem 3rem;
+      font-weight: 700;
+      border-radius: 0.375rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .btn-unificar:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .tabla-resumen-simple {
+      background: white;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    .tabla-resumen-simple th {
+      background-color: #007bff;
+      color: white;
+      padding: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tabla-resumen-simple td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .form-label-custom {
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .contador-seleccion {
+      background: #28a745;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-left: 1rem;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loading-content {
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .spinner-border-lg {
+      width: 3rem;
+      height: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div class="loader-bg">
+      <div class="loader-track">
+          <div class="loader-fill"></div>
+      </div>
+  </div>
+
+  {% include '_sidebar.html' ignore missing %}
+  {% include '_header.html' ignore missing %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+
+      <!-- ========== BREADCRUMB ========== -->
+      <div class="page-header">
+        <div class="page-block">
+          <div class="row align-items-center">
+            <div class="col-md-12">
+              <div class="page-header-title">
+                <h5 class="m-b-10">Vinculación Masiva de Usuarios</h5>
+              </div>
+              <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard"><i class="feather icon-home"></i></a></li>
+                <li class="breadcrumb-item">Administración</li>
+                <li class="breadcrumb-item" aria-current="page">Vinculación Masiva</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================
+           BLOQUE 1: FILTROS DE USUARIOS
+      ========================================================================= -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card bloque-card">
+            <div class="card-header card-header-numero">
+              <div class="numero-bloque">1</div>
+              <div>Búsqueda de Afiliados</div>
+            </div>
+            <div class="card-body">
+              <form id="formBuscarUsuarios">
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <label for="filtroUserTipo" class="form-label-custom">
+                      <i class="feather icon-credit-card me-1"></i>
+                      Tipo de Documento
+                    </label>
+                    <select class="form-select" id="filtroUserTipo">
+                      <option value="">-- Todos --</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PA">Pasaporte (PA)</option>
+                      <option value="TI">Tarjeta de Identidad (TI)</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="filtroUserNumero" class="form-label-custom">
+                      <i class="feather icon-hash me-1"></i>
+                      Número de Documento
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroUserNumero" 
+                      placeholder="Ej: 1010123456"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroUserNombre" class="form-label-custom">
+                      <i class="feather icon-user me-1"></i>
+                      Nombres / Apellidos
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroUserNombre" 
+                      placeholder="Buscar por nombre..."
+                    />
+                  </div>
+
+                  <div class="col-md-2 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                      <i class="feather icon-search me-2"></i>
+                      Buscar Usuarios
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================
+           BLOQUE 2: TABLA MAESTRA DE USUARIOS (SELECCIÓN MÚLTIPLE)
+      ========================================================================= -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card bloque-card">
+            <div class="card-header card-header-numero">
+              <div class="numero-bloque">2</div>
+              <div>Tabla Maestra de Usuarios</div>
+              <span class="contador-seleccion" id="contadorUsuarios">0 seleccionados</span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-completa mb-0">
+                  <thead>
+                    <!-- FILA 1: GRUPOS PRINCIPALES -->
+                    <tr>
+                      <th rowspan="2" style="width: 40px;">
+                        <input type="checkbox" class="checkbox-grande" id="checkTodosUsuarios" />
+                      </th>
+                      <th colspan="3" class="grupo-header">IDENTIFICACIÓN</th>
+                      <th colspan="4" class="grupo-header">NOMBRE COMPLETO</th>
+                      <th colspan="4" class="grupo-header">SEGURIDAD SOCIAL</th>
+                      <th colspan="3" class="grupo-header">DATOS INGRESO</th>
+                      <th colspan="4" class="grupo-header">APORTES ($)</th>
+                      <th rowspan="2" class="grupo-header">EMPRESA ACTUAL</th>
+                      <th rowspan="2" style="width: 80px;">ACCIONES</th>
+                    </tr>
+                    
+                    <!-- FILA 2: DETALLES -->
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Número</th>
+                      <th>Edad</th>
+                      <th>1er Nom</th>
+                      <th>2do Nom</th>
+                      <th>1er Ape</th>
+                      <th>2do Ape</th>
+                      <th>EPS</th>
+                      <th>ARL<br>(Riesgo)</th>
+                      <th>Pensión</th>
+                      <th>Caja</th>
+                      <th>Fecha</th>
+                      <th>Mes</th>
+                      <th>IBC</th>
+                      <th>$ EPS</th>
+                      <th>$ ARL</th>
+                      <th>$ Pensión</th>
+                      <th>$ Caja</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaUsuariosBody">
+                    <tr>
+                      <td colspan="22" class="empty-state">
+                        <i class="feather icon-users"></i>
+                        <p>Use los filtros superiores para buscar usuarios</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================
+           BLOQUE 3: FILTROS DE EMPRESA
+      ========================================================================= -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card bloque-card">
+            <div class="card-header card-header-numero">
+              <div class="numero-bloque">3</div>
+              <div>Buscar Empresa Destino</div>
+            </div>
+            <div class="card-body">
+              <form id="formBuscarEmpresa">
+                <div class="row">
+                  <div class="col-md-3 mb-3">
+                    <label for="filtroEmpresaTipo" class="form-label-custom">
+                      <i class="feather icon-file-text me-1"></i>
+                      Tipo de ID
+                    </label>
+                    <select class="form-select" id="filtroEmpresaTipo">
+                      <option value="">-- Todos --</option>
+                      <option value="NIT">NIT</option>
+                      <option value="RUT">RUT</option>
+                      <option value="CC">Cédula</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="filtroEmpresaNit" class="form-label-custom">
+                      <i class="feather icon-hash me-1"></i>
+                      NIT / Identificación
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroEmpresaNit" 
+                      placeholder="Ej: 900123456-1"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroEmpresaNombre" class="form-label-custom">
+                      <i class="feather icon-briefcase me-1"></i>
+                      Razón Social
+                    </label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroEmpresaNombre" 
+                      placeholder="Nombre de la empresa..."
+                    />
+                  </div>
+
+                  <div class="col-md-2 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                      <i class="feather icon-search me-2"></i>
+                      Buscar Empresa
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================
+           BLOQUE 4: TABLA DE EMPRESAS (SELECCIÓN ÚNICA)
+      ========================================================================= -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card bloque-card">
+            <div class="card-header card-header-numero">
+              <div class="numero-bloque">4</div>
+              <div>Tabla de Empresas Disponibles</div>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle text-sm mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 40px;" class="text-center">Seleccionar</th>
+                      <th>NIT</th>
+                      <th>Razón Social</th>
+                      <th>Representante Legal</th>
+                      <th class="text-center">Estado</th>
+                      <th class="text-center" style="width: 100px;">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaEmpresasBody">
+                    <tr>
+                      <td colspan="6" class="empty-state">
+                        <i class="feather icon-briefcase"></i>
+                        <p>Use los filtros superiores para buscar empresas</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================
+           BLOQUE 5: ZONA DE UNIFICACIÓN (RESUMEN Y CONFIRMACIÓN)
+      ========================================================================= -->
+      <div class="row hidden" id="bloqueResumen">
+        <div class="col-12">
+          <div class="card bloque-card">
+            <div class="card-header card-header-numero">
+              <div class="numero-bloque">5</div>
+              <div>Confirmación de Vinculación Masiva</div>
+            </div>
+            <div class="card-body">
+              <div class="zona-resumen">
+                <div class="texto-resumen">
+                  Estos <span class="highlight" id="resumenCantidad">0</span> usuarios serán relacionados con la empresa:
+                  <br>
+                  <span class="highlight" id="resumenEmpresa">-</span>
+                </div>
+
+                <!-- Tabla Resumen Simple -->
+                <div class="tabla-resumen-simple table-responsive">
+                  <table class="table mb-0">
+                    <thead>
+                      <tr>
+                        <th class="text-center">#</th>
+                        <th>Nombre Completo</th>
+                        <th>Cédula</th>
+                        <th class="text-center">Estado Actual</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaResumenBody">
+                      <!-- Se llena dinámicamente -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- BOTÓN FINAL DE UNIFICACIÓN -->
+              <div class="text-center">
+                <button class="btn btn-primary btn-unificar" id="btnUnificar">
+                  <i class="feather icon-link me-2"></i>
+                  🔗 UNIFICAR EMPRESA Y USUARIOS
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    {% include '_footer.html' ignore missing %}
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="/assets/js/plugins/popper.min.js"></script>
+  <script src="/assets/js/plugins/simplebar.min.js"></script>
+  <script src="/assets/js/plugins/bootstrap.min.js"></script>
+  <script src="/assets/js/pcoded.js"></script>
+  <script src="/assets/js/plugins/feather.min.js"></script>
+
+  <script>
+    // ==========================================================================
+    // VARIABLES GLOBALES
+    // ==========================================================================
+    let todosLosUsuarios = [];
+    let todasLasEmpresas = [];
+    let usuariosSeleccionados = [];
+    let empresaDestino = null;
+
+    // ==========================================================================
+    // INICIALIZACIÓN
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Módulo de Vinculación Masiva inicializado');
+
+      // Inicializar Feather Icons
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+
+      // Ocultar loader
+      const loader = document.querySelector('.loader-bg');
+      if (loader) {
+        setTimeout(() => { loader.style.display = 'none'; }, 500);
+      }
+
+      // Event Listeners
+      document.getElementById('formBuscarUsuarios').addEventListener('submit', buscarUsuarios);
+      document.getElementById('formBuscarEmpresa').addEventListener('submit', buscarEmpresas);
+      document.getElementById('checkTodosUsuarios').addEventListener('change', toggleTodosUsuarios);
+      document.getElementById('btnUnificar').addEventListener('click', ejecutarUnificacion);
+
+      // Cargar datos iniciales
+      cargarDatosIniciales();
+    });
+
+    // ==========================================================================
+    // CARGAR DATOS INICIALES
+    // ==========================================================================
+    async function cargarDatosIniciales() {
+      try {
+        console.log('📥 Cargando datos del servidor...');
+
+        const response = await fetch('/api/unificacion/master_completo', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Error al cargar datos');
+        }
+
+        todosLosUsuarios = data.usuarios || [];
+        todasLasEmpresas = data.empresas || [];
+
+        console.log(`✅ Cargados: ${todosLosUsuarios.length} usuarios, ${todasLasEmpresas.length} empresas`);
+        
+        // Debug: Verificar si edad está en los datos
+        if (todosLosUsuarios.length > 0) {
+          console.log('📊 Primer usuario (muestra):', todosLosUsuarios[0]);
+          console.log('🎂 Campo edad:', todosLosUsuarios[0].edad);
+        }
+
+      } catch (error) {
+        console.error('❌ Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al Cargar Datos',
+          text: error.message
+        });
+      }
+    }
+
+    // ==========================================================================
+    // BUSCAR USUARIOS
+    // ==========================================================================
+    function buscarUsuarios(e) {
+      e.preventDefault();
+
+      const filtros = {
+        numero: document.getElementById('filtroUserNumero').value.trim().toLowerCase(),
+        nombre: document.getElementById('filtroUserNombre').value.trim().toLowerCase()
+      };
+
+      const usuariosFiltrados = todosLosUsuarios.filter(usuario => {
+        let cumple = true;
+
+        if (filtros.numero) {
+          cumple = cumple && (usuario.numeroId || '').toLowerCase().includes(filtros.numero);
+        }
+
+        if (filtros.nombre) {
+          const nombreCompleto = `${usuario.primerNombre || ''} ${usuario.primerApellido || ''}`.toLowerCase();
+          cumple = cumple && nombreCompleto.includes(filtros.nombre);
+        }
+
+        return cumple;
+      });
+
+      renderizarTablaUsuarios(usuariosFiltrados);
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `${usuariosFiltrados.length} usuario(s) encontrado(s)`,
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+
+    // ==========================================================================
+    // RENDERIZAR TABLA DE USUARIOS
+    // ==========================================================================
+    function renderizarTablaUsuarios(usuarios) {
+      const tbody = document.getElementById('tablaUsuariosBody');
+
+      if (!usuarios || usuarios.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="22" class="empty-state">
+              <i class="feather icon-search"></i>
+              <p>No se encontraron usuarios con los criterios especificados</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      usuarios.forEach(usuario => {
+        const empresaText = usuario.empresa_nit && usuario.nombre_empresa
+          ? `<span class="empresa-actual">${usuario.nombre_empresa}</span>`
+          : `<span class="sin-empresa">SIN EMPRESA</span>`;
+
+        html += `
+          <tr>
+            <td class="text-center">
+              <input 
+                type="checkbox" 
+                class="checkbox-grande checkbox-usuario" 
+                data-user-id="${usuario.id}"
+                data-user-nombre="${usuario.primerNombre} ${usuario.primerApellido}"
+                data-user-doc="${usuario.numeroId}"
+                data-user-empresa="${usuario.nombre_empresa || 'Sin Empresa'}"
+              />
+            </td>
+            <td>CC</td>
+            <td>${usuario.numeroId || 'N/A'}</td>
+            <td class="text-center">${usuario.edad || 'N/A'}</td>
+            <td>${usuario.primerNombre || '-'}</td>
+            <td>${usuario.segundoNombre || '-'}</td>
+            <td>${usuario.primerApellido || '-'}</td>
+            <td>${usuario.segundoApellido || '-'}</td>
+            <td><span class="badge-eps">${usuario.eps_nombre || 'N/A'}</span></td>
+            <td><span class="badge-arl">${usuario.arl_nombre || 'N/A'}<br>R${usuario.riesgo_nivel || '0'}</span></td>
+            <td><span class="badge-pension">${usuario.pension_nombre || 'N/A'}</span></td>
+            <td><span class="badge-caja">${usuario.caja_nombre || 'N/A'}</span></td>
+            <td>${usuario.fecha_ingreso || '-'}</td>
+            <td>${usuario.mes_ingreso || '-'}</td>
+            <td>${formatoCurrency(usuario.ibc || 0)}</td>
+            <td><span class="badge-moneda">${formatoCurrency(usuario.aporte_eps || 0)}</span></td>
+            <td><span class="badge-moneda">${formatoCurrency(usuario.aporte_arl || 0)}</span></td>
+            <td><span class="badge-moneda">${formatoCurrency(usuario.aporte_pension || 0)}</span></td>
+            <td><span class="badge-moneda">${formatoCurrency(usuario.aporte_caja || 0)}</span></td>
+            <td>${empresaText}</td>
+            <td class="text-center">
+              <div class="d-flex gap-1 justify-content-center">
+                <!-- NOTA: La página /usuarios/gestion debe leer el parámetro ?edit_id= y autocargar el formulario completo -->
+                <a 
+                  href="/usuarios/gestion?edit_id=${usuario.id}" 
+                  target="_blank" 
+                  class="btn btn-sm btn-outline-primary"
+                  title="Ver/Editar Usuario Completo"
+                >
+                  <i class="feather icon-edit-2"></i>
+                </a>
+                <a 
+                  href="/api/unificacion/historial_usuario/${usuario.id}" 
+                  target="_blank" 
+                  class="btn btn-sm btn-outline-info"
+                  title="Ver Historial Laboral"
+                >
+                  <i class="feather icon-clock"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+
+      // Agregar listeners a checkboxes
+      document.querySelectorAll('.checkbox-usuario').forEach(checkbox => {
+        checkbox.addEventListener('change', actualizarSeleccion);
+      });
+
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    }
+
+    // ==========================================================================
+    // BUSCAR EMPRESAS
+    // ==========================================================================
+    function buscarEmpresas(e) {
+      e.preventDefault();
+
+      const filtros = {
+        nit: document.getElementById('filtroEmpresaNit').value.trim().toLowerCase(),
+        nombre: document.getElementById('filtroEmpresaNombre').value.trim().toLowerCase()
+      };
+
+      const empresasFiltradas = todasLasEmpresas.filter(empresa => {
+        let cumple = true;
+
+        if (filtros.nit) {
+          cumple = cumple && (empresa.nit || '').toLowerCase().includes(filtros.nit);
+        }
+
+        if (filtros.nombre) {
+          cumple = cumple && (empresa.nombre_empresa || '').toLowerCase().includes(filtros.nombre);
+        }
+
+        return cumple;
+      });
+
+      renderizarTablaEmpresas(empresasFiltradas);
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `${empresasFiltradas.length} empresa(s) encontrada(s)`,
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+
+    // ==========================================================================
+    // RENDERIZAR TABLA DE EMPRESAS
+    // ==========================================================================
+    function renderizarTablaEmpresas(empresas) {
+      const tbody = document.getElementById('tablaEmpresasBody');
+
+      if (!empresas || empresas.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="feather icon-search"></i>
+              <p>No se encontraron empresas con los criterios especificados</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      empresas.forEach(empresa => {
+        html += `
+          <tr>
+            <td class="text-center">
+              <input 
+                type="radio" 
+                name="radioEmpresa" 
+                class="radio-grande radio-empresa" 
+                data-empresa-nit="${empresa.nit}"
+                data-empresa-nombre="${empresa.nombre_empresa}"
+              />
+            </td>
+            <td>${empresa.nit || 'N/A'}</td>
+            <td><strong>${empresa.nombre_empresa || 'Sin Nombre'}</strong></td>
+            <td>${empresa.rep_legal_nombre || 'N/A'}</td>
+            <td class="text-center">
+              <span class="badge bg-success">ACTIVA</span>
+            </td>
+            <td class="text-center">
+              <!-- NOTA: La página /empresas/ingresar debe leer el parámetro ?edit_nit= y autocargar el formulario completo con PDFs -->
+              <a 
+                href="/empresas/ingresar?edit_nit=${empresa.nit}" 
+                target="_blank" 
+                class="btn btn-sm btn-outline-secondary"
+                title="Ver/Editar Empresa Completa"
+              >
+                <i class="feather icon-edit"></i>
+              </a>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+
+      // Agregar listeners a radios
+      document.querySelectorAll('.radio-empresa').forEach(radio => {
+        radio.addEventListener('change', actualizarEmpresaDestino);
+      });
+    }
+
+    // ==========================================================================
+    // ACTUALIZAR SELECCIÓN DE USUARIOS
+    // ==========================================================================
+    function actualizarSeleccion() {
+      usuariosSeleccionados = [];
+
+      document.querySelectorAll('.checkbox-usuario:checked').forEach(checkbox => {
+        usuariosSeleccionados.push({
+          id: parseInt(checkbox.dataset.userId),
+          nombre: checkbox.dataset.userNombre,
+          documento: checkbox.dataset.userDoc,
+          empresaActual: checkbox.dataset.userEmpresa
+        });
+      });
+
+      document.getElementById('contadorUsuarios').textContent = `${usuariosSeleccionados.length} seleccionados`;
+
+      actualizarBloqueResumen();
+    }
+
+    // ==========================================================================
+    // TOGGLE TODOS LOS USUARIOS
+    // ==========================================================================
+    function toggleTodosUsuarios() {
+      const checked = document.getElementById('checkTodosUsuarios').checked;
+      
+      document.querySelectorAll('.checkbox-usuario').forEach(checkbox => {
+        checkbox.checked = checked;
+      });
+
+      actualizarSeleccion();
+    }
+
+    // ==========================================================================
+    // ACTUALIZAR EMPRESA DESTINO
+    // ==========================================================================
+    function actualizarEmpresaDestino() {
+      const radioSeleccionado = document.querySelector('.radio-empresa:checked');
+
+      if (radioSeleccionado) {
+        empresaDestino = {
+          nit: radioSeleccionado.dataset.empresaNit,
+          nombre: radioSeleccionado.dataset.empresaNombre
+        };
+
+        console.log('✅ Empresa seleccionada:', empresaDestino);
+        actualizarBloqueResumen();
+      }
+    }
+
+    // ==========================================================================
+    // ACTUALIZAR BLOQUE DE RESUMEN
+    // ==========================================================================
+    function actualizarBloqueResumen() {
+      const bloque = document.getElementById('bloqueResumen');
+
+      if (usuariosSeleccionados.length > 0 && empresaDestino) {
+        bloque.classList.remove('hidden');
+
+        document.getElementById('resumenCantidad').textContent = usuariosSeleccionados.length;
+        document.getElementById('resumenEmpresa').textContent = empresaDestino.nombre;
+
+        // Renderizar tabla resumen
+        const tbody = document.getElementById('tablaResumenBody');
+        let html = '';
+
+        usuariosSeleccionados.forEach((usuario, index) => {
+          html += `
+            <tr>
+              <td class="text-center">${index + 1}</td>
+              <td><strong>${usuario.nombre}</strong></td>
+              <td>${usuario.documento}</td>
+              <td class="text-center">
+                <span class="badge bg-${usuario.empresaActual === 'Sin Empresa' ? 'danger' : 'success'}">
+                  ${usuario.empresaActual}
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+
+      } else {
+        bloque.classList.add('hidden');
+      }
+    }
+
+    // ==========================================================================
+    // EJECUTAR UNIFICACIÓN
+    // ==========================================================================
+    async function ejecutarUnificacion() {
+      // Confirmación con SweetAlert2
+      const result = await Swal.fire({
+        title: '¿Confirmar Vinculación Masiva?',
+        html: `
+          <p>Se asignarán <strong>${usuariosSeleccionados.length} usuarios</strong> a:</p>
+          <p><strong>${empresaDestino.nombre}</strong> (NIT: ${empresaDestino.nit})</p>
+          <p class="text-muted">Esta acción actualizará la base de datos. ¿Está de acuerdo?</p>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '✅ Sí, Unificar',
+        cancelButtonText: '❌ Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d'
+      });
+
+      if (!result.isConfirmed) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Unificación Cancelada',
+          text: 'No se realizaron cambios en la base de datos.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        return;
+      }
+
+      // Mostrar loading
+      Swal.fire({
+        title: 'Procesando Vinculación...',
+        html: '<div class="spinner-border text-primary" role="status"></div><p class="mt-3">Por favor espere...</p>',
+        allowOutsideClick: false,
+        showConfirmButton: false
+      });
+
+      try {
+        // Preparar payload
+        const payload = {
+          empresa_nit: empresaDestino.nit,
+          usuarios_ids: usuariosSeleccionados.map(u => u.id)
+        };
+
+        console.log('📤 Enviando vinculación masiva:', payload);
+
+        // POST al backend
+        const response = await fetch('/api/unificacion/vincular_masivo', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Error al procesar la vinculación');
+        }
+
+        // Éxito
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Vinculación Exitosa!',
+          html: `
+            <p><strong>${data.usuarios_actualizados}</strong> usuarios vinculados correctamente a:</p>
+            <p><strong>${empresaDestino.nombre}</strong></p>
+            <p class="text-muted mt-3">${data.message}</p>
+          `,
+          confirmButtonText: 'OK'
+        });
+
+        // Limpiar selecciones
+        limpiarTodo();
+
+        // Recargar datos
+        await cargarDatosIniciales();
+
+      } catch (error) {
+        console.error('❌ Error en vinculación:', error);
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en la Vinculación',
+          text: error.message,
+          confirmButtonText: 'Cerrar'
+        });
+      }
+    }
+
+    // ==========================================================================
+    // LIMPIAR TODO
+    // ==========================================================================
+    function limpiarTodo() {
+      // Limpiar selecciones
+      usuariosSeleccionados = [];
+      empresaDestino = null;
+
+      // Desmarcar checkboxes
+      document.querySelectorAll('.checkbox-usuario').forEach(cb => cb.checked = false);
+      document.getElementById('checkTodosUsuarios').checked = false;
+
+      // Desmarcar radios
+      document.querySelectorAll('.radio-empresa').forEach(rb => rb.checked = false);
+
+      // Ocultar bloque resumen
+      document.getElementById('bloqueResumen').classList.add('hidden');
+
+      // Actualizar contador
+      document.getElementById('contadorUsuarios').textContent = '0 seleccionados';
+    }
+
+    // ==========================================================================
+    // UTILIDADES
+    // ==========================================================================
+    function formatoCurrency(valor) {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+      }).format(valor || 0);
+    }
+  </script>
+</body>
+</html>

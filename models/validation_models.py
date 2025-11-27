@@ -84,11 +84,11 @@ class RegisterRequest(BaseModel):
         description="Contraseña del usuario (mínimo 6 caracteres)",
         json_schema_extra={"example": "miPassword123"},
     )
-    password_confirm: str = Field(
-        ...,
+    password_confirm: Optional[str] = Field(
+        None,
         min_length=6,
         max_length=128,
-        description="Confirmación de contraseña",
+        description="Confirmación de contraseña (opcional)",
         json_schema_extra={"example": "miPassword123"},
     )
 
@@ -107,8 +107,8 @@ class RegisterRequest(BaseModel):
 
     @field_validator("password_confirm")
     def passwords_match(cls, v, info):
-        """Valida que las contraseñas coincidan"""
-        if "password" in info.data and v != info.data["password"]:
+        """Valida que las contraseñas coincidan (solo si se proporciona)"""
+        if v is not None and "password" in info.data and v != info.data["password"]:
             raise ValueError("Las contraseñas no coinciden")
         return v
 

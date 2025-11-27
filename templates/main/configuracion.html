@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Configuración de Usuario | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f0f0f0;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .profile-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-info h4 {
+            margin: 10px 0 5px;
+            font-weight: 600;
+        }
+        .profile-info .badge {
+            font-size: 0.85rem;
+            padding: 5px 12px;
+        }
+        .profile-info p {
+            color: #6c757d;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="page-header-title">
+                        <h5 class="mb-0 font-medium">Configuración de Usuario</h5>
+                    </div>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Home</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Configuración</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="feedbackMessage"></div>
+
+            <div class="grid grid-cols-12 gap-x-6">
+
+                <!-- Columna Izquierda: Perfil del Usuario -->
+                <div class="col-span-12 md:col-span-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Información del Perfil</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="profile-info">
+                                <!-- Avatar genérico -->
+                                <img src="/assets/images/user/avatar-default.png"
+                                     alt="Avatar"
+                                     class="profile-avatar"
+                                     onerror="this.src='https://ui-avatars.com/api/?name={{ user.primerNombre }}+{{ user.primerApellido }}&size=120&background=4680ff&color=fff'">
+
+                                <!-- Nombre del Usuario -->
+                                <h4 id="profileName">Cargando...</h4>
+
+                                <!-- Rol -->
+                                <span class="badge bg-primary" id="profileRole">Usuario</span>
+
+                                <!-- Correo -->
+                                <p id="profileEmail"><i data-feather="mail" class="w-4 h-4 inline"></i> Cargando...</p>
+
+                                <!-- Información Adicional -->
+                                <hr class="my-3">
+                                <div class="text-start">
+                                    <p class="mb-2"><strong>Tipo ID:</strong> <span id="profileTipoId">-</span></p>
+                                    <p class="mb-2"><strong>Número ID:</strong> <span id="profileNumeroId">-</span></p>
+                                    <p class="mb-2"><strong>Empresa:</strong> <span id="profileEmpresa">-</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Seguridad / Cambiar Contraseña -->
+                <div class="col-span-12 md:col-span-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i data-feather="shield" class="w-5 h-5 inline mr-2"></i>Seguridad de la Cuenta</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="mb-3">Cambiar Contraseña</h6>
+                            <p class="text-muted mb-4">Actualiza tu contraseña periódicamente para mantener tu cuenta segura.</p>
+
+                            <form id="formChangePassword">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Contraseña Actual <span class="text-danger">*</span></label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="currentPassword"
+                                           name="current_password"
+                                           placeholder="Ingresa tu contraseña actual"
+                                           required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Nueva Contraseña <span class="text-danger">*</span></label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="newPassword"
+                                           name="new_password"
+                                           placeholder="Ingresa tu nueva contraseña (mín. 6 caracteres)"
+                                           minlength="6"
+                                           required>
+                                    <small class="form-text text-muted">La contraseña debe tener al menos 6 caracteres.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña <span class="text-danger">*</span></label>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="confirmPassword"
+                                           name="confirm_password"
+                                           placeholder="Confirma tu nueva contraseña"
+                                           minlength="6"
+                                           required>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-secondary" id="btnCancelPassword">
+                                        <i data-feather="x" class="w-4 h-4 mr-1"></i> Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="btnUpdatePassword">
+                                        <i data-feather="check" class="w-4 h-4 mr-1"></i> Actualizar Contraseña
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta adicional: Actividad Reciente (opcional) -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5><i data-feather="activity" class="w-5 h-5 inline mr-2"></i>Actividad Reciente</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Última sesión iniciada: <strong id="lastLogin">Hoy</strong></p>
+                            <p class="text-muted mb-0">Dispositivo: <strong>Navegador Web</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_URL = '/api';
+
+            // Referencias a elementos del DOM
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            const formChangePassword = document.getElementById('formChangePassword');
+            const btnUpdatePassword = document.getElementById('btnUpdatePassword');
+            const btnCancelPassword = document.getElementById('btnCancelPassword');
+
+            // Referencias a campos del perfil
+            const profileName = document.getElementById('profileName');
+            const profileRole = document.getElementById('profileRole');
+            const profileEmail = document.getElementById('profileEmail');
+            const profileTipoId = document.getElementById('profileTipoId');
+            const profileNumeroId = document.getElementById('profileNumeroId');
+            const profileEmpresa = document.getElementById('profileEmpresa');
+
+            // --- Funciones de Feedback ---
+            function showMessage(message, type = 'info') {
+                if (feedbackDiv) {
+                    const alertHtml = `
+                        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                            ${message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                    feedbackDiv.innerHTML = alertHtml;
+
+                    // Auto-cerrar después de 5 segundos si es éxito
+                    if(type === 'success') {
+                        setTimeout(() => {
+                            const alert = feedbackDiv.querySelector('.alert-success');
+                            if(alert) new bootstrap.Alert(alert).close();
+                        }, 5000);
+                    }
+
+                    // Scroll al mensaje
+                    feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    alert(message);
+                }
+            }
+
+            // --- Cargar Información del Usuario ---
+            async function loadUserProfile() {
+                try {
+                    const response = await fetch(`${API_URL}/check_auth`, {
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('No se pudo cargar la información del usuario');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.authenticated && data.user_data) {
+                        const user = data.user_data;
+
+                        // Actualizar información del perfil
+                        profileName.textContent = `${user.primerNombre || ''} ${user.primerApellido || ''}`.trim() || 'Usuario';
+                        profileRole.textContent = user.role === 'admin' ? 'Administrador' : 'Usuario';
+                        profileRole.className = user.role === 'admin' ? 'badge bg-danger' : 'badge bg-primary';
+
+                        profileEmail.innerHTML = `<i data-feather="mail" class="w-4 h-4 inline"></i> ${user.correoElectronico || 'No disponible'}`;
+                        profileTipoId.textContent = user.tipoId || '-';
+                        profileNumeroId.textContent = user.numeroId || '-';
+                        profileEmpresa.textContent = user.empresa_nombre || 'No asignada';
+
+                        // Actualizar íconos de feather
+                        feather.replace();
+                    } else {
+                        window.location.href = '/login';
+                    }
+                } catch (error) {
+                    console.error('Error cargando perfil:', error);
+                    showMessage('Error al cargar la información del perfil.', 'danger');
+                }
+            }
+
+            // --- Cambiar Contraseña ---
+            formChangePassword.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Validación frontend
+                if (newPassword !== confirmPassword) {
+                    showMessage('Las contraseñas nuevas no coinciden.', 'warning');
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    showMessage('La nueva contraseña debe tener al menos 6 caracteres.', 'warning');
+                    return;
+                }
+
+                if (currentPassword === newPassword) {
+                    showMessage('La nueva contraseña debe ser diferente a la actual.', 'warning');
+                    return;
+                }
+
+                // Deshabilitar botón y mostrar loading
+                const originalBtnHtml = btnUpdatePassword.innerHTML;
+                btnUpdatePassword.disabled = true;
+                btnUpdatePassword.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Actualizando...';
+
+                try {
+                    const response = await fetch(`${API_URL}/user/change_password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            current_password: currentPassword,
+                            new_password: newPassword
+                        }),
+                        credentials: 'include'
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showMessage('✅ Contraseña actualizada exitosamente.', 'success');
+                        formChangePassword.reset();
+                    } else {
+                        showMessage(`❌ ${result.error || 'Error al actualizar la contraseña'}`, 'danger');
+                    }
+
+                } catch (error) {
+                    console.error('Error al cambiar contraseña:', error);
+                    showMessage('Error de conexión al actualizar la contraseña.', 'danger');
+                } finally {
+                    btnUpdatePassword.disabled = false;
+                    btnUpdatePassword.innerHTML = originalBtnHtml;
+                    feather.replace();
+                }
+            });
+
+            // Botón Cancelar
+            btnCancelPassword.addEventListener('click', () => {
+                formChangePassword.reset();
+                feedbackDiv.innerHTML = '';
+            });
+
+            // --- Carga Inicial ---
+            loadUserProfile();
+            feather.replace();
+        });
+    </script>
+</body>
+</html>

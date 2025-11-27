@@ -1,43 +1,29 @@
-# -*- coding: utf-8 -*-
 """
 envio_planillas.py - ACTUALIZADO con logging
 ====================================================
 Maneja la lógica para registrar y consultar envíos de planillas.
 """
-
 import os
-import sqlite3
 import traceback
 from datetime import datetime
-from functools import wraps  # Necesario para el fallback
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session, current_app
 
-# --- IMPORTAR UTILIDADES Y LOGGER ---
 from logger import logger
 
-# --- INICIO BLOQUE DE IMPORTACIÓN ROBUSTA (Corregido error de try/except) ---
+# --- IMPORTACIÓN CENTRALIZADA ---
 try:
-    from utils import get_db_connection, login_required
-except ImportError as e:
-    logger.error(f"Error importando utils en envio_planillas.py: {e}", exc_info=True)
-
-    # --- Fallbacks ---
-    def get_db_connection():
-        return None
-
-    def login_required(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-
-# --- FIN BLOQUE DE IMPORTACIÓN ROBUSTA ---
+    from ..utils import login_required
+    from ..extensions import db
+    from ..models.orm_models import EnvioPlanilla, Empresa
+except (ImportError, ValueError):
+    from utils import login_required
+    from extensions import db
+    from models.orm_models import EnvioPlanilla, Empresa
+# -------------------------------
 
 # ==================== DEFINICIÓN DEL BLUEPRINT ====================
-bp_envio_planillas = Blueprint("bp_envio_planillas", __name__, url_prefix="/api/envios")
+bp_envio_planillas = Blueprint("bp_envio_planillas", __name__, url_prefix="/api/envios_planillas")
 
 # ==================== ENDPOINTS DE ENVÍOS ====================
 
@@ -46,91 +32,83 @@ bp_envio_planillas = Blueprint("bp_envio_planillas", __name__, url_prefix="/api/
 @login_required
 def get_envios():
     """Obtiene todos los registros de envíos de planillas."""
-    conn = None
     try:
         # Filtros opcionales
         empresa_nit = request.args.get("empresa_nit")
 
-        conn = get_db_connection()
-        query = "SELECT e.*, emp.nombre_empresa FROM envios_planillas e LEFT JOIN empresas emp ON e.empresa_nit = emp.nit"
-        params = []
+        # Construir query ORM con filtros y JOIN
+        query = db.session.query(EnvioPlanilla, Empresa.nombre_empresa).join(
+            Empresa, EnvioPlanilla.empresa_nit == Empresa.nit, isouter=True
+        )
 
         if empresa_nit and empresa_nit != "todos":
-            query += " WHERE e.empresa_nit = ?"
-            params.append(empresa_nit)
+            query = query.filter(EnvioPlanilla.empresa_nit == empresa_nit)
 
-        query += " ORDER BY e.fecha_envio DESC"
+        envios = query.order_by(EnvioPlanilla.fecha_envio.desc()).all()
 
-        envios = conn.execute(query, tuple(params)).fetchall()
+        # Convertir resultados a diccionarios
+        result = []
+        for envio, nombre_empresa in envios:
+            envio_dict = envio.to_dict()
+            envio_dict['nombre_empresa'] = nombre_empresa
+            result.append(envio_dict)
 
-        logger.debug(f"Se consultaron {len(envios)} registros de envíos")
-        return jsonify([dict(row) for row in envios])
+        logger.debug(f"Se consultaron {len(result)} registros de envíos")
+        return jsonify(result)
 
     except Exception as e:
         logger.error(f"Error obteniendo lista de envíos: {e}", exc_info=True)
         return jsonify({"error": "No se pudo obtener la lista de envíos."}), 500
-    finally:
-        if conn:
-            conn.close()
 
 
 @bp_envio_planillas.route("", methods=["POST"])
 @login_required
 def add_envio():
     """Añade un nuevo registro de envío de planilla."""
-    conn = None
-    nit = request.get_json().get("empresa_nit")
+    data = request.get_json()
+    nit = data.get("empresa_nit") if data else None
+    
     try:
-        data = request.get_json()
-
-        # Validación básica
-        required_fields = ["empresa_nit", "fecha_envio", "plataforma", "estado"]
+        # Validación básica - Ajustado a los campos del modelo EnvioPlanilla
+        required_fields = ["empresa_nit", "periodo", "fecha_envio"]
         if not all(field in data for field in required_fields):
             logger.warning(f"Intento de agregar envío con campos faltantes. NIT: {nit}")
             return (
-                jsonify({"error": "Faltan campos obligatorios (empresa_nit, fecha_envio, plataforma, estado)."}),
+                jsonify({"error": "Faltan campos obligatorios (empresa_nit, periodo, fecha_envio)."}),
                 400,
             )
 
-        conn = get_db_connection()
-        cur = conn.cursor()
+        # Obtener nombre de empresa
+        empresa = Empresa.query.filter_by(nit=data["empresa_nit"]).first()
+        if not empresa:
+            logger.warning(f"Intento de registro con NIT no encontrado: {nit}")
+            return jsonify({"error": f"Empresa con NIT {nit} no encontrada."}), 404
 
-        cur.execute(
-            """
-            INSERT INTO envios_planillas (empresa_nit, fecha_envio, plataforma, estado, notas, responsable)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                data["empresa_nit"],
-                data["fecha_envio"],
-                data["plataforma"],
-                data["estado"],
-                data.get("notas"),
-                data.get("responsable"),
-            ),
+        # Crear nuevo envío usando ORM
+        nuevo_envio = EnvioPlanilla(
+            empresa_nit=data["empresa_nit"],
+            empresa_nombre=empresa.nombre_empresa,
+            periodo=data["periodo"],
+            tipo_id=data.get("tipo_id"),
+            numero_id=data.get("numero_id"),
+            documento=data.get("documento"),
+            contacto=data.get("contacto"),
+            telefono=data.get("telefono"),
+            correo=data.get("correo"),
+            canal=data.get("canal", "Correo"),
+            mensaje=data.get("mensaje"),
+            estado=data.get("estado", "Pendiente"),
+            fecha_envio=data["fecha_envio"]
         )
-        conn.commit()
 
-        nuevo_id = cur.lastrowid
-        logger.info(f"Nuevo envío de planilla registrado con ID: {nuevo_id} para NIT: {data['empresa_nit']}")
+        db.session.add(nuevo_envio)
+        db.session.commit()
 
-        nuevo_envio = conn.execute("SELECT * FROM envios_planillas WHERE id = ?", (nuevo_id,)).fetchone()
+        logger.info(f"Nuevo envío de planilla registrado con ID: {nuevo_envio.id} para NIT: {data['empresa_nit']}")
 
-        return jsonify(dict(nuevo_envio)), 201
+        return jsonify(nuevo_envio.to_dict()), 201
 
-    except sqlite3.IntegrityError as ie:
-        if conn:
-            conn.rollback()
-        logger.error(f"Error de integridad al agregar envío: {ie}", exc_info=True)
-        return (
-            jsonify({"error": "Error de integridad, verifique que el NIT de la empresa exista."}),
-            409,
-        )
     except Exception as e:
-        if conn:
-            conn.rollback()
+        db.session.rollback()
         logger.error(f"Error general al agregar envío (NIT: {nit}): {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
-    finally:
-        if conn:
-            conn.close()

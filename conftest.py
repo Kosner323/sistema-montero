@@ -15,8 +15,8 @@ import pytest
 # Configurar ENCRYPTION_KEY para tests ANTES de importar encryption
 os.environ.setdefault("ENCRYPTION_KEY", "tZNEUELUZ7lMMN8g4WW1nxpu67mALsZOCBdV5bniow4=")
 
-# (CORREGIDO) Importa la FÁBRICA de la app y el inicializador
-from app import create_app, initialize_database
+# (CORREGIDO) Importa la FÁBRICA de la app
+from app import create_app
 from utils import get_db_connection as original_get_db_connection
 
 # --- Fixtures Principales de la App ---

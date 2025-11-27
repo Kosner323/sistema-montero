@@ -8,11 +8,20 @@ Flask-CORS>=6.0.0
 Werkzeug>=3.0.6
 flask-restx
 
+# Production Server
+gunicorn>=21.2.0
+
 # Seguridad
 cryptography>=42.0.5
 python-dotenv==1.0.0
+Flask-Limiter>=3.5.0
+
+# Email
+Flask-Mail>=0.9.1
 
 # Base de datos y migraciones
+Flask-SQLAlchemy>=3.0.0
+Flask-Migrate>=4.0.0
 sqlalchemy
 alembic
 
@@ -28,15 +37,29 @@ pytz==2023.3
 pytest==7.4.3
 pytest-cov==4.1.0
 
+# Code Quality & Formatting
+black>=24.0.0
+flake8>=7.0.0
+isort>=5.13.0
+
 # Logging
 python-json-logger==2.0.7
 
 # PDF
 pypdf>=4.0.0
+reportlab>=4.0.0
 
 # Forzar push para activar Actions
 
 flask_wtf
+
+# --- AUTOMATIZACIÓN RPA ---
+selenium>=4.15.0
+webdriver-manager>=4.0.1
+beautifulsoup4>=4.12.3
+
+pdfrw
+reportlab
 
 
 

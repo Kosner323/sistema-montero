@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Simulador PILA - Seguridad Social | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="description" content="Simulador de cálculo de aportes a Seguridad Social (PILA) - Colombia 2025" />
+  <meta name="author" content="Portal Montero" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+  <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/assets/fonts/material.css" />
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+  
+  <!-- SweetAlert2 para alertas visuales -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+
+  <script>
+    (async function checkAuthentication() {
+      const loader = document.querySelector('.loader-bg');
+      if (loader) loader.style.display = 'flex'; // Mostrar loader
+
+      try {
+        console.log('🔍 Verificando autenticación (Simulador PILA)...');
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const response = await fetch('/api/check_auth', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          credentials: 'include' 
+        });
+
+        console.log('📡 Respuesta check_auth:', response.status);
+
+        if (!response.ok) {
+          console.error('❌ Error del servidor:', response.status, response.statusText);
+          window.location.href = '/login';
+          return;
+        }
+
+        const data = await response.json();
+        console.log('📦 Datos check_auth:', data);
+
+        if (!data.authenticated) {
+          console.log('🚫 Usuario no autenticado, redirigiendo...');
+          window.location.href = '/login';
+        } else { 
+          console.log('✅ Usuario autenticado:', data.user_name);
+          if (loader) loader.style.display = 'none'; // Ocultar loader
+          sessionStorage.setItem('userName', data.user_name); 
+
+          // Actualizar nombre de usuario en el DOM
+          document.addEventListener('DOMContentLoaded', () => {
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            if(userNameDisplay) userNameDisplay.textContent = data.user_name;
+          });
+        }
+      } catch (error) { 
+        console.error('❌ Error de red en check_auth:', error);
+        window.location.href = '/login';
+      }
+    })();
+  </script>
+
+  <style>
+    /* ========== ESTILOS SIMULADOR PILA ========== */
+    
+    /* Header del simulador */
+    .simulador-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: 0;
+    }
+
+    .simulador-header h2 {
+      color: white;
+      margin: 0 0 0.5rem 0;
+      font-weight: 700;
+      font-size: 1.75rem;
+    }
+
+    .simulador-header p {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    /* Formulario */
+    .form-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-control, .form-select {
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    /* Switches personalizados */
+    .custom-switch-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .custom-switch-container:hover {
+      background: #e9ecef;
+    }
+
+    .form-switch .form-check-input {
+      width: 3rem;
+      height: 1.5rem;
+      cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .switch-label {
+      font-weight: 600;
+      color: #495057;
+      margin: 0;
+      flex: 1;
+    }
+
+    .switch-description {
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* Botón calcular */
+    .btn-calcular {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 1rem 3rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .btn-calcular:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-calcular:active {
+      transform: translateY(0);
+    }
+
+    .btn-calcular:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Sección de resultados */
+    #resultadosContainer {
+      margin-top: 2rem;
+    }
+
+    .resultado-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+    }
+
+    .resultado-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+
+    .resultado-card.empleado {
+      border-left-color: #dc3545;
+      background: linear-gradient(to right, rgba(220, 53, 69, 0.05) 0%, white 100%);
+    }
+
+    .resultado-card.empleador {
+      border-left-color: #0d6efd;
+      background: linear-gradient(to right, rgba(13, 110, 253, 0.05) 0%, white 100%);
+    }
+
+    .resultado-card.totales {
+      border-left-color: #198754;
+      background: linear-gradient(to right, rgba(25, 135, 84, 0.05) 0%, white 100%);
+    }
+
+    .resultado-card.datos {
+      border-left-color: #6c757d;
+      background: linear-gradient(to right, rgba(108, 117, 125, 0.05) 0%, white 100%);
+    }
+
+    .card-header-resultado {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .card-header-resultado h5 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-header-resultado .badge {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .resultado-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .resultado-item:last-child {
+      border-bottom: none;
+    }
+
+    .resultado-label {
+      font-weight: 500;
+      color: #495057;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .resultado-valor {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #212529;
+    }
+
+    .resultado-valor.destacado {
+      font-size: 1.5rem;
+      color: #198754;
+    }
+
+    .resultado-valor.empleado {
+      color: #dc3545;
+    }
+
+    .resultado-valor.empleador {
+      color: #0d6efd;
+    }
+
+    /* Badges informativos */
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .info-badge.success {
+      background: #d1f2eb;
+      color: #0a7852;
+    }
+
+    .info-badge.warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .info-badge.info {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    /* Alertas de advertencia */
+    .advertencias-container {
+      margin-top: 1rem;
+    }
+
+    .advertencia-item {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #856404;
+    }
+
+    /* Loader */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loader-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .spinner-border-custom {
+      width: 3rem;
+      height: 3rem;
+      border-width: 0.3rem;
+      color: #667eea;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .simulador-header {
+        padding: 1.5rem;
+      }
+
+      .form-card {
+        padding: 1.5rem;
+      }
+
+      .btn-calcular {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+      }
+
+      .resultado-card {
+        padding: 1rem;
+      }
+
+      .card-header-resultado {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+    }
+
+    /* Animaciones */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-slide-in {
+      animation: slideInUp 0.5s ease-out;
+    }
+  </style>
+
+  <!-- Script de autenticación IIFE -->
+  <script>
+    (function() {
+      const username = sessionStorage.getItem('username');
+      const empresaActual = sessionStorage.getItem('empresa_actual');
+      if (!username || !empresaActual) {
+        window.location.href = '/login';
+      }
+    })();
+  </script>
+</head>
+
+<body data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+
+  <!-- Loader inicial -->
+  <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+    <div class="loader-track h-3 w-full bg-black/10 dark:bg-white/10 inline-block absolute left-0 top-0">
+      <div class="loader-fill bg-primary-600"></div>
+    </div>
+  </div>
+
+  <!-- Incluir Sidebar -->
+  {% include '_sidebar.html' %}
+
+  <!-- Incluir Header -->
+  {% include '_header.html' %}
+
+  <!-- Contenido principal -->
+  <div class="pc-container">
+    <div class="pc-content">
+      
+      <!-- Header del Simulador -->
+      <div class="simulador-header">
+        <h2>
+          <i class="ti ti-calculator"></i> Simulador PILA - Seguridad Social
+        </h2>
+        <p>
+          <i class="ti ti-info-circle"></i> 
+          Calcula los aportes exactos de Salud, Pensión, ARL y Parafiscales según la legislación colombiana 2025. 
+          <strong>Motor v1.1</strong> con correcciones legales validadas.
+        </p>
+      </div>
+
+      <!-- Formulario de Simulación -->
+      <div class="form-card">
+        <form id="formSimulador">
+          <div class="row">
+            
+            <!-- Salario Base -->
+            <div class="col-md-6 mb-4">
+              <label for="salarioBase" class="form-label">
+                <i class="ti ti-currency-dollar"></i> Salario Base Mensual (COP)
+              </label>
+              <input 
+                type="number" 
+                class="form-control" 
+                id="salarioBase" 
+                name="salario_base"
+                placeholder="Ej: 1300000"
+                min="0"
+                step="1000"
+                required
+              />
+              <small class="text-muted">
+                <i class="ti ti-info-circle"></i> 
+                SMMLV 2025: $1,300,000 COP
+              </small>
+            </div>
+
+            <!-- Nivel de Riesgo ARL -->
+            <div class="col-md-6 mb-4">
+              <label for="nivelRiesgo" class="form-label">
+                <i class="ti ti-shield"></i> Nivel de Riesgo ARL
+              </label>
+              <select class="form-select" id="nivelRiesgo" name="nivel_riesgo" required>
+                <option value="">Selecciona un nivel...</option>
+                <option value="1">Nivel I - Mínimo (0.522%) - Oficinas</option>
+                <option value="2">Nivel II - Bajo (1.044%) - Comercio</option>
+                <option value="3">Nivel III - Medio (2.436%) - Manufactura</option>
+                <option value="4">Nivel IV - Alto (4.350%) - Industria Pesada</option>
+                <option value="5">Nivel V - Máximo (6.960%) - Construcción</option>
+              </select>
+              <small class="text-muted">
+                <i class="ti ti-info-circle"></i> 
+                Según la actividad económica de la empresa
+              </small>
+            </div>
+
+            <!-- Switch: Salario Integral -->
+            <div class="col-md-6 mb-4">
+              <div class="custom-switch-container">
+                <div class="form-check form-switch mb-0">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="salarioIntegral" 
+                    name="es_salario_integral"
+                  />
+                </div>
+                <div class="flex-grow-1">
+                  <label class="switch-label" for="salarioIntegral">
+                    <i class="ti ti-percentage"></i> ¿Salario Integral?
+                  </label>
+                  <p class="switch-description">
+                    IBC = 70% del salario (factor prestacional 30%)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Switch: Empresa Exonerada -->
+            <div class="col-md-6 mb-4">
+              <div class="custom-switch-container">
+                <div class="form-check form-switch mb-0">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    id="empresaExonerada" 
+                    name="es_empresa_exonerada"
+                    checked
+                  />
+                </div>
+                <div class="flex-grow-1">
+                  <label class="switch-label" for="empresaExonerada">
+                    <i class="ti ti-discount"></i> ¿Empresa Exonerada?
+                  </label>
+                  <p class="switch-description">
+                    Salud Empleador = $0 para salarios < 10 SMMLV (Ley 1607/2012)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón Calcular -->
+            <div class="col-12">
+              <button type="submit" class="btn btn-calcular" id="btnCalcular">
+                <i class="ti ti-calculator me-2"></i> Calcular Aportes PILA
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      <!-- Contenedor de Resultados (inicialmente oculto) -->
+      <div id="resultadosContainer" style="display: none;">
+        
+        <!-- Datos de Entrada -->
+        <div class="resultado-card datos animate-slide-in">
+          <div class="card-header-resultado">
+            <h5>
+              <i class="ti ti-file-invoice"></i> Datos de Entrada
+            </h5>
+            <span class="badge bg-secondary" id="badgeVersion">Motor v1.1.0</span>
+          </div>
+          <div id="datosEntrada"></div>
+        </div>
+
+        <!-- Aportes del Empleado -->
+        <div class="resultado-card empleado animate-slide-in">
+          <div class="card-header-resultado">
+            <h5>
+              <i class="ti ti-user-minus"></i> Aportes del Empleado
+            </h5>
+            <span class="badge bg-danger" id="badgeTotalEmpleado">$0</span>
+          </div>
+          <div id="aportesEmpleado"></div>
+        </div>
+
+        <!-- Aportes del Empleador -->
+        <div class="resultado-card empleador animate-slide-in">
+          <div class="card-header-resultado">
+            <h5>
+              <i class="ti ti-building"></i> Aportes del Empleador
+            </h5>
+            <span class="badge bg-primary" id="badgeTotalEmpleador">$0</span>
+          </div>
+          <div id="aportesEmpleador"></div>
+        </div>
+
+        <!-- Totales -->
+        <div class="resultado-card totales animate-slide-in">
+          <div class="card-header-resultado">
+            <h5>
+              <i class="ti ti-chart-bar"></i> Resumen Totales
+            </h5>
+          </div>
+          <div id="totalesResumen"></div>
+        </div>
+
+        <!-- Botón Guardar como Cotización -->
+        <div class="resultado-card animate-slide-in" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none;">
+          <div class="text-center py-3">
+            <button type="button" class="btn btn-light btn-lg shadow-sm" id="btnGuardarCotizacion" style="min-width: 250px;">
+              <i class="ti ti-device-floppy me-2"></i> 💾 Guardar como Cotización Real
+            </button>
+            <p class="text-white mt-2 mb-0 small">
+              <i class="ti ti-info-circle me-1"></i> 
+              Esta simulación se guardará en el sistema de cotizaciones
+            </p>
+          </div>
+        </div>
+
+        <!-- Advertencias (si existen) -->
+        <div id="advertenciasContainer" style="display: none;">
+          <div class="advertencias-container" id="advertenciasList"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Loader de cálculo (overlay) -->
+  <div id="loaderOverlay" class="loader-overlay" style="display: none;">
+    <div class="loader-content">
+      <div class="spinner-border spinner-border-custom" role="status">
+        <span class="visually-hidden">Calculando...</span>
+      </div>
+      <p class="mt-3 mb-0 fw-bold">Calculando aportes PILA...</p>
+      <p class="text-muted small mb-0">Motor v1.1.0 procesando</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/plugins/popper.min.js"></script>
+  <script src="/assets/js/plugins/simplebar.min.js"></script>
+  <script src="/assets/js/plugins/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/fonts/custom-font.js"></script>
+  <script src="/assets/js/pcoded.js"></script>
+  <script src="/assets/js/plugins/feather.min.js"></script>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Script del Simulador PILA -->
+  <script src="/assets/js/simulador-pila.js"></script>
+
+  <!-- Inicialización de Tabler Icons -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ocultar loader inicial
+      const loader = document.querySelector('.loader-bg');
+      if (loader) {
+        loader.style.display = 'none';
+      }
+
+      // Inicializar tooltips si Bootstrap está disponible
+      if (typeof bootstrap !== 'undefined') {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>

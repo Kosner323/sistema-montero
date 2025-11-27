@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Unificación Maestro | Portal Montero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+  <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+  <link rel="stylesheet" href="/assets/fonts/feather.css" />
+  <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+  <link rel="stylesheet" href="/assets/fonts/material.css" />
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+  <link rel="stylesheet" href="/assets/css/style-preset.css" />
+
+  <!-- Simple-DataTables CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+
+  <style>
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .badge {
+      font-weight: 500;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+    }
+    .stats-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .stats-number {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .stats-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 0.25rem;
+    }
+    .table-hover tbody tr:hover {
+      background-color: rgba(0, 123, 255, 0.05);
+      cursor: pointer;
+    }
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    /* ===== ESTILOS PERSONALIZADOS PARA SIMPLE-DATATABLES ===== */
+
+    /* Contenedor de búsqueda y selector de entradas */
+    .dataTable-wrapper .dataTable-top {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e9ecef;
+      background: #f8f9fa;
+    }
+
+    .dataTable-wrapper .dataTable-bottom {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #e9ecef;
+      background: #f8f9fa;
+    }
+
+    /* Input de búsqueda */
+    .dataTable-input {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      transition: border-color 0.15s ease-in-out;
+    }
+
+    .dataTable-input:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Selector de número de entradas */
+    .dataTable-selector {
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      background-color: white;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 16px 12px;
+      appearance: none;
+    }
+
+    .dataTable-selector:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Paginación */
+    .dataTable-pagination ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    .dataTable-pagination li {
+      list-style: none;
+    }
+
+    .dataTable-pagination a {
+      border: 1px solid #d1d5db;
+      color: #374151;
+      padding: 0.5rem 0.75rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      border-radius: 0.375rem;
+      margin: 0 0.125rem;
+      font-size: 0.875rem;
+    }
+
+    .dataTable-pagination a:hover {
+      background-color: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    .dataTable-pagination .active a,
+    .dataTable-pagination .active a:hover {
+      background-color: #4f46e5;
+      color: white;
+      border-color: #4f46e5;
+    }
+
+    .dataTable-pagination .disabled a {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Encabezados ordenables */
+    .dataTable-table thead th {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      padding-right: 1.5rem !important;
+    }
+
+    .dataTable-table thead th.dataTable-ascending::after,
+    .dataTable-table thead th.dataTable-descending::after {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+
+    .dataTable-table thead th.dataTable-ascending::after {
+      content: "▲";
+    }
+
+    .dataTable-table thead th.dataTable-descending::after {
+      content: "▼";
+    }
+
+    /* Info de registros */
+    .dataTable-info {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    /* Responsive: Ocultar columnas en mobile */
+    @media (max-width: 768px) {
+      .dataTable-table thead th:nth-child(3),
+      .dataTable-table tbody td:nth-child(3) {
+        display: none;
+      }
+    }
+
+    /* Eliminar bordes duplicados con card */
+    .card-body .dataTable-wrapper .dataTable-container {
+      border: none;
+    }
+
+    .dataTable-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    /* Mantener el estilo de tabla original */
+    .dataTable-table thead {
+      background-color: #f8f9fa;
+    }
+
+    .dataTable-table tbody tr:hover {
+      background-color: rgba(0, 123, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div class="loader-bg">
+      <div class="loader-track">
+          <div class="loader-fill"></div>
+      </div>
+  </div>
+
+  {% include '_sidebar.html' ignore missing %}
+  {% include '_header.html' ignore missing %}
+
+  <div class="pc-container">
+    <div class="pc-content">
+
+      <!-- Breadcrumb -->
+      <div class="page-header">
+        <div class="page-block">
+          <div class="row align-items-center">
+            <div class="col-md-12">
+              <div class="page-header-title">
+                <h5 class="m-b-10">Gestión Unificada</h5>
+              </div>
+              <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/dashboard"><i class="feather icon-home"></i></a></li>
+                <li class="breadcrumb-item">Información</li>
+                <li class="breadcrumb-item" aria-current="page">Maestro</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Búsqueda y Criterios -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">
+                <i class="feather icon-filter me-2"></i>
+                Criterios de Búsqueda y Unificación
+              </h5>
+            </div>
+            <div class="card-body">
+              <form id="formBusquedaUnificacion">
+                
+                <!-- SECCIÓN A: DATOS DEL USUARIO -->
+                <div class="row mb-3">
+                  <div class="col-12">
+                    <h6 class="text-muted mb-3">
+                      <i class="feather icon-user me-2"></i>
+                      Datos del Usuario / Empleado
+                    </h6>
+                  </div>
+                  
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroUserTipoDoc" class="form-label">Tipo de Documento</label>
+                    <select class="form-select" id="filtroUserTipoDoc">
+                      <option value="">-- Todos --</option>
+                      <option value="CC">Cédula de Ciudadanía (CC)</option>
+                      <option value="CE">Cédula de Extranjería (CE)</option>
+                      <option value="PA">Pasaporte (PA)</option>
+                      <option value="TI">Tarjeta de Identidad (TI)</option>
+                      <option value="RC">Registro Civil (RC)</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroUserDoc" class="form-label">Número de Documento</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroUserDoc" 
+                      placeholder="Ej: 1010123456"
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroUserNombre" class="form-label">Nombre del Usuario</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroUserNombre" 
+                      placeholder="Buscar por nombre o apellido..."
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+
+                <!-- SECCIÓN B: DATOS DE LA EMPRESA -->
+                <div class="row mb-3">
+                  <div class="col-12">
+                    <h6 class="text-muted mb-3">
+                      <i class="feather icon-briefcase me-2"></i>
+                      Datos de la Empresa
+                    </h6>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroEmpresaTipoDoc" class="form-label">Tipo de Identificación</label>
+                    <select class="form-select" id="filtroEmpresaTipoDoc">
+                      <option value="">-- Todos --</option>
+                      <option value="NIT">NIT (Número de Identificación Tributaria)</option>
+                      <option value="RUT">RUT (Registro Único Tributario)</option>
+                      <option value="CC">Cédula de Ciudadanía</option>
+                      <option value="CE">Cédula de Extranjería</option>
+                      <option value="OTRO">Otro</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroEmpresaNit" class="form-label">Número de Identificación</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroEmpresaNit" 
+                      placeholder="Ej: 900123456-1"
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="filtroEmpresaNombre" class="form-label">Razón Social / Nombre</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="filtroEmpresaNombre" 
+                      placeholder="Buscar por nombre de empresa..."
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+
+                <!-- BOTÓN DE ACCIÓN -->
+                <div class="row">
+                  <div class="col-12">
+                    <div class="d-flex justify-content-end gap-2">
+                      <button 
+                        type="button" 
+                        class="btn btn-outline-secondary"
+                        id="btnLimpiarFiltros"
+                      >
+                        <i class="feather icon-x me-1"></i>
+                        Limpiar Filtros
+                      </button>
+                      <button 
+                        type="submit" 
+                        class="btn btn-primary px-4"
+                        id="btnConsultarUnificacion"
+                      >
+                        <i class="feather icon-search me-2"></i>
+                        Consultar Registros
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla Principal -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <div class="row align-items-center">
+                <div class="col">
+                  <h5 class="mb-0">
+                    <i class="feather icon-database me-2"></i>
+                    Base de Datos Maestra
+                  </h5>
+                  <span class="text-muted small d-block mt-1" id="statsDisplay">
+                    <i class="feather icon-clock me-1"></i>Cargando...
+                  </span>
+                </div>
+                <div class="col-auto">
+                  <button class="btn btn-primary btn-sm" onclick="loadMaster()" id="btnRefresh">
+                    <i class="feather icon-refresh-cw me-1"></i> Actualizar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="tableUnificacion">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" style="width: 60px;">#</th>
+                                <th>Usuario / Empleado</th>
+                                <th class="text-center">Identificación</th>
+                                <th>Empresa Asignada</th>
+                                <th class="text-center">Rol</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="text-muted mt-3 mb-0">Cargando datos del sistema...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    {% include '_footer.html' ignore missing %}
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/plugins/popper.min.js"></script>
+  <script src="/assets/js/plugins/simplebar.min.js"></script>
+  <script src="/assets/js/plugins/bootstrap.min.js"></script>
+  <script src="/assets/js/pcoded.js"></script>
+  <script src="/assets/js/plugins/feather.min.js"></script>
+
+  <!-- Simple-DataTables JS -->
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  {% include '_theme_config.html' ignore missing %}
+
+  <script>
+    // ==========================================================================
+    // VARIABLES GLOBALES
+    // ==========================================================================
+    let dataCache = null;
+    let dataTableInstance = null; // Instancia de Simple-DataTables
+
+    // ==========================================================================
+    // UTILIDAD: FUNCIÓN DEBOUNCE (para optimizar búsquedas)
+    // ==========================================================================
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // ==========================================================================
+    // INICIALIZACIÓN
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar iconos Feather
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+
+        // Ocultar loader inicial
+        const loader = document.querySelector('.loader-bg');
+        if (loader) {
+            setTimeout(() => { loader.style.display = 'none'; }, 500);
+        }
+
+        // Event Listeners del Formulario de Búsqueda
+        const formBusqueda = document.getElementById('formBusquedaUnificacion');
+        const btnLimpiar = document.getElementById('btnLimpiarFiltros');
+
+        // Submit del formulario
+        if (formBusqueda) {
+            formBusqueda.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('🔍 Formulario de búsqueda enviado');
+                aplicarFiltros();
+            });
+        }
+
+        // Botón limpiar filtros
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener('click', function() {
+                console.log('🧹 Limpiando filtros...');
+                limpiarFiltros();
+            });
+        }
+
+        // Cargar datos automáticamente al iniciar
+        loadMaster();
+    });
+
+    // ==========================================================================
+    // FUNCIÓN: LIMPIAR FILTROS
+    // ==========================================================================
+    function limpiarFiltros() {
+        console.log('🧹 Limpiando filtros de búsqueda...');
+        
+        // Limpiar todos los campos del formulario
+        document.getElementById('filtroUserTipoDoc').value = '';
+        document.getElementById('filtroUserDoc').value = '';
+        document.getElementById('filtroUserNombre').value = '';
+        document.getElementById('filtroEmpresaTipoDoc').value = '';
+        document.getElementById('filtroEmpresaNit').value = '';
+        document.getElementById('filtroEmpresaNombre').value = '';
+
+        // Renderizar tabla completa desde el caché
+        if (dataCache && dataCache.usuarios) {
+            renderTable(dataCache.usuarios);
+            
+            // Restaurar indicador de estadísticas
+            const statsDisplay = document.getElementById('statsDisplay');
+            if (statsDisplay && dataCache.timestamp) {
+                statsDisplay.innerHTML = `
+                    <i class="feather icon-check-circle me-1 text-success"></i>
+                    Última actualización: ${new Date(dataCache.timestamp).toLocaleString('es-CO')}
+                `;
+            }
+
+            // Toast de confirmación
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'info',
+                title: 'Filtros limpiados',
+                text: `Mostrando todos los registros (${dataCache.usuarios.length})`,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        }
+    }
+
+    // ==========================================================================
+    // FUNCIÓN: APLICAR FILTROS (CLIENT-SIDE)
+    // ==========================================================================
+    function aplicarFiltros() {
+        // Verificar que los datos estén cargados
+        if (!dataCache || !dataCache.usuarios) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Datos No Cargados',
+                text: 'Por favor, espere a que se carguen los datos del sistema.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Obtener valores de los filtros
+        const filtros = {
+            userTipoDoc: document.getElementById('filtroUserTipoDoc').value.trim(),
+            userDoc: document.getElementById('filtroUserDoc').value.trim().toLowerCase(),
+            userNombre: document.getElementById('filtroUserNombre').value.trim().toLowerCase(),
+            empresaTipoDoc: document.getElementById('filtroEmpresaTipoDoc').value.trim(),
+            empresaNit: document.getElementById('filtroEmpresaNit').value.trim().toLowerCase(),
+            empresaNombre: document.getElementById('filtroEmpresaNombre').value.trim().toLowerCase()
+        };
+
+        console.log('🔍 Filtros aplicados:', filtros);
+
+        // Verificar si hay al menos un filtro activo
+        const hayFiltros = Object.values(filtros).some(v => v !== '');
+
+        if (!hayFiltros) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin Filtros',
+                text: 'Por favor, ingrese al menos un criterio de búsqueda.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // ======================================================================
+        // FILTRADO CLIENT-SIDE DESDE EL CACHÉ
+        // ======================================================================
+        const usuariosFiltrados = dataCache.usuarios.filter(usuario => {
+            let cumple = true;
+
+            // FILTRO 1: Número de Documento Usuario (búsqueda parcial)
+            if (filtros.userDoc) {
+                const numeroId = (usuario.numeroId || '').toString().toLowerCase();
+                cumple = cumple && numeroId.includes(filtros.userDoc);
+            }
+
+            // FILTRO 2: Nombre Usuario (busca en nombre y apellido)
+            if (filtros.userNombre) {
+                const nombreCompleto = `${usuario.primerNombre || ''} ${usuario.segundoNombre || ''} ${usuario.primerApellido || ''} ${usuario.segundoApellido || ''}`.toLowerCase();
+                cumple = cumple && nombreCompleto.includes(filtros.userNombre);
+            }
+
+            // FILTRO 3: NIT/Número ID Empresa (búsqueda parcial)
+            if (filtros.empresaNit) {
+                const empresaNit = (usuario.empresa_nit || '').toString().toLowerCase();
+                cumple = cumple && empresaNit.includes(filtros.empresaNit);
+            }
+
+            // FILTRO 4: Nombre Empresa (búsqueda parcial)
+            if (filtros.empresaNombre) {
+                const nombreEmpresa = (usuario.nombre_empresa || '').toLowerCase();
+                cumple = cumple && nombreEmpresa.includes(filtros.empresaNombre);
+            }
+
+            return cumple;
+        });
+
+        console.log(`✅ Resultados: ${usuariosFiltrados.length} de ${dataCache.usuarios.length} registros`);
+
+        // Renderizar tabla con resultados filtrados
+        renderTable(usuariosFiltrados);
+
+        // Actualizar indicador en el header
+        const statsDisplay = document.getElementById('statsDisplay');
+        if (statsDisplay) {
+            statsDisplay.innerHTML = `
+                <i class="feather icon-filter me-1 text-primary"></i>
+                Mostrando <strong>${usuariosFiltrados.length}</strong> de <strong>${dataCache.usuarios.length}</strong> registros
+            `;
+        }
+
+        // Mostrar mensaje si no hay resultados
+        if (usuariosFiltrados.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin Resultados',
+                text: 'No se encontraron registros que coincidan con los criterios de búsqueda.',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#4f46e5'
+            });
+        } else {
+            // Mostrar toast de éxito
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: `${usuariosFiltrados.length} registro(s) encontrado(s)`,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        }
+    }
+
+    // ==========================================================================
+    // FUNCIÓN PRINCIPAL: CARGAR DATOS
+    // ==========================================================================
+    async function loadMaster() {
+        const tbody = document.getElementById('tableBody');
+        const btnRefresh = document.getElementById('btnRefresh');
+        const statsDisplay = document.getElementById('statsDisplay');
+
+        // Deshabilitar botón de actualizar
+        if (btnRefresh) {
+            btnRefresh.disabled = true;
+            btnRefresh.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Cargando...';
+        }
+
+        // Mostrar spinner en tabla
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="text-muted mt-3 mb-0">Actualizando datos del sistema...</p>
+                </td>
+            </tr>
+        `;
+
+        try {
+            console.log('📊 Iniciando carga de datos de unificación...');
+
+            const response = await fetch('/api/unificacion/master', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('✅ Datos recibidos:', data);
+
+            // Verificar que la respuesta sea exitosa
+            if (!data.success) {
+                throw new Error(data.error || 'Error desconocido del servidor');
+            }
+
+            // Guardar en caché
+            dataCache = data;
+
+            // Actualizar timestamp en header
+            if (statsDisplay && data.timestamp) {
+                statsDisplay.innerHTML = `
+                    <i class="feather icon-check-circle me-1 text-success"></i>
+                    Última actualización: ${new Date(data.timestamp).toLocaleString('es-CO')}
+                `;
+            }
+
+            // Renderizar tabla
+            renderTable(data.usuarios);
+
+            // Mostrar notificación de éxito
+            Swal.fire({
+                icon: 'success',
+                title: '¡Datos cargados!',
+                text: `${data.stats.total_usuarios} usuarios y ${data.stats.total_empresas} empresas`,
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+
+        } catch (error) {
+            console.error('❌ Error cargando datos:', error);
+
+            // Mostrar error en tabla
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-danger">
+                        <i class="feather icon-alert-triangle" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 mb-2">Error al Cargar Datos</h5>
+                        <p class="text-muted">${error.message}</p>
+                        <button class="btn btn-primary btn-sm mt-2" onclick="loadMaster()">
+                            <i class="feather icon-refresh-cw me-1"></i> Reintentar
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            // Mostrar SweetAlert de error
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Conexión',
+                html: `
+                    <p>No se pudieron cargar los datos del sistema.</p>
+                    <p class="text-muted small">${error.message}</p>
+                `,
+                confirmButtonText: 'Reintentar',
+                confirmButtonColor: '#dc3545',
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    loadMaster();
+                }
+            });
+
+        } finally {
+            // Rehabilitar botón de actualizar
+            if (btnRefresh) {
+                btnRefresh.disabled = false;
+                btnRefresh.innerHTML = '<i class="feather icon-refresh-cw me-1"></i> Actualizar';
+            }
+
+            // Reinicializar iconos
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+        }
+    }
+
+    // ==========================================================================
+    // NOTA: Estadísticas removidas - ahora usamos formulario de búsqueda avanzada
+    // ==========================================================================
+
+    // ==========================================================================
+    // FUNCIÓN: RENDERIZAR TABLA
+    // ==========================================================================
+    function renderTable(usuarios) {
+        const tbody = document.getElementById('tableBody');
+
+        if (!usuarios || usuarios.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="feather icon-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="text-muted mt-3 mb-0">No se encontraron usuarios en el sistema</p>
+                    </td>
+                </tr>
+            `;
+            // Destruir DataTable si no hay datos
+            if (dataTableInstance) {
+                dataTableInstance.destroy();
+                dataTableInstance = null;
+            }
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        usuarios.forEach((usuario, index) => {
+            // Obtener info del badge de rol
+            const roleBadge = usuario.role_badge || { color: 'secondary', text: 'Usuario' };
+
+            // Crear fila
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="text-center">
+                    <span class="badge bg-light-secondary">${index + 1}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar bg-light-primary text-primary d-flex align-items-center justify-content-center me-3 fw-bold">
+                            ${getInitials(usuario)}
+                        </div>
+                        <div>
+                            <h6 class="mb-0">${usuario.nombre_completo || `${usuario.primerNombre} ${usuario.primerApellido}`}</h6>
+                            <small class="text-muted">
+                                <i class="feather icon-mail" style="font-size: 0.75rem;"></i>
+                                ${usuario.correoElectronico || 'Sin correo'}
+                            </small>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <code class="text-dark">${usuario.numeroId}</code>
+                </td>
+                <td>
+                    ${usuario.tiene_empresa
+                        ? `<span class="badge bg-light-success text-success">
+                             <i class="feather icon-check-circle me-1"></i>${usuario.nombre_empresa}
+                           </span>`
+                        : `<span class="badge bg-light-warning text-warning">
+                             <i class="feather icon-alert-circle me-1"></i>Sin Asignar
+                           </span>`
+                    }
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-${roleBadge.color}">${roleBadge.text}</span>
+                </td>
+                <td class="text-center">
+                    <a href="/api/unificacion/formulario_vinculacion/${usuario.id}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-primary" 
+                       title="Abrir formulario de vinculación">
+                        <i class="feather icon-external-link me-1"></i>Vincular/Editar
+                    </a>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // =======================================================================
+        // INICIALIZAR SIMPLE-DATATABLES
+        // =======================================================================
+        initializeDataTable();
+    }
+
+    // ==========================================================================
+    // FUNCIÓN: INICIALIZAR DATATABLE
+    // ==========================================================================
+    function initializeDataTable() {
+        // Destruir instancia anterior si existe
+        if (dataTableInstance) {
+            console.log('🔄 Destruyendo instancia anterior de DataTable...');
+            dataTableInstance.destroy();
+            dataTableInstance = null;
+        }
+
+        // Pequeño delay para asegurar que el DOM esté completamente renderizado
+        setTimeout(() => {
+            try {
+                const table = document.getElementById('tableUnificacion');
+
+                if (!table) {
+                    console.error('❌ No se encontró la tabla #tableUnificacion');
+                    return;
+                }
+
+                console.log('📊 Inicializando Simple-DataTables...');
+
+                dataTableInstance = new simpleDatatables.DataTable(table, {
+                    searchable: true,       // Habilitar búsqueda
+                    fixedHeight: false,     // Altura dinámica
+                    perPage: 25,            // Registros por página por defecto
+                    perPageSelect: [10, 25, 50, 100, 500], // Opciones de registros por página
+                    sortable: true,         // Habilitar ordenamiento
+                    labels: {
+                        placeholder: "Buscar usuarios, empresas, roles...",
+                        perPage: "registros por página",
+                        noRows: "No se encontraron registros",
+                        info: "Mostrando {start} a {end} de {rows} registros",
+                        noResults: "No hay resultados para tu búsqueda",
+                        previous: "Anterior",
+                        next: "Siguiente"
+                    },
+                    layout: {
+                        top: "{select}{search}",
+                        bottom: "{info}{pager}"
+                    },
+                    columns: [
+                        // Columna 0: # - No ordenable
+                        { select: 0, sortable: false },
+                        // Columna 1: Usuario - Ordenable
+                        { select: 1, sortable: true },
+                        // Columna 2: Identificación - Ordenable
+                        { select: 2, sortable: true },
+                        // Columna 3: Empresa - Ordenable
+                        { select: 3, sortable: true },
+                        // Columna 4: Rol - Ordenable
+                        { select: 4, sortable: true },
+                        // Columna 5: Acciones - No ordenable
+                        { select: 5, sortable: false }
+                    ]
+                });
+
+                console.log('✅ DataTable inicializado correctamente');
+                console.log(`📈 Mostrando ${dataTableInstance.data.length} registros totales`);
+
+                // Reinicializar iconos de Feather después de renderizar la tabla
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+
+            } catch (error) {
+                console.error('❌ Error al inicializar DataTable:', error);
+            }
+        }, 100);
+    }
+
+    // ==========================================================================
+    // FUNCIONES AUXILIARES
+    // ==========================================================================
+
+    function getInitials(usuario) {
+        const firstInitial = (usuario.primerNombre || 'U').charAt(0).toUpperCase();
+        const lastInitial = (usuario.primerApellido || 'S').charAt(0).toUpperCase();
+        return firstInitial + lastInitial;
+    }
+
+    function viewUserDetails(userId) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Ver Detalles',
+            text: `Funcionalidad en desarrollo para usuario ID: ${userId}`,
+            confirmButtonText: 'OK'
+        });
+    }
+
+    function editUser(userId) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Editar Usuario',
+            text: `Funcionalidad en desarrollo para usuario ID: ${userId}`,
+            confirmButtonText: 'OK'
+        });
+    }
+
+    // ==========================================================================
+    // NOTA: El formulario de vinculación ahora se abre en una nueva pestaña
+    // Las funciones abrirModalVinculacion() y guardarCambios() ya no son necesarias
+    // El botón "Vincular/Editar" es ahora un enlace directo a:
+    // /api/unificacion/formulario_vinculacion/{user_id}
+    // ==========================================================================
+  </script>
+</body>
+</html>

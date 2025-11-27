@@ -5,73 +5,33 @@ pago_impuestos.py - ACTUALIZADO con logging
 Maneja la lógica de backend para la subida de formularios
 de impuestos y la consulta de registros.
 """
-
 import os
-import sqlite3
 import traceback
 from datetime import datetime
-from functools import wraps  # Necesario para el fallback
-
-from flask import Blueprint, current_app, jsonify, request, session
+from flask import Blueprint, jsonify, request, session
 from werkzeug.utils import secure_filename
-
-# --- IMPORTAR UTILIDADES Y LOGGER ---
 from logger import logger
 
-# --- INICIO BLOQUE DE IMPORTACIÓN ROBUSTA (Corregido: Eliminado save_text_content del import) ---
+# --- IMPORTACIÓN CENTRALIZADA ---
 try:
-    from utils import (  # save_text_content <--- ELIMINADO PARA ARREGLAR ImportError
-        COMPANY_DATA_FOLDER,
-        get_db_connection,
-        log_file_upload,
-        login_required,
-        sanitize_and_save_file,
-    )
-except ImportError as e:
-    logger.error(f"Error importando utils en pago_impuestos.py: {e}", exc_info=True)
+    from ..utils import login_required, COMPANY_DATA_FOLDER, sanitize_and_save_file, log_file_upload
+    from ..extensions import db
+    from ..models.orm_models import PagoImpuesto, Empresa
+except (ImportError, ValueError):
+    from utils import login_required, COMPANY_DATA_FOLDER, sanitize_and_save_file, log_file_upload
+    from extensions import db
+    from models.orm_models import PagoImpuesto, Empresa
+# -------------------------------
 
-    # --- Fallbacks ---
-    def get_db_connection():
-        DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "mi_sistema.db")
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        return conn
-
-    def login_required(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    COMPANY_DATA_FOLDER = os.getenv("COMPANY_DATA_FOLDER", "D:\\ruta\\por\\defecto\\EMPRESAS")
-
-    def sanitize_and_save_file(file, upload_path, custom_name=None):
-        if not file or not file.filename:
-            raise ValueError("Archivo no válido.")
-        filename = secure_filename(custom_name if custom_name else file.filename)
-        target_path = os.path.join(upload_path, filename)
-        if os.path.normpath(target_path).startswith(os.path.normpath(upload_path)):
-            file.save(target_path)
-            return target_path
-        else:
-            raise ValueError("Ruta de archivo no válida.")
-
-    # Función necesaria para guardar el TXT (ahora definida aquí si falla el import)
-    def save_text_content(content, upload_path, filename):
-        target_path = os.path.join(upload_path, secure_filename(filename))
-        if os.path.normpath(target_path).startswith(os.path.normpath(upload_path)):
-            with open(target_path, "w", encoding="utf-8") as f:
-                f.write(content)
-            return target_path
-        else:
-            raise ValueError("Ruta de archivo no válida para TXT.")
-
-    def log_file_upload(filename, user_id, success, error=None):
-        logger.warning(f"LOG_FALLBACK: User {user_id} upload {filename}. Success: {success}. Error: {error}")
-
-
-# --- FIN BLOQUE DE IMPORTACIÓN ROBUSTA ---
+def save_text_content(content, upload_path, filename):
+    """Guarda contenido de texto en un archivo."""
+    target_path = os.path.join(upload_path, secure_filename(filename))
+    if os.path.normpath(target_path).startswith(os.path.normpath(upload_path)):
+        with open(target_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return target_path
+    else:
+        raise ValueError("Ruta de archivo no válida para TXT.")
 
 # ==================== DEFINICIÓN DEL BLUEPRINT ====================
 bp_impuestos = Blueprint("bp_impuestos", __name__, url_prefix="/api/impuestos")
@@ -104,39 +64,26 @@ def _get_company_folder(nit, nombre_empresa, tipo_impuesto):
 @login_required
 def get_impuestos():
     """Obtiene registros de impuestos, con filtros."""
-    conn = None
     try:
         empresa_nit = request.args.get("empresa_nit")
         tipo_impuesto = request.args.get("tipo_impuesto")
 
-        conn = get_db_connection()
-        query = "SELECT * FROM pago_impuestos"
-        params = []
-        conditions = []
+        # Construir query ORM con filtros
+        query = PagoImpuesto.query
 
         if empresa_nit and empresa_nit != "todos":
-            conditions.append("empresa_nit = ?")
-            params.append(empresa_nit)
+            query = query.filter_by(empresa_nit=empresa_nit)
 
         if tipo_impuesto and tipo_impuesto != "todos":
-            conditions.append("tipo_impuesto = ?")
-            params.append(tipo_impuesto)
+            query = query.filter_by(tipo_impuesto=tipo_impuesto)
 
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-
-        query += " ORDER BY fecha_limite ASC"
-
-        registros = conn.execute(query, tuple(params)).fetchall()
+        registros = query.order_by(PagoImpuesto.fecha_limite.asc()).all()
         logger.debug(f"Consulta de impuestos exitosa. Registros: {len(registros)}")
-        return jsonify([dict(row) for row in registros])
+        return jsonify([registro.to_dict() for registro in registros])
 
     except Exception as e:
         logger.error(f"Error obteniendo registros de impuestos: {e}", exc_info=True)
         return jsonify({"error": "No se pudo obtener la lista de registros."}), 500
-    finally:
-        if conn:
-            conn.close()
 
 
 @bp_impuestos.route("", methods=["POST"])
@@ -165,14 +112,12 @@ def add_impuesto():
         if file.filename == "":
             return jsonify({"error": "El archivo no tiene nombre."}), 400
 
-        conn = get_db_connection()
-
-        # 1. Obtener el nombre de la empresa desde la BD
-        empresa = conn.execute("SELECT nombre_empresa FROM empresas WHERE nit = ?", (nit,)).fetchone()
+        # 1. Obtener el nombre de la empresa desde la BD usando ORM
+        empresa = Empresa.query.filter_by(nit=nit).first()
         if not empresa:
             logger.warning(f"Intento de registro con NIT no encontrado: {nit}")
             return jsonify({"error": f"Empresa con NIT {nit} no encontrada."}), 404
-        nombre_empresa = empresa["nombre_empresa"]
+        nombre_empresa = empresa.nombre_empresa
 
         # 2. Determinar la ruta de guardado
         try:
@@ -237,68 +182,47 @@ def add_impuesto():
         except (ValueError, IOError) as e:
             logger.warning(f"Advertencia: Error al guardar archivo TXT de soporte para {nit}: {e}")
 
-        # 6. Guardar registro en la base de datos
-        cur = conn.cursor()
-        cur.execute(
-            """
-            INSERT INTO pago_impuestos (
-                empresa_nit, empresa_nombre, tipo_impuesto, periodo, fecha_limite, estado, ruta_archivo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-            (
-                nit,
-                nombre_empresa,
-                tipo_impuesto,
-                periodo,
-                fecha_limite,
-                "Pendiente de Pago",
-                ruta_guardada,
-            ),
+        # 6. Guardar registro en la base de datos usando ORM
+        nuevo_impuesto = PagoImpuesto(
+            empresa_nit=nit,
+            empresa_nombre=nombre_empresa,
+            tipo_impuesto=tipo_impuesto,
+            periodo=periodo,
+            fecha_limite=fecha_limite,
+            estado="Pendiente de Pago",
+            ruta_archivo=ruta_guardada
         )
-        conn.commit()
+        
+        db.session.add(nuevo_impuesto)
+        db.session.commit()
 
-        nuevo_id = cur.lastrowid
-        logger.info(f"Impuesto registrado con ID: {nuevo_id} para NIT: {nit}")
+        logger.info(f"Impuesto registrado con ID: {nuevo_impuesto.id} para NIT: {nit}")
 
-        nuevo_registro = conn.execute("SELECT * FROM pago_impuestos WHERE id = ?", (nuevo_id,)).fetchone()
-
-        return jsonify(dict(nuevo_registro)), 201
+        return jsonify(nuevo_impuesto.to_dict()), 201
 
     except Exception as e:
-        if conn:
-            conn.rollback()
+        db.session.rollback()
         logger.error(f"Error creando registro de impuesto (NIT: {nit}): {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
-    finally:
-        if conn:
-            conn.close()
 
 
 @bp_impuestos.route("/<int:impuesto_id>/pagar", methods=["PUT"])
 @login_required
 def marcar_como_pagado(impuesto_id):
     """Actualiza el estado de un impuesto a 'Pagado'."""
-    conn = None
     try:
-        conn = get_db_connection()
-
-        registro = conn.execute("SELECT * FROM pago_impuestos WHERE id = ?", (impuesto_id,)).fetchone()
+        registro = PagoImpuesto.query.get(impuesto_id)
         if not registro:
             return jsonify({"error": "Registro no encontrado."}), 404
 
-        conn.execute("UPDATE pago_impuestos SET estado = 'Pagado' WHERE id = ?", (impuesto_id,))
-        conn.commit()
+        registro.estado = 'Pagado'
+        db.session.commit()
 
-        registro_actualizado = conn.execute("SELECT * FROM pago_impuestos WHERE id = ?", (impuesto_id,)).fetchone()
         logger.info(f"Impuesto ID {impuesto_id} marcado como 'Pagado'")
 
-        return jsonify(dict(registro_actualizado)), 200
+        return jsonify(registro.to_dict()), 200
 
     except Exception as e:
-        if conn:
-            conn.rollback()
+        db.session.rollback()
         logger.error(f"Error actualizando estado de impuesto {impuesto_id}: {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
-    finally:
-        if conn:
-            conn.close()

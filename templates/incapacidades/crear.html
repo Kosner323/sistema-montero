@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Registrar Nueva Incapacidad | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+
+    <style>
+        .form-section-header {
+            background-color: #f0f4f8;
+            padding: 12px 15px;
+            border-left: 4px solid #4680ff;
+            margin-top: 25px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            <div class="page-header">
+                <div class="page-block">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                        <li class="breadcrumb-item"><a href="/incapacidades">Incapacidades</a></li>
+                        <li class="breadcrumb-item" aria-current="page">Nueva Incapacidad</li>
+                    </ul>
+                    <div class="page-header-title">
+                        <h5 class="mb-0">Registrar Nueva Incapacidad</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="feedbackMessage" class="mb-3"></div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5><i data-feather="file-text" class="w-5 h-5 inline mr-2"></i>Información de la Incapacidad</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="formIncapacidad" enctype="multipart/form-data">
+
+                                <!-- Información de la Empresa y Empleado -->
+                                <h6 class="form-section-header">Información del Empleado</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="modalEmpresa" class="form-label">Empresa <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="modalEmpresa" name="empresa_nit" required>
+                                            <option value="">Cargando empresas...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Por favor seleccione una empresa.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="modalUsuario" class="form-label">Usuario (Empleado) <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="modalUsuario" name="usuario_id" required disabled>
+                                            <option value="">Seleccione una empresa primero...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Por favor seleccione un empleado.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Información Médica -->
+                                <h6 class="form-section-header">Información Médica</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label for="diagnostico" class="form-label">Diagnóstico <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="diagnostico" name="diagnostico"
+                                               placeholder="Ej: Gripe Común, Cirugía Menor, Fractura" required>
+                                        <div class="invalid-feedback">El diagnóstico es obligatorio.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="fechaInicio" class="form-label">Fecha de Inicio <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="fechaInicio" name="fecha_inicio" required>
+                                        <div class="invalid-feedback">La fecha de inicio es obligatoria.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="fechaFin" class="form-label">Fecha de Fin <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="fechaFin" name="fecha_fin" required>
+                                        <div class="invalid-feedback">La fecha de fin es obligatoria.</div>
+                                    </div>
+                                </div>
+
+                                <!-- Documentos Adjuntos -->
+                                <h6 class="form-section-header">Documentos Adjuntos</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label for="archivosPDF" class="form-label">Anexar Documentos (PDF, JPG, PNG)</label>
+                                        <input class="form-control" type="file" id="archivosPDF" name="archivosPDF" accept=".pdf,image/*" multiple>
+                                        <div class="form-text">
+                                            <i data-feather="info" class="w-4 h-4 inline"></i>
+                                            Adjunte la Incapacidad, Historia Clínica, etc. Se permiten múltiples archivos.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div class="mt-4 d-flex justify-content-between gap-2">
+                                    <a href="/incapacidades" class="btn btn-secondary">
+                                        <i data-feather="x" class="w-4 h-4 inline mr-1"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary" id="btnRegistrar">
+                                        <i data-feather="save" class="w-4 h-4 inline mr-1"></i> Registrar Incapacidad
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA (Ejecutar ANTES de script.js) ---
+        // Previene errores de ReferenceError cuando script.js intenta llamar estas funciones
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <script>
+        const API_URL = '/api';
+        const feedbackDiv = document.getElementById('feedbackMessage');
+        let allUsers = null;
+
+        // Mostrar mensajes
+        function showMessage(message, type = 'info') {
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                          ${message}
+                                          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                       </div>`;
+            }
+        }
+
+        // Toggle spinner en botón
+        function toggleSpinner(show) {
+            const button = document.getElementById('btnRegistrar');
+            if (button) {
+                const originalHTML = button.innerHTML;
+                if (show) {
+                    button.disabled = true;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+                    button.dataset.originalHtml = originalHTML;
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = button.dataset.originalHtml || originalHTML;
+                }
+            }
+        }
+
+        // Cargar empresas
+        async function loadCompanies() {
+            const loader = document.querySelector('.loader-bg');
+            if (loader) loader.style.display = 'flex';
+
+            try {
+                const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`Error ${response.status} cargando empresas`);
+
+                const companies = await response.json();
+                const modalSelect = document.getElementById('modalEmpresa');
+
+                modalSelect.innerHTML = '<option value="">Seleccione la Empresa...</option>';
+                companies.forEach(emp => modalSelect.add(new Option(emp.nombre_empresa, emp.nit)));
+
+            } catch (error) {
+                console.error('Error cargando empresas:', error);
+                showMessage(`Error al cargar empresas: ${error.message}`, 'danger');
+            } finally {
+                if (loader) loader.style.display = 'none';
+            }
+        }
+
+        // Cargar todos los usuarios una vez
+        async function loadAllUsers() {
+            try {
+                const response = await fetch(`${API_URL}/usuarios`, { credentials: 'include' });
+                if (!response.ok) throw new Error(`Error ${response.status} cargando usuarios`);
+                allUsers = await response.json();
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                allUsers = [];
+            }
+        }
+
+        // Poblar select de usuarios según empresa seleccionada
+        function populateUserSelect(selectedNit) {
+            const modalUsuarioSelect = document.getElementById('modalUsuario');
+            if (!modalUsuarioSelect) return;
+
+            if (!allUsers) {
+                modalUsuarioSelect.innerHTML = '<option value="">Error al cargar usuarios</option>';
+                modalUsuarioSelect.disabled = true;
+                return;
+            }
+
+            modalUsuarioSelect.innerHTML = '<option value="">Cargando usuarios...</option>';
+            modalUsuarioSelect.disabled = true;
+
+            const usuariosDeEmpresa = allUsers.filter(u => u.empresa_nit == selectedNit);
+
+            modalUsuarioSelect.innerHTML = '<option value="">Seleccione un usuario...</option>';
+            if (usuariosDeEmpresa.length > 0) {
+                usuariosDeEmpresa.forEach(u => {
+                    modalUsuarioSelect.add(new Option(
+                        `${u.primerNombre || ''} ${u.primerApellido || ''} (${u.numeroId})`,
+                        u.numeroId
+                    ));
+                });
+                modalUsuarioSelect.disabled = false;
+            } else {
+                modalUsuarioSelect.innerHTML = '<option value="">No hay usuarios para esta empresa</option>';
+                modalUsuarioSelect.disabled = true;
+            }
+        }
+
+        // Registrar incapacidad
+        async function registerIncapacidad(event) {
+            event.preventDefault();
+            const form = document.getElementById('formIncapacidad');
+
+            // Validar fechas
+            const fechaInicio = document.getElementById('fechaInicio').value;
+            const fechaFin = document.getElementById('fechaFin').value;
+            if (fechaInicio && fechaFin && new Date(fechaFin) < new Date(fechaInicio)) {
+                showMessage('La fecha de fin no puede ser anterior a la fecha de inicio.', 'warning');
+                return;
+            }
+
+            toggleSpinner(true);
+            showMessage('Registrando incapacidad...', 'info');
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(`${API_URL}/incapacidades`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.error || `Error ${response.status}`);
+
+                let successMessage = `✅ Incapacidad ${result.id} registrada con éxito.`;
+                if (result.mensaje_advertencia) {
+                    successMessage += ` Advertencia: ${result.mensaje_advertencia}`;
+                }
+
+                showMessage(successMessage, 'success');
+
+                // Redireccionar después de 1.5 segundos
+                setTimeout(() => {
+                    window.location.href = '/incapacidades';
+                }, 1500);
+
+            } catch (error) {
+                console.error("Error al registrar incapacidad:", error);
+                showMessage(`❌ Error al registrar: ${error.message}`, 'danger');
+                toggleSpinner(false);
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            feather.replace();
+
+            // Cargar datos iniciales
+            await loadCompanies();
+            await loadAllUsers();
+
+            // Listener para cambio de empresa
+            const modalEmpresaSelect = document.getElementById('modalEmpresa');
+            if (modalEmpresaSelect) {
+                modalEmpresaSelect.addEventListener('change', (e) => {
+                    populateUserSelect(e.target.value);
+                });
+            }
+
+            // Listener para submit del formulario
+            const formIncapacidad = document.getElementById('formIncapacidad');
+            if (formIncapacidad) {
+                formIncapacidad.addEventListener('submit', registerIncapacidad);
+            }
+        });
+    </script>
+</body>
+</html>

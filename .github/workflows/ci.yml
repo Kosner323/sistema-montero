@@ -99,7 +99,6 @@ jobs:
     - name: 🎨 Check code formatting with Black
       run: |
         black --check --diff .
-      continue-on-error: true
     
     - name: 📏 Run Flake8
       run: |

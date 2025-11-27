@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Blueprint de Notificaciones - Sistema Montero
 =============================================
@@ -12,6 +12,7 @@ from flask import Blueprint, g, jsonify, request
 
 # Importar el servicio de notificaciones
 from routes.notification_service import notification_service
+from utils import get_db_connection
 
 # Configuración de logging
 logger = logging.getLogger(__name__)
@@ -227,7 +228,7 @@ def delete_notification(notification_id):
         user_id = session.get("user_id")
 
         # Usar g.db para consistencia con otros blueprints
-        conn = g.db
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         # Verificar que la notificación pertenece al usuario
