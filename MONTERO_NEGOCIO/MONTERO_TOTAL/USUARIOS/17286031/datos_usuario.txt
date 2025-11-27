@@ -1,0 +1,35 @@
+--- DATOS AFILIADO: 17286031 ---
+
+Tipo id: Cédula de Ciudadanía
+Numero id: 17286031
+Primer nombre: Usuario
+Segundo nombre: Prueba
+Primer apellido: Test
+Segundo apellido: Sistema
+Sexo biologico: Masculino
+Sexo identificacion: Masculino
+Nacionalidad: Colombiana
+Fecha nacimiento: 1990-01-15
+Pais nacimiento: Colombia
+Departamento nacimiento: Valle del Cauca
+Municipio nacimiento: Cali
+Direccion: Calle 123 #45-67
+Telefono celular: 3006968924
+Telefono fijo: 6012345678
+Correo electronico: prueba17286031@empresa.com
+Comuna barrio: San Fernando
+Afp nombre: PORVENIR
+Afp costo: 227000
+Eps nombre: SURA
+Eps costo: 140000
+Arl nombre: POSITIVA
+Arl costo: 8500
+Ccf nombre: COMPENSAR
+Ccf costo: 50000
+Administracion: MONTERO ADMINISTRADORA S.A.S
+Ibc: 1300000
+Clase riesgo a r l: I (Mínimo)
+Fecha ingreso: 2025-11-19
+Fecha firma: 2025-11-19
+
+--- BENEFICIARIOS ---

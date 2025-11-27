@@ -1,0 +1,51 @@
+
+================================================================================
+                     INFORMACIÓN DE LA EMPRESA
+================================================================================
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+NIT:                 901436884
+Razón Social:        code1
+Tipo de Empresa:     S.A.S.
+Sector Económico:    construccion
+Fecha Constitución:  2025-11-25
+
+DATOS DE UBICACIÓN
+------------------
+Dirección:           Avenida Siempre Viva 742
+Ciudad:              Cali
+Departamento:        N/A
+
+DATOS DE CONTACTO
+-----------------
+Teléfono:            6024851234
+Correo Electrónico:  contacto@elfuturosas.com
+
+REPRESENTANTE LEGAL
+-------------------
+Nombre:              Homero J. Simpson
+Tipo ID:             CC
+Número ID:           79123456
+Teléfono:            3043846438
+Correo:              comercializadoraajk@hotmail.com
+
+DATOS LABORALES
+---------------
+Número de Empleados: 1
+Estado:              Activo
+
+DATOS BANCARIOS
+---------------
+Banco:               bancolombia
+Tipo de Cuenta:      Ahorros
+Número de Cuenta:    71000000190
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+ARL:                 I
+CCF:                 Colsubsidio
+
+================================================================================
+Fecha de Generación: 2025-11-25 03:34:30
+================================================================================

@@ -1,0 +1,52 @@
+
+================================================================================
+                     INFORMACIÓN DEL USUARIO
+================================================================================
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+Tipo de ID:          N/A
+Número de ID:        1144047911
+
+DATOS PERSONALES
+----------------
+Primer Nombre:       yapa
+Segundo Nombre:      tin
+Primer Apellido:     pescador
+Segundo Apellido:    ocoro
+Sexo Biológico:      N/A
+Sexo Identificación: N/A
+Fecha Nacimiento:    N/A
+Nacionalidad:        N/A
+
+DATOS DE NACIMIENTO
+-------------------
+País:                N/A
+Departamento:        N/A
+Municipio:           N/A
+
+DATOS DE CONTACTO
+-----------------
+Correo Electrónico:  prueba95972027@empresa.com
+Teléfono Celular:    3001657601
+Teléfono Fijo:       N/A
+Dirección:           N/A
+Comuna/Barrio:       N/A
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+AFP:                 N/A
+EPS:                 N/A
+ARL:                 N/A
+CCF:                 N/A
+
+DATOS LABORALES
+---------------
+Empresa (NIT):       999999999
+Empresa (Nombre):    N/A
+Fecha Ingreso:       N/A
+IBC:                 N/A
+
+================================================================================
+Fecha de Generación: 2025-11-25 03:40:16
+================================================================================

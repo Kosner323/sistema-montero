@@ -1,0 +1,40 @@
+--- DATOS AFILIADO: 1010123456 ---
+
+Tipo id: Cédula de Ciudadanía
+Numero id: 1010123456
+Primer nombre: Carlos
+Segundo nombre: Andrés
+Primer apellido: Pérez
+Segundo apellido: Gómez
+Sexo biologico: Masculino
+Sexo identificacion: Masculino
+Nacionalidad: Colombiana
+Fecha nacimiento: 1985-06-15
+Pais nacimiento: Colombia
+Departamento nacimiento: Valle del Cauca
+Municipio nacimiento: Cali
+Direccion: Calle 5 # 10-20, Apto 501
+Telefono celular: 3105551234
+Telefono fijo: 6028885678
+Correo electronico: carlos.perez@ejemplo.com
+Comuna barrio: San Fernando
+Afp nombre: PORVENIR
+Afp costo: 227000
+Eps nombre: SURA
+Eps costo: 140000
+Arl nombre: POSITIVA
+Arl costo: 8500
+Ccf nombre: COMPENSAR
+Ccf costo: 50000
+Administracion: ADMINISTRADORA DE PRUEBA S.A.S
+Ibc: 2500000
+Clase riesgo a r l: II (Bajo)
+Fecha ingreso: 2023-01-20
+Fecha firma: 2025-11-03
+
+--- BENEFICIARIOS ---
+
+Beneficiario #1:
+  Nombre: María Alejandra Gómez
+  Parentesco: Cónyuge
+  Documento ID: 67890123

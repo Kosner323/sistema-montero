@@ -1,0 +1,51 @@
+
+================================================================================
+                     INFORMACIÓN DE LA EMPRESA
+================================================================================
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+NIT:                 123456789
+Razón Social:        Constructora
+Tipo de Empresa:     None
+Sector Económico:    None
+Fecha Constitución:  None
+
+DATOS DE UBICACIÓN
+------------------
+Dirección:           None
+Ciudad:              None
+Departamento:        None
+
+DATOS DE CONTACTO
+-----------------
+Teléfono:            None
+Correo Electrónico:  None
+
+REPRESENTANTE LEGAL
+-------------------
+Nombre:              Homero J. Simpson
+Tipo ID:             CC
+Número ID:           79123456
+Teléfono:            None
+Correo:              None
+
+DATOS LABORALES
+---------------
+Número de Empleados: None
+Estado:              Activo
+
+DATOS BANCARIOS
+---------------
+Banco:               None
+Tipo de Cuenta:      None
+Número de Cuenta:    None
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+ARL:                 None
+CCF:                 None
+
+================================================================================
+Fecha de Generación: 2025-11-25 01:57:07
+================================================================================

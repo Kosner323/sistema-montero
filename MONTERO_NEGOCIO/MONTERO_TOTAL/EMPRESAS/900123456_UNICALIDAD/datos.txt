@@ -1,0 +1,51 @@
+
+================================================================================
+                     INFORMACIÓN DE LA EMPRESA
+================================================================================
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+NIT:                 900123456
+Razón Social:        UNICALIDAD
+Tipo de Empresa:     N/A
+Sector Económico:    N/A
+Fecha Constitución:  N/A
+
+DATOS DE UBICACIÓN
+------------------
+Dirección:           None
+Ciudad:              None
+Departamento:        N/A
+
+DATOS DE CONTACTO
+-----------------
+Teléfono:            None
+Correo Electrónico:  None
+
+REPRESENTANTE LEGAL
+-------------------
+Nombre:              None
+Tipo ID:             N/A
+Número ID:           N/A
+Teléfono:            N/A
+Correo:              N/A
+
+DATOS LABORALES
+---------------
+Número de Empleados: N/A
+Estado:              Activo
+
+DATOS BANCARIOS
+---------------
+Banco:               N/A
+Tipo de Cuenta:      N/A
+Número de Cuenta:    N/A
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+ARL:                 N/A
+CCF:                 N/A
+
+================================================================================
+Fecha de Generación: 2025-11-25 03:00:09
+================================================================================

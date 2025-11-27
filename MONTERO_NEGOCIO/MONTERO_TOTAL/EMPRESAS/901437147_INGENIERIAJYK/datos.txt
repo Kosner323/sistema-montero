@@ -1,0 +1,51 @@
+
+================================================================================
+                     INFORMACIÓN DE LA EMPRESA
+================================================================================
+
+DATOS DE IDENTIFICACIÓN
+-----------------------
+NIT:                 901437147
+Razón Social:        INGENIERIAJYK
+Tipo de Empresa:     N/A
+Sector Económico:    N/A
+Fecha Constitución:  N/A
+
+DATOS DE UBICACIÓN
+------------------
+Dirección:           Avenida Siempre Viva 742
+Ciudad:              Cali
+Departamento:        N/A
+
+DATOS DE CONTACTO
+-----------------
+Teléfono:            6024851234
+Correo Electrónico:  contacto@elfuturosas.com
+
+REPRESENTANTE LEGAL
+-------------------
+Nombre:              Homero J. Simpson
+Tipo ID:             N/A
+Número ID:           N/A
+Teléfono:            N/A
+Correo:              N/A
+
+DATOS LABORALES
+---------------
+Número de Empleados: N/A
+Estado:              Activo
+
+DATOS BANCARIOS
+---------------
+Banco:               N/A
+Tipo de Cuenta:      N/A
+Número de Cuenta:    N/A
+
+DATOS DE SEGURIDAD SOCIAL
+--------------------------
+ARL:                 N/A
+CCF:                 N/A
+
+================================================================================
+Fecha de Generación: 2025-11-24 01:22:51
+================================================================================

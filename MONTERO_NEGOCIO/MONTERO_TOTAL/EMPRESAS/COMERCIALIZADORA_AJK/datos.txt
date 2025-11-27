@@ -1,0 +1,16 @@
+--- DATOS DE LA EMPRESA: COMERCIALIZADORA AJK ---
+
+Nombre empresa: COMERCIALIZADORA AJK
+Tipo identificacion empresa: NIT
+Nit: 901429801
+Direccion empresa: Calle 2a #7474
+Telefono empresa: 3043846438
+Correo empresa: comercializadoraajk@hotmail.com
+Departamento empresa: valle
+Ciudad empresa: Cali
+Ibc empresa: 1423500
+Afp empresa: PORVENIR
+Arl empresa: arl sura
+Rep legal nombre: kevin andres montero
+Rep legal tipo id: CC
+Rep legal numero id: 1005878110

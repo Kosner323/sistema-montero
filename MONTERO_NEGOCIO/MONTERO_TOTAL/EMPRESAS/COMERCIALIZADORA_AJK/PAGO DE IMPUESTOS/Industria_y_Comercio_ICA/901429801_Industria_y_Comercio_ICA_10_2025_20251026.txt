@@ -1,0 +1,22 @@
+
+====================================================
+  REGISTRO DE FORMULARIO DE IMPUESTO
+====================================================
+
+  FORMULARIO: Industria y Comercio (ICA)
+  EMPRESA:    COMERCIALIZADORA AJK
+  NIT:        901429801
+  PERÍODO FISCAL: 10/2025
+  FECHA LÍMITE DE PAGO: 2025-10-31
+  
+  ESTADO INICIAL: Pendiente de Pago
+  FECHA DE CARGA: 2025-10-26 16:18:55
+
+  RUTA DEL ARCHIVO PDF ADJUNTO:
+  901429801_Industria_y_Comercio_ICA_10_2025_20251026.pdf
+  
+----------------------------------------------------
+  OBSERVACIONES:
+  Este archivo TXT se genera automáticamente como 
+  soporte explicativo para el formulario de impuesto.
+----------------------------------------------------

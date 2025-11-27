@@ -1,0 +1,16 @@
+====================================================
+REGISTRO DE CREDENCIAL DE PLATAFORMA (ENCRIPTADO)
+====================================================
+EMPRESA: COMERCIALIZADORA AJK (NIT: 901429801)
+FECHA DE REGISTRO: 2025-11-02 20:18:33
+----------------------------------------------------
+PLATAFORMA: EPS SURA 
+URL: https://login.sura.com/sso/servicelogin.aspx?continueTo=https%3A%2F%2Fepsapps.suramericana.com%2FSemp%2F&service=epssura
+USUARIO: 1005878110
+CONTRASEÑA: 7777
+NOTAS: FECHA ACTUALIZADA NOVIEMBRE -02-2025
+----------------------------------------------------
+ADVERTENCIA: Las credenciales en la base de datos 
+están encriptadas. Este archivo contiene las 
+credenciales en texto plano solo para respaldo.
+====================================================

@@ -1,0 +1,12 @@
+====================================================
+        REGISTRO DE CREDENCIAL DE PLATAFORMA
+        ====================================================
+        EMPRESA: COMERCIALIZADORA AJK (NIT: 901429801)
+        FECHA DE REGISTRO: 2025-10-26 15:50:39
+        ----------------------------------------------------
+        PLATAFORMA: EPS SURA 
+        URL: https://login.sura.com/sso/servicelogin.aspx?continueTo=https%3A%2F%2Fepsapps.suramericana.com%2FSemp%2F&service=epssura
+        USUARIO: 1005878110
+        CONTRASEÑA: 7777
+        NOTAS: FECHA DE ACTUALIZACION 26/10/2025
+        ====================================================

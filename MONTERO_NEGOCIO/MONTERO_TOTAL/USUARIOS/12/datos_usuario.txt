@@ -1,0 +1,35 @@
+--- DATOS AFILIADO: 12 ---
+
+Tipo id: Cédula de Ciudadanía
+Numero id: 12
+Primer nombre: Carlos
+Segundo nombre: david
+Primer apellido: montero
+Segundo apellido: MONTERO PESCADOR
+Sexo biologico: Masculino
+Sexo identificacion: Masculino
+Nacionalidad: Colombiana
+Fecha nacimiento: 1991-10-28
+Pais nacimiento: Colombia
+Departamento nacimiento: Valle del Cauca
+Municipio nacimiento: Cali
+Direccion: CRA74B#1B122
+Telefono celular: 3043846438
+Telefono fijo: 3043846438
+Correo electronico: carlos.perez@ejemplo.com
+Comuna barrio: 18
+Afp nombre: PORVENIR
+Afp costo: 227000
+Eps nombre: SURA
+Eps costo: 57000
+Arl nombre: POSITIVA
+Arl costo: 7500
+Ccf nombre: comfenalco
+Ccf costo: 50000
+Administracion: COMERCIALIZADORA AJK
+Ibc: 1423500
+Clase riesgo a r l: I (Mínimo)
+Fecha ingreso: 2025-02-11
+Fecha firma: 2025-11-05
+
+--- BENEFICIARIOS ---

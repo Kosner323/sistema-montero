@@ -1,0 +1,16 @@
+--- DATOS EMPRESA: OBRAS CIVILES (NIT: 901436883) ---
+
+Nombre empresa: OBRAS CIVILES
+Tipo identificacion empresa: NIT
+Nit: 901436883
+Direccion empresa: CALLE 2 A 74 74
+Telefono empresa: 3735337
+Correo empresa: obrascivilesmontero@hotmail.com
+Departamento empresa: valle
+Ciudad empresa: Cali
+Ibc empresa: 1423500
+Afp empresa: porvenir
+Arl empresa: arl sura
+Rep legal nombre: yeison david montero
+Rep legal tipo id: CC
+Rep legal numero id: 1144047917
