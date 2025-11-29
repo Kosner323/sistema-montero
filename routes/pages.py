@@ -44,3 +44,11 @@ def dashboard():
 
     # Aquí puedes pasar datos del usuario a la plantilla
     return render_template('main/dashboard.html', user=session.get('user'))
+
+
+@pages_bp.route('/pagos/recaudo')
+def pagos_recaudo():
+    """Muestra la página de recibo de caja"""
+    if 'user_id' not in session:
+        return redirect('/login')
+    return render_template('pagos/recaudo.html')

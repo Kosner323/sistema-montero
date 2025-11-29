@@ -218,7 +218,8 @@
                 const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
                 if (!response.ok) throw new Error(`Error ${response.status} cargando empresas`);
 
-                const companies = await response.json();
+                const data = await response.json();
+                const companies = data.items || data; // ✅ Soporte para respuesta paginada
                 const empresaSelect = document.getElementById('empresa');
 
                 empresaSelect.innerHTML = '<option value="" selected disabled>Seleccione la Empresa...</option>';
@@ -245,7 +246,8 @@
 
                 if (!response.ok) throw new Error('Error al buscar usuario');
 
-                const usuarios = await response.json();
+                const data = await response.json();
+                const usuarios = data.items || data; // ✅ Soporte para respuesta paginada
 
                 if (usuarios && usuarios.length > 0) {
                     const user = usuarios[0];

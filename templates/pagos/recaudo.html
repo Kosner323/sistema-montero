@@ -313,12 +313,11 @@
           <div class="col-span-12" id="historyCard">
             <div class="card">
               <div class="card-header">
-                <h5>Historial de Recibos de Caja (Sesión Actual)</h5>
-                 <small class="text-muted">Nota: El historial completo se cargará desde el servidor en una futura actualización.</small>
+                <h5>Historial Completo de Recibos de Caja</h5>
               </div>
               <div class="card-body">
                 <div class="mb-4 p-3 border rounded">
-                    <h6 class="mb-3">Filtros de Búsqueda (sobre historial local)</h6>
+                    <h6 class="mb-3">Filtros de Búsqueda</h6>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="form-label small" for="filtroTipoID">Tipo de Identificación</label>
@@ -688,37 +687,91 @@
              }
         }
 
-        // --- Carga Inicial de Datos (Usuarios/Empresas desde API) ---
+        // --- Carga Inicial de Datos (Usuarios/Empresas/Historial desde API) ---
         async function loadInitialData() {
             const loader = document.querySelector('.loader-bg');
             loader.style.display = 'flex'; // Mostrar loader
-            showMessage('Cargando datos de usuarios y empresas...', 'info');
+            showMessage('Cargando datos del servidor...', 'info');
 
             try {
-                const [usuariosRes, empresasRes] = await Promise.all([
+                const [usuariosRes, empresasRes, pagosRes] = await Promise.all([
                     fetch(`${API_URL}/usuarios`, { credentials: 'include' }),
-                    fetch(`${API_URL}/empresas`, { credentials: 'include' })
+                    fetch(`${API_URL}/empresas`, { credentials: 'include' }),
+                    fetch(`${API_URL}/pagos`, { credentials: 'include' })
                 ]);
 
                 if (!usuariosRes.ok || !empresasRes.ok) {
                     throw new Error('No se pudo cargar la información inicial del servidor.');
                 }
 
-                usuariosStore = await usuariosRes.json();
-                empresasStore = await empresasRes.json();
+                // ✅ CORRECCIÓN: Manejar respuesta paginada de la API
+                const dataUsuarios = await usuariosRes.json();
+                const dataEmpresas = await empresasRes.json();
+                
+                // Soporte híbrido: Si la API retorna {items: [...]} usar items, si no, usar el objeto completo
+                usuariosStore = dataUsuarios.items || dataUsuarios;
+                empresasStore = dataEmpresas.items || dataEmpresas;
 
-                console.log("Usuarios cargados:", usuariosStore.length);
-                console.log("Empresas cargadas:", empresasStore.length);
-                showMessage('Datos cargados correctamente.', 'success');
+                // ✅ VALIDACIÓN: Confirmar que son arrays
+                if (!Array.isArray(usuariosStore)) {
+                    console.error('❌ usuariosStore NO es un array:', usuariosStore);
+                    usuariosStore = [];
+                }
+                if (!Array.isArray(empresasStore)) {
+                    console.error('❌ empresasStore NO es un array:', empresasStore);
+                    empresasStore = [];
+                }
 
-                // Poblar datalists si es necesario (ya no se usan aquí, pero buena práctica)
+                console.log("✅ Usuarios cargados:", usuariosStore.length);
+                console.log("✅ Empresas cargadas:", empresasStore.length);
+
+                // ✅ CARGAR HISTORIAL DE PAGOS
+                if (pagosRes.ok) {
+                    const dataPagos = await pagosRes.json();
+                    const pagosArray = dataPagos.items || dataPagos;
+                    
+                    // Mapeo de datos del backend (snake_case) al frontend (CamelCase)
+                    receiptHistoryStore = Array.isArray(pagosArray) ? pagosArray.map(pago => {
+                        // Buscar usuario por ID para obtener nombre completo
+                        const usuario = usuariosStore.find(u => u.numeroId === pago.usuario_id);
+                        const nombreUsuario = usuario ? `${usuario.primerNombre || ''} ${usuario.primerApellido || ''}`.trim() : 'N/A';
+                        
+                        return {
+                            id: pago.id || `RC-${Date.now()}`,
+                            fecha: pago.fecha_pago || new Date().toISOString().substring(0, 10),
+                            RecibidoDe: nombreUsuario,
+                            Empresa: pago.empresa || 'N/A',
+                            Identificacion: pago.usuario_id || 'N/A',
+                            NIT: pago.nit || '',
+                            TipoIdentificacion: pago.tipo_id || 'Cédula de Ciudadanía',
+                            Monto: parseFloat(pago.monto) || 0,
+                            FormaPago: pago.tipo_pago || 'Efectivo',
+                            MontoAdministracion: parseFloat(pago.monto_administracion) || 0,
+                            MontoEPS: parseFloat(pago.monto_eps) || 0,
+                            MontoPension: parseFloat(pago.monto_pension) || 0,
+                            MontoCaja: parseFloat(pago.monto_caja) || 0,
+                            MontoARL: parseFloat(pago.monto_arl) || 0,
+                            comprobante: pago.comprobante_path || null
+                        };
+                    }) : [];
+                    
+                    console.log("✅ Historial de pagos cargado:", receiptHistoryStore.length);
+                    
+                    // Renderizar historial cargado
+                    renderReceiptHistory(receiptHistoryStore);
+                } else {
+                    console.warn('⚠️ No se pudo cargar el historial de pagos');
+                }
+                
+                showMessage(`✅ Datos cargados: ${usuariosStore.length} usuarios, ${empresasStore.length} empresas, ${receiptHistoryStore.length} recibos.`, 'success');
 
             } catch (error) {
                 console.error("Error cargando datos iniciales:", error);
-                showMessage(`Error al cargar datos: ${error.message}. El autocompletado no funcionará.`, 'danger');
-                // Dejar usuariosStore y empresasStore como arrays vacíos
+                showMessage(`Error al cargar datos: ${error.message}`, 'danger');
+                // Dejar stores como arrays vacíos
                 usuariosStore = [];
                 empresasStore = [];
+                receiptHistoryStore = [];
             } finally {
                  loader.style.display = 'none'; // Ocultar loader
             }
@@ -914,8 +967,8 @@
                             uploadFormData.append('comprobante', comprobanteInput.files[0]);
                         }
 
-                        // Enviar al endpoint existente que guarda archivos
-                        const response = await fetch(`${API_URL}/recibos/guardar`, {
+                    // Enviar al endpoint existente que guarda archivos
+                        const response = await fetch(`${API_URL}/pagos/guardar-recibo`, {
                             method: 'POST',
                             body: uploadFormData,
                             credentials: 'include' // Enviar cookies si es necesario
@@ -1001,8 +1054,8 @@
 
             // --- Inicialización Final ---
             initializeFeatherIcons();
-{% include '_theme_config.html' %}
         });
     </script>
+    {% include '_theme_config.html' %}
   </body>
 </html>

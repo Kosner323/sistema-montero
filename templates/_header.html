@@ -1,308 +1,144 @@
-<header class="pc-header">
-  <div class="header-wrapper flex max-sm:px-[15px] px-[25px] grow">
-    
-    <div class="me-auto pc-mob-drp">
-      <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
-        <li class="pc-h-item pc-sidebar-collapse max-lg:hidden lg:inline-flex">
-          <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="sidebar-hide"><i data-feather="menu"></i></a>
-        </li>
-        <li class="pc-h-item pc-sidebar-popup lg:hidden">
-          <a href="#" class="pc-head-link ltr:!ml-0 rtl:!mr-0" id="mobile-collapse"><i data-feather="menu"></i></a>
-        </li>
-        
-        <li class="dropdown pc-h-item">
-          <a class="pc-head-link dropdown-toggle me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-            <i data-feather="search"></i>
-          </a>
-          <div class="dropdown-menu pc-h-dropdown drp-search">
-            <form class="px-2 py-1" onsubmit="handleSearch(event)">
-              <input type="search" id="headerSearchInput" class="form-control !border-0 !shadow-none" placeholder="Buscar (Ej: Juan Pérez)..." />
-            </form>
-          </div>
-        </li>
-      </ul>
+<nav class="pc-sidebar">
+  <div class="navbar-wrapper">
+    <div class="m-header d-flex align-items-center py-4 px-4" style="height: 80px;">
+      <a href="/dashboard" class="b-brand d-flex align-items-center gap-3 text-decoration-none">
+        <img src="/assets/images/logo-white.svg" class="img-fluid logo logo-lg" alt="logo" style="max-height: 40px;" />
+        <img src="/assets/images/favicon.svg" class="img-fluid logo logo-sm" alt="logo" style="max-height: 40px;" />
+      </a>
     </div>
 
-    <div class="ms-auto">
-      <ul class="inline-flex *:min-h-header-height *:inline-flex *:items-center">
+    <div class="navbar-content py-3 overflow-auto" style="height: calc(100vh - 80px);">
+      <ul class="pc-navbar">
         
-        <li class="dropdown pc-h-item">
-          <a class="pc-head-link dropdown-toggle me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-            <i data-feather="sun"></i>
+        <li class="pc-item pc-caption">
+            <label>CRECIMIENTO</label>
+            <i data-feather="trending-up"></i>
+        </li>
+        <li class="pc-item">
+          <a href="/dashboard" class="pc-link">
+            <span class="pc-micon"><i data-feather="home"></i></span>
+            <span class="pc-mtext">Dashboard</span>
           </a>
-          <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-            <a href="#!" class="dropdown-item" onclick="layout_change('dark')"><i data-feather="moon"></i><span>Oscuro</span></a>
-            <a href="#!" class="dropdown-item" onclick="layout_change('light')"><i data-feather="sun"></i><span>Claro</span></a>
-            <a href="#!" class="dropdown-item" onclick="layout_change_default()"><i data-feather="settings"></i><span>Sistema</span></a>
-          </div>
+        </li>
+        <li class="pc-item">
+          <a href="/copiloto/arl" class="pc-link">
+            <span class="pc-micon"><i data-feather="zap"></i></span>
+            <span class="pc-mtext">Copiloto ARL</span>
+          </a>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="trending-up"></i></span>
+            <span class="pc-mtext">Marketing</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/marketing/redes">Redes Sociales</a></li>
+            <li class="pc-item"><a class="pc-link" href="/marketing/campanas">CampaÃ±as</a></li>
+          </ul>
         </li>
 
-        <li class="dropdown pc-h-item">
-          <a class="pc-head-link dropdown-toggle me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+        <li class="pc-item pc-caption">
+            <label>ADMINISTRACIÃ“N</label>
+            <i data-feather="briefcase"></i>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="database"></i></span>
+            <span class="pc-mtext">Base de Datos</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/usuarios/gestion">Usuarios</a></li>
+            <li class="pc-item"><a class="pc-link" href="/empresas/ingresar">Empresas</a></li>
+          </ul>
+        </li>
+        <li class="pc-item">
+          <a href="/unificacion" class="pc-link">
+            <span class="pc-micon"><i data-feather="git-merge"></i></span>
+            <span class="pc-mtext">UnificaciÃ³n</span>
+          </a>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="dollar-sign"></i></span>
+            <span class="pc-mtext">Contabilidad</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/pagos/recaudo">Pagos (Ingresos)</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/cartera">Cartera (Deudas)</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/planillas">Pago de Planillas</a></li>
+            <li class="pc-item"><a class="pc-link" href="/planillas/enviar">Enviar Planillas</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/control">Tabla General</a></li>
+          </ul>
+        </li>
+
+        <li class="pc-item pc-caption">
+            <label>OPERACIONES</label>
+            <i data-feather="activity"></i>
+        </li>
+        <li class="pc-item">
+          <a href="/novedades" class="pc-link">
+            <span class="pc-micon"><i data-feather="bell"></i></span>
+            <span class="pc-mtext">Novedades</span>
+          </a>
+        </li>
+        <li class="pc-item">
+          <a href="/formularios" class="pc-link">
+            <span class="pc-micon"><i data-feather="file-text"></i></span>
+            <span class="pc-mtext">Formularios</span>
+          </a>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="shield"></i></span>
+            <span class="pc-mtext">GestiÃ³n JurÃ­dica</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/incapacidades">Incapacidades</a></li>
+            <li class="pc-item"><a class="pc-link" href="/tutelas">Tutelas</a></li>
+            <li class="pc-item"><a class="pc-link" href="/depuraciones">Depuraciones</a></li>
+          </ul>
+        </li>
+
+        <li class="pc-item pc-caption">
+            <label>SOPORTE Y CONTROL</label>
             <i data-feather="settings"></i>
+        </li>
+        <li class="pc-item">
+          <a href="/gestor-archivos" class="pc-link">
+            <span class="pc-micon"><i data-feather="folder"></i></span>
+            <span class="pc-mtext">Gestor de Archivos</span>
           </a>
-          <div class="dropdown-menu dropdown-menu-end pc-h-dropdown">
-            <a href="#!" class="dropdown-item" onclick="openWhatsAppSupport()">
-                <i class="ti ti-brand-whatsapp text-success-500"></i>
-                <span>Soporte WhatsApp</span>
-            </a>
-            <a href="#!" class="dropdown-item" onclick="lockScreen()">
-                <i class="ti ti-lock text-warning-500"></i>
-                <span>Bloquear Pantalla</span>
-            </a>
-          </div>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="info"></i></span>
+            <span class="pc-mtext">InformaciÃ³n</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/informacion/clientes">Clientes</a></li>
+            <li class="pc-item"><a class="pc-link" href="/informacion/empleados">Empleados</a></li>
+            <li class="pc-item"><a class="pc-link" href="/cotizaciones">Cotizaciones</a></li>
+            <li class="pc-item"><a class="pc-link" href="/pagos/impuestos">Pago de Impuestos</a></li>
+          </ul>
+        </li>
+        <li class="pc-item pc-hasmenu">
+          <a href="#!" class="pc-link">
+            <span class="pc-micon"><i data-feather="lock"></i></span>
+            <span class="pc-mtext">Seguridad</span>
+            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
+          </a>
+          <ul class="pc-submenu">
+            <li class="pc-item"><a class="pc-link" href="/auditoria">AuditorÃ­a / Logs</a></li>
+            <li class="pc-item"><a class="pc-link" href="/credenciales">ContraseÃ±as</a></li>
+          </ul>
         </li>
 
-        <li class="dropdown pc-h-item">
-          <a class="pc-head-link dropdown-toggle me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-            <i data-feather="bell"></i>
-            <span class="badge bg-success-500 text-white rounded-full z-10 absolute right-0 top-0" id="notifBadge">0</span>
-          </a>
-          <div class="dropdown-menu dropdown-notification dropdown-menu-end pc-h-dropdown p-2">
-             <div class="dropdown-header flex items-center justify-between py-2">
-                <h6 class="m-0">Notificaciones</h6>
-                <a href="#!" class="text-muted hover:text-primary" onclick="markAllAsRead()">Marcar leídas</a>
-             </div>
-             <div class="dropdown-body p-0 relative" style="max-height: 300px; overflow-y: auto;" id="notificationList">
-                <div class="text-center py-4 text-muted">Cargando...</div>
-             </div>
-          </div>
-        </li>
-
-        <li class="dropdown pc-h-item header-user-profile">
-          <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
-            <i data-feather="user"></i>
-          </a>
-          <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown p-2 overflow-hidden">
-            <div class="dropdown-header flex items-center justify-between py-4 px-5 bg-primary-500">
-              <div class="flex mb-1 items-center">
-                <div class="shrink-0"><i data-feather="user" class="w-10 h-10 text-white"></i></div>
-                <div class="grow ms-3">
-                  <h6 class="mb-1 text-white" id="userNameDisplay">Usuario</h6>
-                  <small class="text-white opacity-75" id="userRoleDisplay">Admin</small>
-                </div>
-              </div>
-            </div>
-            <div class="dropdown-body py-4 px-5">
-              <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
-                
-                <div class="grid mb-3">
-                    <a href="/configuracion" class="btn btn-outline-secondary flex items-center justify-center">
-                        <i data-feather="settings" class="me-2"></i>Configuración
-                    </a>
-                </div>
-
-                <div class="grid mb-3">
-                    <button onclick="lockScreen()" class="btn btn-outline-secondary flex items-center justify-center w-full">
-                        <i data-feather="lock" class="me-2"></i>Bloquear
-                    </button>
-                </div>
-                
-                <hr class="border-secondary-500/10 my-4">
-
-                <div class="grid my-3">
-                   <button class="btn btn-primary flex items-center justify-center" id="logoutButtonHeader">
-                     <i data-feather="log-out" class="me-2"></i>Cerrar Sesión
-                   </button>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </li>
       </ul>
     </div>
   </div>
-</header>
-
-<div id="lockScreenOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[2000] hidden flex-col items-center justify-center text-center">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg max-w-sm w-full">
-        <div class="mb-4 text-primary-500"><i data-feather="lock" class="w-12 h-12 mx-auto"></i></div>
-        <h4 class="mb-2 text-xl font-bold dark:text-white">Sesión Bloqueada</h4>
-        <p class="text-gray-500 mb-4">Ingresa tu contraseña para volver</p>
-
-        <!-- Mensaje de error -->
-        <div id="lockscreenError" class="alert alert-danger mb-3" style="display: none;"></div>
-
-        <!-- Input de contraseña -->
-        <input type="password" id="lockscreen-password" class="form-control mb-4 text-center" placeholder="Contraseña..." onkeypress="if(event.key==='Enter') desbloquearPantalla()" />
-
-        <!-- Botón de desbloqueo -->
-        <button class="btn btn-primary w-full" id="unlockButton" onclick="desbloquearPantalla()">
-            <i data-feather="unlock" class="me-2"></i>
-            Desbloquear
-        </button>
-    </div>
-</div>
-
-<script>
-// ============================================================================
-// LÓGICA UNIFICADA DEL HEADER
-// ============================================================================
-
-// 1. SOPORTE WHATSAPP
-function openWhatsAppSupport() {
-  const phoneNumber = '573001234567'; // Pon tu número aquí
-  const message = encodeURIComponent('Hola, necesito ayuda técnica con el Portal Montero');
-  window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
-}
-
-// 2. BLOQUEO DE PANTALLA (MODAL SEGURO)
-function lockScreen() {
-    const overlay = document.getElementById('lockScreenOverlay');
-    const passwordInput = document.getElementById('lockscreen-password');
-    const errorDiv = document.getElementById('lockscreenError');
-
-    if(overlay) {
-        overlay.classList.remove('hidden');
-        overlay.classList.add('flex');
-
-        // Limpiar input y error
-        if(passwordInput) passwordInput.value = '';
-        if(errorDiv) errorDiv.style.display = 'none';
-
-        // Guardar estado en sessionStorage para persistir si recarga
-        sessionStorage.setItem('isLocked', 'true');
-
-        // Focus en el input de contraseña
-        setTimeout(() => passwordInput?.focus(), 100);
-    }
-}
-
-async function desbloquearPantalla() {
-    const overlay = document.getElementById('lockScreenOverlay');
-    const passwordInput = document.getElementById('lockscreen-password');
-    const errorDiv = document.getElementById('lockscreenError');
-    const unlockButton = document.getElementById('unlockButton');
-
-    const password = passwordInput?.value;
-
-    // Validación básica
-    if (!password) {
-        mostrarErrorLockscreen('Por favor ingresa tu contraseña');
-        return;
-    }
-
-    // Deshabilitar botón mientras procesa
-    if(unlockButton) {
-        unlockButton.disabled = true;
-        unlockButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
-    }
-
-    try {
-        // Llamar a la API de verificación de contraseña (endpoint de auth)
-        const response = await fetch('/api/verify-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({ password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            // Contraseña correcta - desbloquear
-            if(overlay) {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                sessionStorage.removeItem('isLocked');
-            }
-
-            // Limpiar input
-            if(passwordInput) passwordInput.value = '';
-            if(errorDiv) errorDiv.style.display = 'none';
-
-            // Feedback visual de éxito (opcional)
-            console.log('🔓 Pantalla desbloqueada exitosamente');
-
-        } else {
-            // Contraseña incorrecta
-            mostrarErrorLockscreen(data.message || 'Contraseña incorrecta');
-
-            // Limpiar input para reintentar
-            if(passwordInput) {
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
-        }
-
-    } catch (error) {
-        console.error('Error al verificar contraseña:', error);
-        mostrarErrorLockscreen('Error de conexión. Intenta de nuevo.');
-    } finally {
-        // Restaurar botón
-        if(unlockButton) {
-            unlockButton.disabled = false;
-            unlockButton.innerHTML = '<i data-feather="unlock" class="me-2"></i>Desbloquear';
-            feather.replace();
-        }
-    }
-}
-
-function mostrarErrorLockscreen(mensaje) {
-    const errorDiv = document.getElementById('lockscreenError');
-    if(errorDiv) {
-        errorDiv.textContent = mensaje;
-        errorDiv.style.display = 'block';
-
-        // Auto-ocultar después de 5 segundos
-        setTimeout(() => {
-            errorDiv.style.display = 'none';
-        }, 5000);
-    }
-}
-
-// Verificar bloqueo al cargar
-document.addEventListener('DOMContentLoaded', () => {
-    if(sessionStorage.getItem('isLocked') === 'true') {
-        lockScreen();
-    }
-});
-
-// 3. BÚSQUEDA
-function handleSearch(event) {
-  event.preventDefault();
-  const searchInput = document.getElementById('headerSearchInput');
-  const query = searchInput.value.trim().toLowerCase();
-  
-  if (query) {
-      // Mapeo inteligente de atajos
-      const routeMap = {
-          'pagos': '/pagos/recaudo',
-          'usuarios': '/usuarios/gestion',
-          'empleados': '/usuarios/gestion',
-          'novedades': '/novedades',
-          'marketing': '/marketing/redes',
-          'cartera': '/pagos/cartera',
-          'planillas': '/pagos/planillas',
-          'impuestos': '/pagos/impuestos',
-          'configuracion': '/configuracion'
-      };
-
-      // Buscar coincidencia exacta o parcial
-      for (const [key, route] of Object.entries(routeMap)) {
-          if (query.includes(key)) {
-              window.location.href = route;
-              return;
-          }
-      }
-      
-      // Si no encuentra mapeo, alertar (o llevar a página de resultados)
-      alert('Buscando: ' + query + ' (Función de búsqueda avanzada en desarrollo)');
-  }
-}
-
-// 4. LOGOUT (Delegar al script principal si existe, o manejar aquí)
-document.getElementById('logoutButtonHeader')?.addEventListener('click', async () => {
-    if(confirm('¿Estás seguro de cerrar sesión?')) {
-         // Intenta llamar a la API de logout si existe
-         try {
-             await fetch('/api/logout', { method: 'POST' });
-         } catch(e) { console.log('Logout local'); }
-         window.location.href = '/login';
-    }
-});
-
-</script>
+</nav>

@@ -576,7 +576,8 @@
             // Cargar empresas activas
             const empresasResponse = await fetch('/api/empresas', { credentials: 'include' });
             if (empresasResponse.ok) {
-              const empresas = await empresasResponse.json();
+              const data = await empresasResponse.json();
+              const empresas = data.items || data; // ✅ Soporte para respuesta paginada
               document.getElementById('empresasActivas').textContent = empresas.length;
             }
 

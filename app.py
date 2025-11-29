@@ -8,6 +8,12 @@ instancias de app limpias, especialmente para testing.
 import os
 import sqlite3
 import traceback
+import sentry_sdk
+sentry_sdk.init(
+    dsn="https://aa52fecc13c85932c959a382887ee5b2@o4510441465970688.ingest.us.sentry.io/4510441469313024",
+    send_default_pii=True,
+    traces_sample_rate=1.0,
+)
 from datetime import timedelta
 
 from dotenv import load_dotenv

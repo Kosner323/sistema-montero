@@ -337,3 +337,35 @@ def auditoria():
     Muestra la página de auditoría y logs del sistema.
     """
     return render_template("auditoria/logs.html")
+
+
+# =============================================================================
+# RUTAS ADICIONALES DE UNIFICACIÓN Y SEGURIDAD
+# =============================================================================
+
+@bp_main.route("/unificacion/panel")
+@login_required
+def unificacion_panel():
+    """
+    Ruta alternativa para el panel de unificación.
+    Apunta al mismo template que /unificacion.
+    """
+    return render_template("unificacion/panel.html")
+
+
+@bp_main.route("/seguridad/usuarios")
+@login_required
+def seguridad_usuarios():
+    """
+    Muestra la página de gestión de usuarios y contraseñas (Seguridad).
+    """
+    return render_template("usuarios/contrasenas.html")
+
+
+@bp_main.route("/marketing/prospectos")
+@login_required
+def marketing_prospectos():
+    """
+    Muestra la página de gestión de prospectos de marketing.
+    """
+    return render_template("marketing/prospectos.html")

@@ -204,7 +204,8 @@
                 const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
                 if (!response.ok) throw new Error(`Error ${response.status} cargando empresas`);
 
-                const companies = await response.json();
+                const data = await response.json();
+                const companies = data.items || data; // ✅ Soporte para respuesta paginada
                 const empresaSelect = document.getElementById('inputEmpresa');
 
                 empresaSelect.innerHTML = '<option value="" selected disabled>Seleccione la Empresa...</option>';

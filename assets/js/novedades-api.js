@@ -129,7 +129,9 @@ const NovedadesAPI = {
                 throw new Error('Error al obtener empresas');
             }
 
-            return await response.json();
+            const data = await response.json();
+            // Soporte robusto: Manejar respuesta paginada o array directo
+            return data.items || data;
         } catch (error) {
             console.error('Error en getEmpresas():', error);
             return [];
@@ -157,7 +159,9 @@ const NovedadesAPI = {
                 throw new Error('Error al obtener usuarios');
             }
 
-            return await response.json();
+            const data = await response.json();
+            // Soporte robusto: Manejar respuesta paginada o array directo
+            return data.items || data;
         } catch (error) {
             console.error('Error en getUsuarios():', error);
             return [];

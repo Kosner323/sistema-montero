@@ -358,7 +358,8 @@
                 try {
                     const response = await fetch('/api/tutelas/empresas_list');
                     if (!response.ok) throw new Error('Error al cargar empresas');
-                    const empresas = await response.json();
+                    const data = await response.json();
+                    const empresas = data.items || data; // ✅ Soporte para respuesta paginada
                     
                     populateSelect(filtroEmpresaSelect, empresas, 'Todas las Empresas');
                     populateSelect(modalEmpresaSelect, empresas, 'Seleccione la Empresa');

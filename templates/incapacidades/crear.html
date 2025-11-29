@@ -202,7 +202,8 @@
                 const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
                 if (!response.ok) throw new Error(`Error ${response.status} cargando empresas`);
 
-                const companies = await response.json();
+                const data = await response.json();
+                const companies = data.items || data; // ✅ Soporte para respuesta paginada
                 const modalSelect = document.getElementById('modalEmpresa');
 
                 modalSelect.innerHTML = '<option value="">Seleccione la Empresa...</option>';
@@ -221,7 +222,8 @@
             try {
                 const response = await fetch(`${API_URL}/usuarios`, { credentials: 'include' });
                 if (!response.ok) throw new Error(`Error ${response.status} cargando usuarios`);
-                allUsers = await response.json();
+                const data = await response.json();
+                allUsers = data.items || data; // ✅ Soporte para respuesta paginada
             } catch (error) {
                 console.error('Error cargando usuarios:', error);
                 allUsers = [];

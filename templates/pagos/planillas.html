@@ -392,7 +392,9 @@
               try {
                   const response = await fetch(`${API_URL}/empresas`, { credentials: 'include' });
                   if (!response.ok) throw new Error('Error al cargar empresas');
-                  const empresas = await response.json();
+                  const data = await response.json();
+                  // Soporte robusto: Manejar respuesta paginada o array directo
+                  const empresas = data.items || data;
 
                   filtroEmpresa.innerHTML = '<option value="0" selected>Seleccionar Empresa...</option>'; // Resetear
                   empresas.forEach(empresa => {
@@ -419,16 +421,18 @@
               
               try {
                   // Llamar a la API de usuarios filtrando por NIT
-                  const response = await fetch(`${API_URL}/usuarios?empresa_nit=${selectedCompanyNit}`, { 
-                      credentials: 'include' 
+                  const response = await fetch(`${API_URL}/usuarios?empresa_nit=${selectedCompanyNit}`, {
+                      credentials: 'include'
                   });
                   if (!response.ok) {
                       const err = await response.json();
                       throw new Error(err.error || 'Error al cargar usuarios');
                   }
-                  
-                  const filteredUsers = await response.json();
-                  
+
+                  const data = await response.json();
+                  // Soporte robusto: Manejar respuesta paginada o array directo
+                  const filteredUsers = data.items || data;
+
                   renderTable(filteredUsers);
 
               } catch (error) {

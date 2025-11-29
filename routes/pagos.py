@@ -5,10 +5,12 @@ pagos.py - REFACTORIZADO CON ORM
 Maneja la lógica para registrar y consultar pagos usando SQLAlchemy ORM.
 Elimina SQL manual y usa modelos ORM al 100%.
 """
+import os
 import traceback
 from datetime import datetime
 from flask import Blueprint, jsonify, request, session, current_app
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from werkzeug.utils import secure_filename
 
 from logger import logger
 from extensions import db
@@ -16,9 +18,9 @@ from models.orm_models import Pago, Empresa
 
 # --- IMPORTACIÓN CENTRALIZADA ---
 try:
-    from ..utils import login_required
+    from ..utils import login_required, sanitize_and_save_file
 except (ImportError, ValueError):
-    from utils import login_required
+    from utils import login_required, sanitize_and_save_file
 # -------------------------------
 
 
@@ -148,4 +150,89 @@ def add_pago():
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error general al agregar pago: {e}", exc_info=True)
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
+
+
+@bp_pagos.route("/guardar-recibo", methods=["POST"])
+@login_required
+def guardar_recibo():
+    """
+    Guarda un recibo de pago en PDF junto con sus datos.
+
+    Request Form Data:
+        - reciboPdf: Archivo PDF del recibo (requerido)
+        - empresa_nit: NIT de la empresa (requerido)
+        - monto: Monto del pago (requerido)
+        - fecha_pago: Fecha del pago (requerido)
+        - concepto: Concepto/descripción del pago (opcional)
+        - referencia: Número de referencia/comprobante (opcional)
+
+    Returns:
+        JSON con mensaje de éxito y ruta del archivo guardado
+    """
+    try:
+        # Validar que se haya enviado un archivo
+        if "reciboPdf" not in request.files:
+            logger.warning("Intento de guardar recibo sin archivo PDF")
+            return jsonify({"error": "No se incluyó el archivo PDF del recibo."}), 400
+
+        file = request.files["reciboPdf"]
+        if file.filename == "":
+            return jsonify({"error": "El archivo no tiene nombre."}), 400
+
+        # Obtener datos del formulario
+        empresa_nit = request.form.get("empresa_nit")
+        monto = request.form.get("monto")
+        fecha_pago = request.form.get("fecha_pago")
+        concepto = request.form.get("concepto", "Recibo de pago")
+        referencia = request.form.get("referencia", "")
+
+        # Validar campos requeridos
+        if not empresa_nit or not monto or not fecha_pago:
+            logger.warning("Intento de guardar recibo con campos faltantes")
+            return jsonify({"error": "Faltan campos obligatorios (empresa_nit, monto, fecha_pago)."}), 400
+
+        # Validar que la empresa exista
+        empresa = Empresa.query.filter_by(nit=empresa_nit).first()
+        if not empresa:
+            logger.warning(f"Intento de guardar recibo con NIT no encontrado: {empresa_nit}")
+            return jsonify({"error": f"Empresa con NIT {empresa_nit} no encontrada."}), 404
+
+        nombre_empresa = empresa.nombre_empresa
+
+        # Crear carpeta de destino organizada por empresa
+        upload_base = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+        empresa_folder = os.path.join(upload_base, 'recibos', secure_filename(nombre_empresa))
+        os.makedirs(empresa_folder, exist_ok=True)
+
+        # Generar nombre de archivo con timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        custom_filename = f"recibo_{empresa_nit}_{timestamp}"
+
+        # Guardar el archivo usando la utilidad centralizada
+        try:
+            filepath = sanitize_and_save_file(file, empresa_folder, custom_filename)
+            logger.info(f"Recibo guardado exitosamente: {filepath}")
+        except ValueError as ve:
+            logger.error(f"Error de validación al guardar recibo: {ve}")
+            return jsonify({"error": f"Archivo inválido: {str(ve)}"}), 400
+        except Exception as save_err:
+            logger.error(f"Error al guardar archivo de recibo: {save_err}", exc_info=True)
+            return jsonify({"error": f"Error al guardar el archivo: {str(save_err)}"}), 500
+
+        # Retornar respuesta exitosa
+        return jsonify({
+            "message": "Recibo guardado exitosamente",
+            "archivo": os.path.basename(filepath),
+            "empresa": nombre_empresa,
+            "monto": monto,
+            "fecha": fecha_pago,
+            "concepto": concepto
+        }), 201
+
+    except SQLAlchemyError as se:
+        logger.error(f"Error de base de datos al guardar recibo: {se}", exc_info=True)
+        return jsonify({"error": "Error de base de datos al procesar el recibo."}), 500
+    except Exception as e:
+        logger.error(f"Error inesperado al guardar recibo: {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
