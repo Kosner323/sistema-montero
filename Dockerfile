@@ -80,6 +80,7 @@ COPY --chown=appuser:appuser models/ ./models/
 COPY --chown=appuser:appuser routes/ ./routes/
 COPY --chown=appuser:appuser templates/ ./templates/
 COPY --chown=appuser:appuser static/ ./static/
+COPY --chown=appuser:appuser assets/ ./assets/
 COPY --chown=appuser:appuser migrations/ ./migrations/
 COPY --chown=appuser:appuser scripts/ ./scripts/
 
