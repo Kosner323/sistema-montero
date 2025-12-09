@@ -12,12 +12,17 @@ import traceback
 # Sentry SDK (opcional - para monitoreo de errores en producción)
 try:
     import sentry_sdk
-    sentry_sdk.init(
-        dsn="https://aa52fecc13c85932c959a382887ee5b2@o4510441465970688.ingest.us.sentry.io/4510441469313024",
-        send_default_pii=True,
-        traces_sample_rate=1.0,
-    )
-    SENTRY_ENABLED = True
+    SENTRY_DSN = os.getenv("SENTRY_DSN")
+    if SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            send_default_pii=os.getenv("SENTRY_SEND_PII", "True").lower() == "true",
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "1.0")),
+        )
+        SENTRY_ENABLED = True
+    else:
+        SENTRY_ENABLED = False
+        print("⚠️  SENTRY_DSN no configurado - Monitoreo Sentry deshabilitado")
 except ImportError:
     SENTRY_ENABLED = False
     print("⚠️  Sentry SDK no instalado - Monitoreo de errores deshabilitado")
