@@ -17,7 +17,6 @@ os.environ.setdefault("ENCRYPTION_KEY", "tZNEUELUZ7lMMN8g4WW1nxpu67mALsZOCBdV5bn
 
 # (CORREGIDO) Importa la FÁBRICA de la app
 from app import create_app
-from utils import get_db_connection as original_get_db_connection
 
 # --- Fixtures Principales de la App ---
 
@@ -42,9 +41,10 @@ def app():
         }
     )
 
-    # 3. Inicializa el schema en esa base de datos temporal
+    # 3. Inicializa las tablas usando SQLAlchemy ORM
     with app.app_context():
-        initialize_database()
+        from extensions import db
+        db.create_all()
 
     # 4. Entrega la app configurada al test
     yield app
