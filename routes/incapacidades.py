@@ -105,3 +105,80 @@ def add_incapacidad():
         db.session.rollback()
         logger.error(f"Error general en add_incapacidad (Usuario: {numero_id}): {e}", exc_info=True)
         return jsonify({"error": f"Error inesperado en el servidor: {str(e)}"}), 500
+
+
+@bp_incapacidades.route("/<int:id>/transferir-cliente", methods=["PUT"])
+@login_required
+def transferir_a_cliente(id):
+    """
+    Registra el pago a cliente y cierra el caso de incapacidad.
+    Estado requerido: "Pagada por EPS" -> Estado final: "Finalizada"
+    """
+    try:
+        # Buscar la incapacidad
+        incapacidad = db.session.query(Incapacidad).filter_by(id=id).first()
+        
+        if not incapacidad:
+            return jsonify({"error": "Incapacidad no encontrada"}), 404
+        
+        # Validar estado
+        if incapacidad.estado != "Pagada por EPS":
+            return jsonify({
+                "error": "Solo se pueden transferir incapacidades con estado 'Pagada por EPS'",
+                "estado_actual": incapacidad.estado
+            }), 400
+        
+        # Obtener datos del formulario
+        monto_pagado = request.form.get("monto_pagado")
+        fecha_pago = request.form.get("fecha_pago")
+        observaciones = request.form.get("observaciones", "")
+        
+        # Validar campos obligatorios
+        if not monto_pagado or not fecha_pago:
+            return jsonify({"error": "Faltan campos obligatorios: monto_pagado, fecha_pago"}), 400
+        
+        # Validar y guardar archivo de comprobante
+        if "comprobante" not in request.files:
+            return jsonify({"error": "No se incluyó el comprobante de transferencia"}), 400
+        
+        file = request.files["comprobante"]
+        if file.filename == "":
+            return jsonify({"error": "El comprobante no tiene nombre"}), 400
+        
+        # Validar archivo
+        is_valid, error_msg = validate_upload(file, file_type="document")
+        if not is_valid:
+            return jsonify({"error": error_msg}), 400
+        
+        # Guardar comprobante en carpeta del usuario
+        upload_path = _get_user_incapacidad_folder(incapacidad.usuario_id)
+        comprobante_filename = f"comprobante_pago_{id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        filepath = os.path.join(upload_path, secure_filename(comprobante_filename))
+        file.save(filepath)
+        ruta_guardada = os.path.relpath(filepath, USER_DATA_FOLDER)
+        
+        # Actualizar incapacidad
+        incapacidad.estado = "Finalizada"
+        incapacidad.monto_pagado_cliente = float(monto_pagado)
+        incapacidad.fecha_pago_cliente = fecha_pago
+        incapacidad.observaciones_pago = observaciones
+        incapacidad.comprobante_pago = ruta_guardada
+        incapacidad.fecha_cierre = datetime.now().isoformat()
+        
+        db.session.commit()
+        
+        logger.info(f"Transferencia a cliente completada para incapacidad {id}. Estado: Finalizada")
+        
+        return jsonify({
+            "success": True,
+            "mensaje": "Pago a cliente registrado exitosamente",
+            "incapacidad_id": id,
+            "nuevo_estado": "Finalizada",
+            "monto_pagado": float(monto_pagado),
+            "fecha_cierre": incapacidad.fecha_cierre
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error en transferir_a_cliente para incapacidad {id}: {e}", exc_info=True)
+        return jsonify({"error": f"Error al procesar transferencia: {str(e)}"}), 500

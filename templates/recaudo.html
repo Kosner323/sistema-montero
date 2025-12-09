@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recaudo</title>
+    <!-- Agregar aquí los enlaces a los archivos CSS necesarios -->
+</head>
+<body>
+
+<div class="container">
+    <h1>Recaudo</h1>
+    <form id="recaudoForm">
+        <div class="form-group">
+            <label>Identificación Cliente</label>
+            <input type="text" id="inputIdentificacion" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label>Nombre Cliente</label>
+            <input type="text" id="inputNombreCliente" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" id="inputTelefono" class="form-control" readonly>
+        </div>
+        <!-- Agregar aquí los demás campos del formulario según sea necesario -->
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='assets/js/universal-search.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchRecaudo = new UniversalSearch({
+        inputId: 'inputIdentificacion',
+        mapping: {
+            'nombre': '#inputNombreCliente',
+            'telefono': '#inputTelefono'
+        },
+        callback: function(usuario) {
+            document.getElementById('inputNombreCliente').value = `${usuario.nombre} ${usuario.apellido}`;
+        }
+    });
+});
+</script>
+<!-- Agregar aquí los enlaces a los archivos JS necesarios -->
+</body>
+</html>

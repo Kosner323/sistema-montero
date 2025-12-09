@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
 
     <style>
       /* Ajuste para que el modal respete el menú lateral izquierdo */
@@ -47,6 +49,27 @@
        .badge-status-en-proceso { background-color: #ffc107; color: #000; } /* Amarillo */
        .badge-status-pagada { background-color: #28a745; color: #fff; } /* Verde */
        .badge-status-rechazada { background-color: #dc3545; color: #fff; } /* Rojo */
+       
+       /* Estilo para botón de escalar a tutela */
+       .btn-escalar-tutela {
+           background-color: #6f42c1; /* Púrpura */
+           color: white;
+           border: none;
+           padding: 0.25rem 0.5rem;
+           border-radius: 0.25rem;
+           cursor: pointer;
+           font-size: 0.875rem;
+           transition: all 0.2s;
+       }
+       .btn-escalar-tutela:hover {
+           background-color: #5a32a3;
+           transform: translateY(-1px);
+           box-shadow: 0 2px 4px rgba(111, 66, 193, 0.3);
+       }
+       .btn-escalar-tutela i {
+           width: 16px;
+           height: 16px;
+       }
     </style>
 
   </head>
@@ -169,6 +192,105 @@
     {% include '_footer.html' %}
 
     {# Modal removido - ahora usando página dedicada /incapacidades/crear #}
+    
+    {# Modal Pagar a Cliente #}
+    <div class="modal fade" id="modalPagarCliente" tabindex="-1" aria-labelledby="modalPagarClienteLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title" id="modalPagarClienteLabel">
+              <i data-feather="dollar-sign" class="me-2"></i>
+              💸 Pagar a Cliente
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+              <i data-feather="info" class="me-2"></i>
+              <div>
+                <strong>Cliente:</strong> <span id="pagoClienteNombre">-</span><br>
+                <strong>Monto a pagar:</strong> <span id="pagoClienteMonto">$0</span>
+              </div>
+            </div>
+            
+            <form id="formPagarCliente">
+              <input type="hidden" id="pagoIncapacidadId">
+              
+              <div class="mb-3">
+                <label for="pagoMontoPagado" class="form-label fw-semibold">
+                  <i data-feather="dollar-sign" class="me-1" style="width: 16px; height: 16px;"></i>
+                  Monto Pagado (COP) <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="pagoMontoPagado" 
+                    placeholder="0"
+                    min="0"
+                    step="1000"
+                    required
+                  >
+                </div>
+                <small class="text-muted">Ingrese el monto exacto pagado al cliente</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="pagoComprobante" class="form-label fw-semibold">
+                  <i data-feather="upload" class="me-1" style="width: 16px; height: 16px;"></i>
+                  Comprobante de Transferencia <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="file" 
+                  class="form-control" 
+                  id="pagoComprobante" 
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required
+                >
+                <small class="text-muted">Formatos: PDF, JPG, PNG (máx. 5MB)</small>
+              </div>
+              
+              <div class="mb-3">
+                <label for="pagoObservaciones" class="form-label fw-semibold">
+                  <i data-feather="message-square" class="me-1" style="width: 16px; height: 16px;"></i>
+                  Observaciones
+                </label>
+                <textarea 
+                  class="form-control" 
+                  id="pagoObservaciones" 
+                  rows="3"
+                  placeholder="Detalles adicionales sobre el pago (opcional)..."
+                ></textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label for="pagoFecha" class="form-label fw-semibold">
+                  <i data-feather="calendar" class="me-1" style="width: 16px; height: 16px;"></i>
+                  Fecha de Pago
+                </label>
+                <input 
+                  type="date" 
+                  class="form-control" 
+                  id="pagoFecha" 
+                  required
+                >
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i data-feather="x" class="me-1" style="width: 16px; height: 16px;"></i>
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-success" onclick="confirmarPagoCliente()">
+              <i data-feather="check-circle" class="me-1" style="width: 16px; height: 16px;"></i>
+              💾 Confirmar Pago
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
 </div>
@@ -384,6 +506,8 @@
                             <button class="btn btn-sm btn-icon btn-outline-info btn-view" title="Ver Detalle (próximamente)"><i data-feather="eye"></i></button>
                             ${inc.estado !== 'Rechazada' ? `<button class="btn btn-sm btn-icon btn-outline-danger btn-reject" title="Rechazar"><i data-feather="x-circle"></i></button>` : ''}
                             ${inc.estado === 'En Proceso' ? `<button class="btn btn-sm btn-icon btn-outline-success btn-pay" title="Marcar como Pagada"><i data-feather="check-circle"></i></button>` : ''}
+                            ${inc.estado === 'Pagada por EPS' ? `<button class="btn btn-sm btn-success" onclick="pagarACliente(${inc.id}, '${inc.usuario_nombre || 'Usuario'}', ${inc.monto_total || 0})" title="Pagar a Cliente"><i data-feather="dollar-sign"></i> 💸 Pagar a Cliente</button>` : ''}
+                            ${inc.estado === 'Rechazada' ? `<button class="btn-escalar-tutela" onclick="escalarATutela(${inc.id})" title="Escalar a Tutela Jurídica"><i data-feather="shield"></i> Escalar a Tutela</button>` : ''}
                         </td>
                     </tr>
                 `;
@@ -510,6 +634,188 @@
                  console.error(`Error actualizando estado a ${newStatus}:`, error);
                  showMessage(`❌ Error al actualizar estado: ${error.message}`, 'danger');
             }
+        }
+
+
+        // --- Escalar Incapacidad Rechazada a Tutela Jurídica ---
+        /**
+         * Captura los datos de una incapacidad rechazada y redirige al módulo de tutelas
+         * para crear una nueva tutela basada en el rechazo de la incapacidad.
+         * 
+         * @param {number} incapacidadId - ID de la incapacidad rechazada
+         */
+        function escalarATutela(incapacidadId) {
+            console.log('🔄 Escalando incapacidad', incapacidadId, 'a tutela jurídica...');
+            
+            // Buscar los datos de la incapacidad en el array actual
+            const incapacidad = currentIncapacidades.find(inc => inc.id == incapacidadId);
+            
+            if (!incapacidad) {
+                showMessage('❌ Error: No se encontraron los datos de la incapacidad.', 'danger');
+                console.error('Incapacidad no encontrada en currentIncapacidades:', incapacidadId);
+                return;
+            }
+            
+            // Validar que esté en estado Rechazada
+            if (incapacidad.estado !== 'Rechazada') {
+                showMessage('⚠️ Solo se pueden escalar incapacidades rechazadas.', 'warning');
+                return;
+            }
+            
+            // Confirmar acción con el usuario
+            const empleadoNombre = getUserName(incapacidad.usuario_id);
+            const empresaNombre = getCompanyName(incapacidad.empresa_nit);
+            
+            const confirmar = confirm(
+                `¿Deseas escalar esta incapacidad rechazada a una Tutela Jurídica?\n\n` +
+                `Empleado: ${empleadoNombre}\n` +
+                `Empresa: ${empresaNombre}\n` +
+                `Diagnóstico: ${incapacidad.diagnostico}\n\n` +
+                `Se creará un nuevo registro de tutela con estos datos.`
+            );
+            
+            if (!confirmar) return;
+            
+            // Preparar parámetros para la URL
+            const params = new URLSearchParams({
+                new_from_incapacidad: incapacidadId,
+                usuario_id: incapacidad.usuario_id,
+                empresa_nit: incapacidad.empresa_nit,
+                motivo: `Rechazo de Incapacidad - ${incapacidad.diagnostico}`,
+                descripcion: `Incapacidad rechazada del ${incapacidad.fecha_inicio} al ${incapacidad.fecha_fin}. Diagnóstico: ${incapacidad.diagnostico || 'No especificado'}.`,
+                origen: 'incapacidad',
+                origen_id: incapacidadId
+            });
+            
+            // Log para depuración
+            console.log('📋 Datos de transferencia a tutela:', {
+                incapacidad_id: incapacidadId,
+                usuario_id: incapacidad.usuario_id,
+                empresa_nit: incapacidad.empresa_nit
+            });
+            
+            // Redirigir a la página de tutelas con parámetros
+            window.location.href = `/tutelas/crear?${params.toString()}`;
+        }
+        
+        /**
+         * Abre el modal para pagar a cliente
+         * @param {number} incapacidadId - ID de la incapacidad
+         * @param {string} nombreUsuario - Nombre del cliente/usuario
+         * @param {number} monto - Monto a pagar
+         */
+        window.pagarACliente = function(incapacidadId, nombreUsuario, monto) {
+            // Setear fecha actual como fecha de pago
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('pagoFecha').value = hoy;
+            
+            // Poblar información
+            document.getElementById('pagoIncapacidadId').value = incapacidadId;
+            document.getElementById('pagoClienteNombre').textContent = nombreUsuario;
+            document.getElementById('pagoClienteMonto').textContent = '$' + (monto || 0).toLocaleString('es-CO');
+            document.getElementById('pagoMontoPagado').value = monto || 0;
+            
+            // Limpiar campos
+            document.getElementById('pagoComprobante').value = '';
+            document.getElementById('pagoObservaciones').value = '';
+            
+            // Abrir modal
+            const modalEl = document.getElementById('modalPagarCliente');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+            
+            // Reinicializar iconos
+            setTimeout(() => {
+                if (typeof feather !== 'undefined' && feather && typeof feather.replace === 'function') {
+                    feather.replace();
+                }
+            }, 100);
+        }
+        
+        /**
+         * Confirma y envía el pago a cliente
+         */
+        window.confirmarPagoCliente = async function() {
+            const form = document.getElementById('formPagarCliente');
+            
+            // Validar formulario
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const incapacidadId = document.getElementById('pagoIncapacidadId').value;
+            const montoPagado = document.getElementById('pagoMontoPagado').value;
+            const comprobante = document.getElementById('pagoComprobante').files[0];
+            const observaciones = document.getElementById('pagoObservaciones').value;
+            const fechaPago = document.getElementById('pagoFecha').value;
+            
+            // Validar archivo
+            if (!comprobante) {
+                showMessage('⚠️ Debe adjuntar el comprobante de transferencia', 'warning');
+                return;
+            }
+            
+            // Validar tamaño (5MB max)
+            if (comprobante.size > 5 * 1024 * 1024) {
+                showMessage('⚠️ El archivo no debe superar los 5MB', 'warning');
+                return;
+            }
+            
+            // Preparar FormData
+            const formData = new FormData();
+            formData.append('monto_pagado', montoPagado);
+            formData.append('fecha_pago', fechaPago);
+            formData.append('observaciones', observaciones);
+            formData.append('comprobante', comprobante);
+            
+            try {
+                // Mostrar loader
+                showMessage('⏳ Procesando pago...', 'info');
+                
+                // Enviar a backend
+                const response = await fetch(`${API_URL}/incapacidades/${incapacidadId}/pagar-cliente`, {
+                    method: 'PUT',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Error al procesar pago');
+                }
+                
+                const result = await response.json();
+                
+                // Cerrar modal
+                const modalEl = document.getElementById('modalPagarCliente');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                
+                // Mostrar éxito
+                showMessage(`✅ Pago registrado exitosamente. Caso cerrado.`, 'success');
+                
+                // Recargar tabla
+                loadIncapacidades();
+                
+            } catch (error) {
+                console.error('Error al pagar cliente:', error);
+                showMessage(`❌ Error al procesar pago: ${error.message}`, 'danger');
+            }
+        }
+                usuario_id: incapacidad.usuario_id,
+                empresa_nit: incapacidad.empresa_nit,
+                diagnostico: incapacidad.diagnostico,
+                fecha_inicio: incapacidad.fecha_inicio,
+                fecha_fin: incapacidad.fecha_fin
+            });
+            
+            // Redirigir al módulo de tutelas con los parámetros
+            showMessage('⏳ Redirigiendo al módulo de tutelas...', 'info');
+            
+            setTimeout(() => {
+                window.location.href = `/tutelas?${params.toString()}`;
+            }, 500);
         }
 
 

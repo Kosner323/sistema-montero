@@ -1,0 +1,20 @@
+<!-- Modificar input de identificación -->
+<div class="form-group">
+    <label for="usuario_identificacion">Identificación Usuario</label>
+    <input type="text" id="usuario_identificacion" name="usuario_identificacion" class="form-control" required>
+    <span id="nombreConfirmacion" class="text-success font-weight-bold mt-2 d-none"></span>
+</div>
+
+<script src="{{ url_for('static', filename='assets/js/universal-search.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchVinculacion = new UniversalSearch({
+        inputId: 'usuario_identificacion',
+        callback: function(usuario) {
+            const nombreSpan = document.getElementById('nombreConfirmacion');
+            nombreSpan.textContent = `✓ ${usuario.nombre} ${usuario.apellido}`;
+            nombreSpan.classList.remove('d-none');
+        }
+    });
+});
+</script>

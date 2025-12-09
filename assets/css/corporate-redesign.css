@@ -1,0 +1,1155 @@
+/**
+ * ============================================================================
+ * REDISEÑO CORPORATIVO ENTERPRISE - SISTEMA MONTERO
+ * Lead Frontend Engineer & UI/UX Expert
+ * ============================================================================
+ *
+ * ESPECIFICACIONES EXACTAS (Estilo Banco/Corporativo):
+ * - Azul Sólido: #0056b3 (Primary)
+ * - Fondo Gris Hielo: #f4f6f9 (Background)
+ * - Border-radius: 2-4px máximo (NO 8px, NO 12px)
+ * - Estilo: FLAT (NO gradientes)
+ * - Tipografía: Sans-serif 13px/0.85rem
+ * - Tablas: Compactas, encabezado azul
+ * - Formularios: 3-4 columnas
+ *
+ * ELIMINADOS: Morados, naranjas, gradientes coloridos, border-radius >4px
+ */
+
+/* ============================================================================
+   VARIABLES CSS CORPORATIVAS ENTERPRISE
+   ============================================================================ */
+:root {
+    /* Colores Primarios - Azul Corporativo #0056b3 */
+    --color-primary: #0056b3;
+    --color-primary-dark: #004494;
+    --color-primary-light: #0062cc;
+    --color-primary-rgb: 0, 86, 179;
+    
+    /* Grises Neutros */
+    --color-bg-main: #f4f6f9;
+    --color-bg-card: #ffffff;
+    --color-bg-hover: #e8eaf0;
+    --color-border: #d1d5db;
+    --color-border-light: #e5e7eb;
+    
+    /* Texto */
+    --color-text-primary: #263238;
+    --color-text-secondary: #546e7a;
+    --color-text-muted: #78909c;
+    
+    /* Estados */
+    --color-success: #2e7d32;
+    --color-warning: #f57c00;
+    --color-danger: #c62828;
+    --color-info: #0277bd;
+    
+    /* Sombras Profesionales */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    
+    /* Bordes (Máximo 4px - Estilo Corporate Flat) */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 4px;
+    
+    /* Tipografía */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+}
+
+/* ============================================================================
+   TIPOGRAFÍA PROFESIONAL
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: var(--font-family-base) !important;
+    font-size: 13px !important;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-base) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.9rem; }
+
+/* ============================================================================
+   BOTONES CORPORATIVOS
+   ============================================================================ */
+.btn-primary,
+.btn-primary-corporate {
+    background: var(--color-primary) !important;
+    border: 1px solid var(--color-primary) !important;
+    color: white !important;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover,
+.btn-primary-corporate:hover {
+    background: var(--color-primary-dark) !important;
+    border-color: var(--color-primary-dark) !important;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn-secondary-corporate {
+    background: white !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text-primary) !important;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-corporate:hover {
+    background: var(--color-bg-hover) !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* Eliminar gradientes coloridos en botones antiguos */
+.btn {
+    background-image: none !important;
+}
+
+/* ============================================================================
+   CARDS CORPORATIVAS
+   ============================================================================ */
+.card-corporate {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.card-corporate:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary-light);
+}
+
+.card-corporate .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--color-border-light);
+    padding: 20px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.card-corporate .card-body {
+    padding: 20px;
+}
+
+/* ============================================================================
+   ELIMINAR GRADIENTES - ESTILO FLAT OBLIGATORIO
+   ============================================================================ */
+/* Sobrescribir TODOS los gradientes (Estilo Flat Corporativo) */
+.bg-gradient-primary,
+.bg-gradient-purple,
+.bg-gradient-orange,
+.bg-gradient-corporate,
+.bg-gradient-light,
+.bg-gradient-secondary,
+.bg-gradient,
+[class*="gradient"] {
+    background: var(--color-primary) !important;
+    background-image: none !important;
+}
+
+/* Forzar estilo plano en cards con inline styles */
+.card[style*="gradient"],
+.card[style*="linear-gradient"] {
+    background: var(--color-bg-card) !important;
+    background-image: none !important;
+}
+
+/* ============================================================================
+   TABLAS MODO EXCEL (ESTILO FINTECH/BANCO)
+   ============================================================================ */
+/*
+ * ESPECIFICACIÓN CRÍTICA:
+ * - Rejilla completa visible (bordes en CADA celda)
+ * - Encabezado Azul Rey #0056b3 con texto blanco UPPERCASE
+ * - Inputs dentro de tabla sin bordes (hasta focus)
+ * - Clase base: .table .table-bordered .table-sm
+ */
+
+.table-corporate,
+.table {
+    width: 100%;
+    background: white;
+    border-radius: 0 !important; /* FLAT - sin bordes redondeados */
+    overflow: visible;
+    box-shadow: none !important; /* Sin sombras en modo Excel */
+    font-size: 13px;
+    border-collapse: collapse !important;
+}
+
+/* ✅ MODO EXCEL: Bordes visibles en CADA celda (rejilla completa) */
+.table-bordered,
+.table.table-bordered {
+    border: 1px solid #dee2e6 !important;
+}
+
+.table-bordered th,
+.table-bordered td,
+.table.table-bordered th,
+.table.table-bordered td {
+    border: 1px solid #dee2e6 !important;
+}
+
+/* Encabezado AZUL REY #0056b3 (DICTADURA VISUAL) */
+.table-corporate thead,
+.table thead,
+.table-bordered thead {
+    background: #0056b3 !important; /* Azul Rey exacto */
+    border-bottom: 2px solid #004494 !important;
+}
+
+.table-corporate thead th,
+.table thead th,
+.table-bordered thead th {
+    padding: 10px 12px !important;
+    font-weight: var(--font-weight-semibold);
+    color: #ffffff !important; /* Texto blanco */
+    text-align: center !important;
+    font-size: 12px;
+    text-transform: uppercase !important; /* MAYÚSCULAS obligatorio */
+    letter-spacing: 0.5px;
+    border: 1px solid #004494 !important; /* Bordes entre headers */
+    vertical-align: middle;
+}
+
+/* Filas del cuerpo */
+.table-corporate tbody tr,
+.table tbody tr,
+.table-bordered tbody tr {
+    border-bottom: 1px solid #dee2e6 !important;
+    transition: background 0.15s ease;
+}
+
+.table-corporate tbody tr:hover,
+.table tbody tr:hover,
+.table-bordered tbody tr:hover {
+    background: #f8f9fa !important; /* Hover gris muy claro */
+}
+
+.table-corporate tbody td,
+.table tbody td,
+.table-bordered tbody td {
+    padding: 8px 10px !important; /* Compacto tipo Excel */
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    vertical-align: middle;
+    border: 1px solid #dee2e6 !important; /* Rejilla completa */
+}
+
+/* ✅ INPUTS EN TABLA: Sin bordes hasta focus (simular Excel) */
+.table input[type="text"],
+.table input[type="number"],
+.table input[type="email"],
+.table input[type="tel"],
+.table input[type="date"],
+.table select,
+.table textarea {
+    border: none !important;
+    background: transparent !important;
+    padding: 6px 8px;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Al hacer clic (focus), mostrar borde azul */
+.table input[type="text"]:focus,
+.table input[type="number"]:focus,
+.table input[type="email"]:focus,
+.table input[type="tel"]:focus,
+.table input[type="date"]:focus,
+.table select:focus,
+.table textarea:focus {
+    border: 2px solid #0056b3 !important;
+    background: #f0f8ff !important; /* Fondo azul muy claro al editar */
+    outline: none;
+    box-shadow: none !important;
+}
+
+/* Tabla compacta forzada (table-sm override) */
+.table-sm tbody td,
+.table-sm tbody th {
+    padding: 6px 8px !important;
+    font-size: 12px;
+}
+
+/* ============================================================================
+   BADGES CORPORATIVOS
+   ============================================================================ */
+.badge-corporate-success {
+    background: #e8f5e9 !important;
+    color: var(--color-success) !important;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
+    font-size: 12px;
+}
+
+.badge-corporate-warning {
+    background: #fff3e0 !important;
+    color: var(--color-warning) !important;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
+    font-size: 12px;
+}
+
+.badge-corporate-danger {
+    background: #ffebee !important;
+    color: var(--color-danger) !important;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
+    font-size: 12px;
+}
+
+.badge-corporate-info {
+    background: #e1f5fe !important;
+    color: var(--color-info) !important;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-weight-medium);
+    font-size: 12px;
+}
+
+/* ============================================================================
+   CONSOLA TERMINAL (Copiloto ARL)
+   ============================================================================ */
+.terminal-console {
+    background: #000000;
+    color: #00ff00;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+}
+
+.terminal-console .log-line {
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.terminal-console .log-line.success {
+    color: #00ff00;
+}
+
+.terminal-console .log-line.error {
+    color: #ff5555;
+}
+
+.terminal-console .log-line.warning {
+    color: #ffaa00;
+}
+
+.terminal-console .log-line.info {
+    color: #55aaff;
+}
+
+.terminal-console .prompt {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+/* Scrollbar en terminal */
+.terminal-console::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-console::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.terminal-console::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.terminal-console::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ============================================================================
+   INPUTS CORPORATIVOS
+   ============================================================================ */
+.input-corporate {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: white;
+    transition: all 0.2s ease;
+    font-family: var(--font-family-base);
+}
+
+.input-corporate:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+}
+
+.input-corporate::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* ============================================================================
+   ALERTAS CORPORATIVAS
+   ============================================================================ */
+.alert-corporate-info {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-left: 4px solid var(--color-info);
+    color: var(--color-text-primary);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+}
+
+.alert-corporate-success {
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    border-left: 4px solid var(--color-success);
+    color: var(--color-text-primary);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+}
+
+.alert-corporate-warning {
+    background: #fff3e0;
+    border: 1px solid #ffb74d;
+    border-left: 4px solid var(--color-warning);
+    color: var(--color-text-primary);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+}
+
+/* ============================================================================
+   PASO A PASO (Wizard Corporativo)
+   ============================================================================ */
+.wizard-step {
+    background: white;
+    border: 2px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.wizard-step.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.wizard-step-number {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    margin-right: 12px;
+}
+
+.wizard-step.disabled .wizard-step-number {
+    background: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+/* ============================================================================
+   ANIMACIONES SUTILES
+   ============================================================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes pulse-subtle {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* ============================================================================
+   UTILIDADES
+   ============================================================================ */
+.text-corporate-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-corporate-secondary {
+    color: var(--color-text-secondary) !important;
+}
+
+.text-corporate-muted {
+    color: var(--color-text-muted) !important;
+}
+
+.bg-corporate-light {
+    background: var(--color-bg-main) !important;
+}
+
+.border-corporate {
+    border-color: var(--color-border) !important;
+}
+
+.shadow-corporate-sm {
+    box-shadow: var(--shadow-sm);
+}
+
+.shadow-corporate-md {
+    box-shadow: var(--shadow-md);
+}
+
+.shadow-corporate-lg {
+    box-shadow: var(--shadow-lg);
+}
+
+/* ============================================================================
+   FORMULARIOS DE ALTA DENSIDAD (3-4 Columnas)
+   ============================================================================ */
+.form-corporate .row {
+    margin-bottom: 12px;
+}
+
+.form-corporate .form-label {
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+
+.form-corporate .form-control,
+.form-corporate .form-select {
+    font-size: 13px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    height: auto;
+}
+
+.form-corporate .form-control:focus,
+.form-corporate .form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+}
+
+/* Grid de formularios: 3-4 columnas */
+.form-corporate .col-md-3,
+.form-corporate .col-md-4 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* ============================================================================
+   SOBRESCRIBIR BOOTSTRAP - ESTILO FLAT FORZADO
+   ============================================================================ */
+/* Eliminar border-radius excesivo en Bootstrap */
+.card,
+.btn,
+.form-control,
+.form-select,
+.modal-content,
+.dropdown-menu,
+.alert,
+.badge,
+.pagination .page-link {
+    border-radius: var(--radius-md) !important;
+}
+
+/* Eliminar sombras excesivas */
+.shadow-lg,
+.shadow-xl {
+    box-shadow: var(--shadow-md) !important;
+}
+
+/* Botones planos */
+.btn {
+    font-size: 13px;
+    padding: 8px 16px;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Cards compactas */
+.card {
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+    background: var(--color-bg-main);
+    border-bottom: 1px solid var(--color-border-light);
+    padding: 12px 16px;
+    font-weight: var(--font-weight-semibold);
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+/* Modales compactos */
+.modal-header {
+    background: var(--color-primary);
+    color: white;
+    border-bottom: none;
+    padding: 12px 20px;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+}
+
+.modal-body {
+    padding: 20px;
+    font-size: 13px;
+}
+
+/* Eliminar todos los inline styles con gradientes */
+[style*="linear-gradient"] {
+    background-image: none !important;
+}
+
+[style*="background: linear-gradient"],
+[style*="background:linear-gradient"] {
+    background: var(--color-bg-card) !important;
+}
+
+/* Sobrescribir colores morados/naranjas de Datta Able */
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--color-primary) !important;
+}
+
+/* ============================================================================
+   SIDEBAR Y NAVEGACIÓN CORPORATIVA
+   ============================================================================ */
+.sidebar {
+    background: #ffffff !important;
+    border-right: 1px solid var(--color-border-light);
+}
+
+.sidebar .nav-link {
+    font-size: 13px;
+    padding: 10px 16px;
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: var(--color-bg-hover);
+    color: var(--color-primary);
+}
+
+/* ============================================================================
+   ENCABEZADO CORPORATIVO
+   ============================================================================ */
+.header,
+.navbar {
+    background: var(--color-primary) !important;
+    border-bottom: 2px solid var(--color-primary-dark);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-brand,
+.navbar .nav-link {
+    color: white !important;
+    font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================
+   WIDGETS Y MÉTRICAS (KPIs)
+   ============================================================================ */
+.metric-card {
+    background: white;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.metric-card .metric-value {
+    font-size: 28px;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.metric-card .metric-label {
+    font-size: 12px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   BREADCRUMBS CORPORATIVOS
+   ============================================================================ */
+.breadcrumb {
+    background: transparent;
+    padding: 8px 0;
+    margin-bottom: 16px;
+    font-size: 12px;
+}
+
+.breadcrumb-item {
+    color: var(--color-text-secondary);
+}
+
+.breadcrumb-item.active {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================
+   PAGINACIÓN CORPORATIVA
+   ============================================================================ */
+.pagination {
+    gap: 4px;
+}
+
+.pagination .page-link {
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    padding: 6px 12px;
+    margin: 0;
+}
+
+.pagination .page-link:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* ============================================================================
+   🎯 MODO EXCEL - TABLAS TIPO HOJA DE CÁLCULO (CRÍTICO)
+   Estilo: Rejilla completa visible, inputs sin bordes hasta focus
+   ============================================================================ */
+
+/* Tabla Excel: Rejilla completa */
+.table-excel {
+    width: 100%;
+    border-collapse: collapse !important;
+    background: #ffffff;
+    font-size: 13px;
+    border: 1px solid #dee2e6;
+}
+
+.table-excel thead {
+    background: #0056b3 !important;
+}
+
+.table-excel thead th {
+    padding: 10px 12px !important;
+    font-weight: 600;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border: 1px solid #004494 !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table-excel tbody td {
+    padding: 6px 10px !important;
+    border: 1px solid #dee2e6 !important;
+    vertical-align: middle;
+    font-size: 13px;
+    color: #263238;
+}
+
+.table-excel tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.table-excel tbody tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+/* Inputs dentro de tabla Excel - Sin bordes (Estilo Spreadsheet) */
+.table-excel input.form-control,
+.table-excel select.form-select,
+.table-excel .input-excel {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 8px !important;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+.table-excel input.form-control:focus,
+.table-excel select.form-select:focus,
+.table-excel .input-excel:focus {
+    background: #ffffff !important;
+    border: 2px solid #0056b3 !important;
+    box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.15) !important;
+}
+
+.table-excel input.form-control:hover,
+.table-excel select.form-select:hover,
+.table-excel .input-excel:hover {
+    background: #f0f4f8 !important;
+}
+
+/* Celdas editables Excel */
+.table-excel td.editable {
+    cursor: text;
+    position: relative;
+}
+
+.table-excel td.editable:hover {
+    background: #e8f4fc;
+}
+
+/* Acciones en tabla Excel */
+.table-excel .btn-action {
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 2px;
+}
+
+/* ============================================================================
+   🏗️ FORMULARIOS GRID CORPORATIVO (3-4 columnas)
+   Elimina formularios verticales infinitos
+   ============================================================================ */
+
+.form-section-corporate {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.form-section-corporate .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0056b3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0056b3;
+}
+
+/* Labels más compactos */
+.form-section-corporate .form-label,
+.form-corporate .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #546e7a;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+}
+
+/* Inputs corporativos compactos */
+.form-section-corporate .form-control,
+.form-section-corporate .form-select,
+.form-corporate .form-control,
+.form-corporate .form-select {
+    font-size: 13px;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 2px;
+    transition: border-color 0.15s ease;
+}
+
+.form-section-corporate .form-control:focus,
+.form-section-corporate .form-select:focus,
+.form-corporate .form-control:focus,
+.form-corporate .form-select:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.1);
+}
+
+/* ============================================================================
+   📦 CARDS FLAT (Sin sombras grandes, sin border-radius >4px)
+   ============================================================================ */
+
+.card-flat {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.card-flat .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #263238;
+    border-radius: 4px 4px 0 0 !important;
+}
+
+.card-flat .card-body {
+    padding: 16px;
+}
+
+/* Header azul corporativo */
+.card-header-corporate {
+    background: #0056b3 !important;
+    color: #ffffff !important;
+    border-bottom: none;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-header-corporate h5,
+.card-header-corporate .card-title {
+    color: #ffffff !important;
+    margin: 0;
+    font-size: 13px;
+}
+
+/* ============================================================================
+   🔘 BOTONES EXCEL/FINTECH
+   ============================================================================ */
+
+.btn-excel {
+    background: #217346 !important; /* Verde Excel */
+    border: 1px solid #1e6b40 !important;
+    color: #ffffff !important;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 2px;
+}
+
+.btn-excel:hover {
+    background: #1e6b40 !important;
+}
+
+.btn-export {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    color: #263238;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 2px;
+}
+
+.btn-export:hover {
+    background: #f8f9fa;
+    border-color: #0056b3;
+    color: #0056b3;
+}
+
+/* ============================================================================
+   📊 STATS CARDS COMPACTAS
+   ============================================================================ */
+
+.stat-card-compact {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-card-compact .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0056b3;
+    line-height: 1;
+}
+
+.stat-card-compact .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #78909c;
+    text-transform: uppercase;
+    margin-top: 8px;
+}
+
+/* ============================================================================
+   🚫 OVERRIDE GLOBAL - ELIMINAR ESTILOS NO DESEADOS
+   ============================================================================ */
+
+/* Eliminar border-radius grandes */
+.card,
+.card-header,
+.modal-content,
+.dropdown-menu {
+    border-radius: 4px !important;
+}
+
+/* Eliminar sombras excesivas */
+.card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Sidebar profesional */
+.pc-sidebar {
+    background: #1a2035 !important;
+}
+
+.pc-sidebar .pc-navbar .pc-link {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+}
+
+.pc-sidebar .pc-navbar .pc-link:hover,
+.pc-sidebar .pc-navbar .pc-link.active {
+    color: #ffffff;
+    background: rgba(0, 86, 179, 0.3);
+}
+
+.pc-sidebar .pc-caption label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 768px) {
+    body {
+        font-size: 12px !important;
+    }
+
+    .card-corporate,
+    .card {
+        border-radius: var(--radius-md);
+    }
+
+    .wizard-step {
+        padding: 16px;
+    }
+
+    .terminal-console {
+        font-size: 12px;
+        padding: 12px;
+        min-height: 150px;
+    }
+
+    .form-corporate .col-md-3,
+    .form-corporate .col-md-4 {
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .table-corporate thead th,
+    .table thead th {
+        font-size: 11px;
+        padding: 8px !important;
+    }
+
+    .table-corporate tbody td,
+    .table tbody td {
+        font-size: 12px;
+        padding: 8px !important;
+    }
+}

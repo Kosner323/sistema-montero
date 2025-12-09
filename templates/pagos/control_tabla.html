@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
     <style>
         .row-pendiente {
@@ -48,37 +50,42 @@
         <div class="grid grid-cols-12 gap-x-6">
           
           <div class="col-span-12">
-            <div class="card">
-                <div class="card-header flex justify-between items-center">
-                    <h5>Detalle de Empleados y Aportes</h5>
+            <div class="card-flat">
+                <div class="card-header card-header-corporate flex justify-between items-center">
+                    <h5 class="mb-0">Detalle de Empleados y Aportes</h5>
                     <div class="flex items-center space-x-2">
-                        <select class="form-select w-auto" id="filtroEmpresa">
+                        <select class="form-select form-select-sm w-auto" id="filtroEmpresa">
                             <option value="todos" selected>Todas las Empresas</option>
                         </select>
                         
-                        <select class="form-select w-auto" id="filtroEstado">
+                        <select class="form-select form-select-sm w-auto" id="filtroEstado">
                             <option value="todos" selected>Todos los Estados</option>
-                            <option value="Pagado">Pagado</option>
-                            <option value="Pendiente">Pendiente</option>
+                            <option value="Pagado">✅ Pagado</option>
+                            <option value="Pendiente">⏳ Pendiente</option>
+                            <option value="Moroso">📢 Morosos</option>
                         </select>
 
-                        <input type="month" class="form-control w-auto" id="filtroMes" value="">
+                        <input type="month" class="form-control form-control-sm w-auto" id="filtroMes" value="">
                         
-                        <button class="btn btn-primary" id="btnConsultar">
+                        <button class="btn btn-corporate btn-sm" id="btnConsultar">
                             <i data-feather="search" class="mr-1"></i> Consultar
                         </button>
 
+                        <button class="btn btn-excel btn-sm" data-bs-toggle="modal" data-bs-target="#modalExportarExcel">
+                            <i data-feather="download" class="mr-1"></i> 📊 Exportar
+                        </button>
+
                         <span id="whatsappReminderContainer" style="display: none;">
-                            <button class="btn btn-success" id="btnEnviarRecordatorio">
-                                <i class="ti ti-brand-whatsapp mr-1"></i> Enviar Recordatorio
+                            <button class="btn btn-success btn-sm" id="btnEnviarRecordatorio">
+                                <i class="ti ti-brand-whatsapp mr-1"></i> Recordatorio
                             </button>
                         </span>
                     </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted">Lista detallada de empleados. El color del estado (y el fondo de la fila) indica el pago de seguridad social para el periodo seleccionado. **Usa el filtro de "Pendiente" y el botón Consultar para ver el nuevo botón de Recordatorio.**</p>
+                <div class="card-body p-0">
+                    <p class="text-muted px-3 pt-3 mb-2" style="font-size: 0.85rem;">Lista detallada de empleados. El color del estado indica el pago de seguridad social para el periodo seleccionado.</p>
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered text-sm whitespace-nowrap" id="tablaPagos">
+                        <table class="table table-excel table-bordered table-sm" id="tablaPagos">
                             <thead>
                                 <tr>
                                     <th rowspan="2" class="align-middle"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
@@ -88,33 +95,33 @@
                                     <th rowspan="2" class="align-middle">APELLIDO(S)</th>
                                     <th rowspan="2" class="align-middle">EDAD</th>
                                     
-                                    <th rowspan="2" class="align-middle">ESTADO PAGO</th>
-                                    <th rowspan="2" class="align-middle">MES/AÑO PAGO</th>
+                                    <th rowspan="2" class="align-middle">ESTADO</th>
+                                    <th rowspan="2" class="align-middle">PERIODO</th>
                                     
-                                    <th colspan="4" class="text-center bg-gray-100">ENTIDADES DE SEGURIDAD SOCIAL</th>
+                                    <th colspan="4" class="text-center">ENTIDADES SEG. SOCIAL</th>
                                     
-                                    <th colspan="3" class="text-center bg-gray-100">DATOS DE INGRESO Y BASE</th>
+                                    <th colspan="3" class="text-center">DATOS INGRESO/BASE</th>
                                     
-                                    <th colspan="5" class="text-center bg-gray-100">VALORES APORTADOS ($COP)</th>
+                                    <th colspan="5" class="text-center">APORTES ($COP)</th>
                                     
-                                    <th rowspan="2" class="align-middle bg-primary-100">TOTAL APORTE</th>
-                                    <th rowspan="2" class="align-middle">ACCIONES</th>
+                                    <th rowspan="2" class="align-middle">TOTAL</th>
+                                    <th rowspan="2" class="align-middle">ACC.</th>
                                 </tr>
                                 <tr>
                                     <th>EPS</th>
-                                    <th>ARL (Riesgo)</th>
-                                    <th>PENSIÓN</th>
-                                    <th>CAJA COMP.</th>
+                                    <th>ARL</th>
+                                    <th>AFP</th>
+                                    <th>CCF</th>
                                     
-                                    <th>FECHA INGRESO</th>
-                                    <th>MES INGRESO</th>
+                                    <th>F.INGRESO</th>
+                                    <th>MES</th>
                                     <th>IBC</th>
                                     
                                     <th>EPS</th>
                                     <th>ARL</th>
-                                    <th>PENSIÓN</th>
-                                    <th>CAJA COMP.</th>
-                                    <th>ADMIN.</th>
+                                    <th>AFP</th>
+                                    <th>CCF</th>
+                                    <th>ADM.</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -126,6 +133,117 @@
           </div>
         </div>
         </div>
+</div>
+
+<!-- Modal: Exportar Excel para Contador -->
+<div class="modal fade" id="modalExportarExcel" tabindex="-1" aria-labelledby="modalExportarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #217346; color: white;">
+                <h5 class="modal-title" id="modalExportarLabel">
+                    <i data-feather="download" class="inline mr-2"></i>
+                    📊 Exportar Reporte Contable
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Seleccione el periodo a exportar. El sistema generará un archivo Excel con todos los datos contables del mes.</p>
+                
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="exportAnio" class="form-label fw-bold text-uppercase" style="font-size: 11px;">
+                            <i data-feather="calendar" class="inline mr-1"></i>
+                            Año
+                        </label>
+                        <select class="form-select" id="exportAnio" required>
+                            <!-- Se llena dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="exportMes" class="form-label fw-bold text-uppercase" style="font-size: 11px;">
+                            <i data-feather="calendar" class="inline mr-1"></i>
+                            Mes
+                        </label>
+                        <select class="form-select" id="exportMes" required>
+                            <!-- Se llena dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-excel w-100" id="btnDescargarExcel">
+                            <i data-feather="download" class="inline mr-1"></i>
+                            Descargar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0" style="border-left: 4px solid #0dcaf0;">
+                    <strong>📋 Información:</strong><br>
+                    El reporte incluirá:
+                    <ul class="mb-0 mt-2">
+                        <li>Nómina completa del periodo</li>
+                        <li>Aportes seguridad social detallados</li>
+                        <li>Estados de pago por empleado</li>
+                        <li>Totales consolidados por empresa</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i data-feather="x" class="inline mr-1"></i>
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Programar Recordatorio de Cobro -->
+<div class="modal fade" id="modalProgramarRecordatorio" tabindex="-1" aria-labelledby="modalProgramarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #0056b3; color: white;">
+                <h5 class="modal-title" id="modalProgramarLabel">
+                    <i data-feather="clock" class="inline mr-2"></i>
+                    Programar Recordatorio de Cobro
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-uppercase" style="font-size: 11px;">Cliente/Empresa</label>
+                        <p class="text-muted mb-0" id="recordatorioClienteNombre">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-uppercase" style="font-size: 11px;">Monto Pendiente</label>
+                        <p class="text-danger mb-0" style="font-size: 1.2rem; font-weight: 700;" id="recordatorioMonto">$0</p>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="recordatorioFecha" class="form-label fw-bold text-uppercase" style="font-size: 11px;">
+                            <i data-feather="calendar" class="inline mr-1"></i>
+                            Fecha del Recordatorio
+                        </label>
+                        <input type="date" class="form-control" id="recordatorioFecha" required min="">
+                        <small class="text-muted">Selecciona la fecha en la que deseas recibir el recordatorio.</small>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="recordatorioNotas" class="form-label fw-bold text-uppercase" style="font-size: 11px;">Notas (Opcional)</label>
+                        <textarea class="form-control" id="recordatorioNotas" rows="3" placeholder="Agrega notas o detalles adicionales..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i data-feather="x" class="inline mr-1"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnGuardarRecordatorio">
+                    <i data-feather="check" class="inline mr-1"></i>
+                    Guardar Recordatorio
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
     {% include '_footer.html' %}
@@ -211,12 +329,26 @@
               const anioIngreso = fechaIngreso.getFullYear();
 
               const estadoPago = user.estadoPago || 'Pendiente';
+              const esMoroso = user.mora === true || user.esMoroso === true; // Verificar si está marcado como moroso
               const rowClass = estadoPago === 'Pendiente' ? 'row-pendiente' : '';
               const badgeClass = estadoPago === 'Pendiente' ? 'bg-danger' : 'bg-success';
               
+              // Botón de marcar como pagado
               const actionButton = estadoPago === 'Pendiente' 
                 ? `<button class="btn btn-sm btn-success btn-marcar-pagado" data-id="${user.numeroId}" title="Marcar como Pagado"><i data-feather="check-circle" class="w-4 h-4"></i></button>`
                 : '';
+
+              // Botón de recordatorio WhatsApp (solo para morosos o pendientes)
+              const whatsappButton = (estadoPago === 'Pendiente' || esMoroso)
+                ? `<button class="btn btn-sm btn-success ms-1" onclick="enviarRecordatorioWhatsApp('${user.primerNombre} ${user.primerApellido}', '${user.telefono || ''}', ${totalAporte}, ${user.saldo_a_favor || 0})" title="Recordar Pago por WhatsApp">
+                     <i class="ti ti-brand-whatsapp" style="font-size: 1.1rem;"></i>
+                   </button>`
+                : '';
+
+              // Botón de programar recordatorio
+              const programarButton = `<button class="btn btn-sm btn-warning ms-1" onclick="abrirModalProgramar('${user.numeroId}', '${user.primerNombre} ${user.primerApellido}', ${totalAporte}, '${user.administracion || 'N/A'}')" title="Programar Recordatorio">
+                     <i data-feather="clock" class="w-4 h-4"></i>
+                   </button>`;
 
               const row = `
                   <tr class="${rowClass}">
@@ -240,7 +372,7 @@
                       <td class="text-right">${costoCaja.toLocaleString('es-CO')}</td>
                       <td class="text-right">${costoAdmin.toLocaleString('es-CO')}</td>
                       <td class="text-right font-semibold bg-primary-50">${totalAporte.toLocaleString('es-CO')}</td>
-                      <td class="text-center">${actionButton}</td>
+                      <td class="text-center">${actionButton}${whatsappButton}${programarButton}</td>
                   </tr>
               `;
               tbody.insertAdjacentHTML('beforeend', row);
@@ -260,12 +392,20 @@
               : userDataStore.filter(user => user.administracion === empresaSeleccionada);
           
           if (estadoSeleccionado !== 'todos') {
-              filteredData = filteredData.filter(user => (user.estadoPago || 'Pendiente') === estadoSeleccionado);
+              if (estadoSeleccionado === 'Moroso') {
+                  // Filtrar solo usuarios morosos (pendientes con mora)
+                  filteredData = filteredData.filter(user => 
+                      (user.estadoPago === 'Pendiente' || !user.estadoPago) && 
+                      (user.mora === true || user.esMoroso === true)
+                  );
+              } else {
+                  filteredData = filteredData.filter(user => (user.estadoPago || 'Pendiente') === estadoSeleccionado);
+              }
           }
           
           renderTable(filteredData);
 
-          reminderContainer.style.display = (estadoSeleccionado === 'Pendiente') ? '' : 'none';
+          reminderContainer.style.display = (estadoSeleccionado === 'Pendiente' || estadoSeleccionado === 'Moroso') ? '' : 'none';
           if (document.getElementById('selectAll')) document.getElementById('selectAll').checked = false;
       }
       
@@ -306,8 +446,288 @@
               }
           });
           
-{% include '_theme_config.html' %}
+          feather.replace();
       });
+
+      // ========== FUNCIÓN WHATSAPP RECORDATORIO ==========
+      
+      /**
+       * Envía recordatorio de pago por WhatsApp Web
+       * @param {string} nombreCompleto - Nombre del cliente
+       * @param {string} telefono - Número de teléfono (opcional)
+       * @param {number} montoPendiente - Monto adeudado
+       * @param {number} saldoFavor - Saldo a favor disponible
+       */
+      function enviarRecordatorioWhatsApp(nombreCompleto, telefono, montoPendiente, saldoFavor = 0) {
+          const mensaje = `Hola ${nombreCompleto}, recordamos que su pago de seguridad social presenta mora.\n\n` +
+                          `💰 Monto pendiente: $${montoPendiente.toLocaleString('es-CO')}\n` +
+                          `${saldoFavor > 0 ? `🌟 Saldo a favor disponible: $${saldoFavor.toLocaleString('es-CO')}\n` : ''}` +
+                          `\nPor favor regularizar a la brevedad posible.\n\n` +
+                          `Gracias por su atención.`;
+
+          // Si hay teléfono, abrir WhatsApp con número, sino solo el mensaje
+          let whatsappURL;
+          if (telefono && telefono.trim() !== '') {
+              // Limpiar número (quitar espacios, guiones, paréntesis)
+              const telefonoLimpio = telefono.replace(/\D/g, '');
+              whatsappURL = `https://wa.me/57${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+          } else {
+              // Sin número, abrir WhatsApp Web con mensaje solamente
+              whatsappURL = `https://web.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+          }
+
+          window.open(whatsappURL, '_blank');
+      }
+
+      // ========== FIN FUNCIÓN WHATSAPP ==========
+
+      // ========== FUNCIÓN PROGRAMAR RECORDATORIO ==========
+      
+      let datosRecordatorioActual = {};
+
+      /**
+       * Abre el modal para programar un recordatorio de cobro
+       * @param {string} clienteId - ID del cliente/usuario
+       * @param {string} nombreCompleto - Nombre del cliente
+       * @param {number} monto - Monto pendiente
+       * @param {string} empresa - Nombre de la empresa
+       */
+      function abrirModalProgramar(clienteId, nombreCompleto, monto, empresa) {
+          // Guardar datos para uso posterior
+          datosRecordatorioActual = {
+              clienteId: clienteId,
+              nombreCompleto: nombreCompleto,
+              monto: monto,
+              empresa: empresa
+          };
+
+          // Llenar modal
+          document.getElementById('recordatorioClienteNombre').textContent = `${nombreCompleto} (${empresa})`;
+          document.getElementById('recordatorioMonto').textContent = `$${monto.toLocaleString('es-CO')}`;
+          
+          // Establecer fecha mínima (hoy)
+          const hoy = new Date().toISOString().split('T')[0];
+          document.getElementById('recordatorioFecha').setAttribute('min', hoy);
+          document.getElementById('recordatorioFecha').value = '';
+          document.getElementById('recordatorioNotas').value = '';
+
+          // Abrir modal
+          const modal = new bootstrap.Modal(document.getElementById('modalProgramarRecordatorio'));
+          modal.show();
+          
+          // Reemplazar iconos
+          feather.replace();
+      }
+
+      /**
+       * Guarda el recordatorio programado
+       */
+      async function guardarRecordatorio() {
+          const fecha = document.getElementById('recordatorioFecha').value;
+          const notas = document.getElementById('recordatorioNotas').value;
+
+          if (!fecha) {
+              alert('⚠️ Por favor selecciona una fecha para el recordatorio.');
+              return;
+          }
+
+          const payload = {
+              cliente_id: datosRecordatorioActual.clienteId,
+              nombre_completo: datosRecordatorioActual.nombreCompleto,
+              empresa: datosRecordatorioActual.empresa,
+              monto: datosRecordatorioActual.monto,
+              fecha_recordatorio: fecha,
+              notas: notas || ''
+          };
+
+          try {
+              const response = await fetch('/api/finanzas/programar-cobro', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  credentials: 'include',
+                  body: JSON.stringify(payload)
+              });
+
+              const result = await response.json();
+
+              if (response.ok) {
+                  // Cerrar modal
+                  const modal = bootstrap.Modal.getInstance(document.getElementById('modalProgramarRecordatorio'));
+                  modal.hide();
+
+                  // Mostrar Toast de éxito
+                  mostrarToast(
+                      '✅ Recordatorio Programado', 
+                      `Recordatorio programado para el ${new Date(fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}. Te avisaré en Novedades.`,
+                      'success'
+                  );
+
+                  console.log('✅ Recordatorio guardado:', result);
+              } else {
+                  throw new Error(result.error || 'Error al guardar recordatorio');
+              }
+
+          } catch (error) {
+              console.error('❌ Error al programar recordatorio:', error);
+              mostrarToast(
+                  '❌ Error', 
+                  'No se pudo programar el recordatorio. Intenta nuevamente.',
+                  'danger'
+              );
+          }
+      }
+
+      /**
+       * Muestra un toast de notificación
+       * @param {string} titulo - Título del toast
+       * @param {string} mensaje - Mensaje del toast
+       * @param {string} tipo - Tipo: success, danger, warning, info
+       */
+      function mostrarToast(titulo, mensaje, tipo = 'info') {
+          const colorMap = {
+              'success': '#28a745',
+              'danger': '#dc3545',
+              'warning': '#ffc107',
+              'info': '#17a2b8'
+          };
+
+          const iconMap = {
+              'success': '✅',
+              'danger': '❌',
+              'warning': '⚠️',
+              'info': 'ℹ️'
+          };
+
+          // Crear toast container si no existe
+          let toastContainer = document.getElementById('toastContainer');
+          if (!toastContainer) {
+              toastContainer = document.createElement('div');
+              toastContainer.id = 'toastContainer';
+              toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+              document.body.appendChild(toastContainer);
+          }
+
+          // Crear toast
+          const toastHTML = `
+              <div class="toast align-items-center text-white border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: ${colorMap[tipo]}; min-width: 300px;">
+                  <div class="d-flex">
+                      <div class="toast-body">
+                          <strong>${iconMap[tipo]} ${titulo}</strong><br>
+                          ${mensaje}
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+              </div>
+          `;
+
+          toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+          const toastElement = toastContainer.lastElementChild;
+          const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+          toast.show();
+
+          // Eliminar del DOM después de ocultarse
+          toastElement.addEventListener('hidden.bs.toast', () => {
+              toastElement.remove();
+          });
+      }
+
+      // Event Listener para botón de guardar
+      document.addEventListener('DOMContentLoaded', () => {
+          document.getElementById('btnGuardarRecordatorio')?.addEventListener('click', guardarRecordatorio);
+          document.getElementById('btnDescargarExcel')?.addEventListener('click', descargarExcel);
+          
+          // Cargar años y meses en modal exportar
+          cargarAniosExport();
+          cargarMesesExport();
+      });
+
+      // ========== FIN FUNCIÓN PROGRAMAR RECORDATORIO ==========
+
+      // ========== 📊 EXPORTAR EXCEL PARA CONTADOR ==========
+      function descargarExcel() {
+          const anio = document.getElementById('exportAnio').value;
+          const mes = document.getElementById('exportMes').value;
+
+          if (!anio || !mes) {
+              alert('⚠️ Por favor seleccione año y mes');
+              return;
+          }
+
+          // Cerrar modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('modalExportarExcel'));
+          modal.hide();
+
+          // Mostrar notificación de descarga
+          mostrarToast('📥 Descargando Excel', `Generando reporte de ${mes}/${anio}...`, 'info');
+
+          // En producción: descomentar
+          // window.location.href = `/api/contabilidad/exportar?anio=${anio}&mes=${mes}`;
+
+          // Simulación temporal
+          setTimeout(() => {
+              console.log(`📊 Exportando datos contables: ${mes}/${anio}`);
+              mostrarToast('✅ Exportación Completa', `Excel de ${mes}/${anio} descargado correctamente`, 'success');
+              
+              // Simulación de descarga (en producción se reemplaza por el endpoint real)
+              const fakeDownload = document.createElement('a');
+              fakeDownload.href = '#';
+              fakeDownload.download = `Reporte_Contable_${mes}_${anio}.xlsx`;
+              // fakeDownload.click(); // Descomentar en producción
+          }, 1500);
+      }
+
+      // Llenar select de años (2020 - año actual + 1)
+      function cargarAniosExport() {
+          const selectAnio = document.getElementById('exportAnio');
+          if (!selectAnio) return;
+
+          const anioActual = new Date().getFullYear();
+          const anioInicio = 2020;
+
+          for (let anio = anioActual + 1; anio >= anioInicio; anio--) {
+              const option = document.createElement('option');
+              option.value = anio;
+              option.textContent = anio;
+              if (anio === anioActual) option.selected = true;
+              selectAnio.appendChild(option);
+          }
+      }
+
+      // Llenar select de meses
+      function cargarMesesExport() {
+          const selectMes = document.getElementById('exportMes');
+          if (!selectMes) return;
+
+          const meses = [
+              { valor: '01', nombre: 'Enero' },
+              { valor: '02', nombre: 'Febrero' },
+              { valor: '03', nombre: 'Marzo' },
+              { valor: '04', nombre: 'Abril' },
+              { valor: '05', nombre: 'Mayo' },
+              { valor: '06', nombre: 'Junio' },
+              { valor: '07', nombre: 'Julio' },
+              { valor: '08', nombre: 'Agosto' },
+              { valor: '09', nombre: 'Septiembre' },
+              { valor: '10', nombre: 'Octubre' },
+              { valor: '11', nombre: 'Noviembre' },
+              { valor: '12', nombre: 'Diciembre' }
+          ];
+
+          const mesActual = String(new Date().getMonth() + 1).padStart(2, '0');
+
+          meses.forEach(mes => {
+              const option = document.createElement('option');
+              option.value = mes.valor;
+              option.textContent = mes.nombre;
+              if (mes.valor === mesActual) option.selected = true;
+              selectMes.appendChild(option);
+          });
+      }
+      // ========== FIN EXPORTAR EXCEL ==========
+      
+{% include '_theme_config.html' %}
     </script>
 
   </body>

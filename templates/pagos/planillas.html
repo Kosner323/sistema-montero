@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
       (async function checkAuthentication() {
@@ -136,9 +139,15 @@
             <div class="card">
                 <div class="card-header flex justify-between items-center">
                     <h5>Detalle de Usuarios Pagados</h5>
-                    <button class="btn btn-warning" onclick="crearArchivoPlano()">
-                        <i data-feather="download" class="mr-1"></i> Crear Archivo Plano (CSV)
-                    </button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-lg btn-primary shadow-lg" onclick="auditarConJordy()" id="btnAuditorIA" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">
+                            <i data-feather="cpu" class="mr-1" style="width: 20px; height: 20px;"></i> 
+                            🤖 Auditar con IA "Jordy"
+                        </button>
+                        <button class="btn btn-lg btn-warning ms-2" onclick="crearArchivoPlano()">
+                            <i data-feather="download" class="mr-1"></i> Descargar Archivo Plano (CSV)
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <p class="text-muted">Seleccione los usuarios que desea incluir en el Archivo Plano para su liquidación o registro. Los datos mostrados corresponden a la última planilla procesada.</p>
@@ -163,6 +172,7 @@
                                     <th colspan="5" class="text-center bg-gray-100">VALORES APORTADOS ($COP)</th>
                                     
                                     <th rowspan="2" class="align-middle bg-primary-100">TOTAL APORTE</th>
+                                    <th rowspan="2" class="align-middle bg-danger-100">ACCIONES</th>
                                 </tr>
                                 <tr>
                                     <th>EPS</th>
@@ -296,7 +306,7 @@
           const tbody = document.getElementById('tablaUsuariosPagos').querySelector('tbody');
           tbody.innerHTML = '';
           if(dataToRender.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="19" class="text-center text-muted">No se encontraron usuarios para esta empresa.</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="20" class="text-center text-muted">No se encontraron usuarios para esta empresa.</td></tr>';
               return;
           }
 
@@ -348,6 +358,11 @@
                       <td class="text-right">${costoCaja.toLocaleString('es-CO', {style: 'currency', currency: 'COP', minimumFractionDigits: 0})}</td>
                       <td class="text-right">${costoAdmin.toLocaleString('es-CO', {style: 'currency', currency: 'COP', minimumFractionDigits: 0})}</td>
                       <td class="text-right font-semibold bg-primary-50">${totalAporte.toLocaleString('es-CO', {style: 'currency', currency: 'COP', minimumFractionDigits: 0})}</td>
+                      <td class="text-center">
+                          <button type="button" class="btn btn-sm btn-danger" onclick="retirarEmpleado('${user.numeroId}', '${user.primerNombre || ''} ${user.segundoNombre || ''} ${user.primerApellido || ''} ${user.segundoApellido || ''}')" title="Retirar Empleado">
+                              <i data-feather="user-x" class="w-4 h-4"></i> Retirar
+                          </button>
+                      </td>
                   </tr>
               `;
               tbody.insertAdjacentHTML('beforeend', row);
@@ -417,7 +432,7 @@
                   return;
               }
 
-              tbody.innerHTML = '<tr><td colspan="19" class="text-center text-muted">Cargando usuarios...</td></tr>';
+              tbody.innerHTML = '<tr><td colspan="20" class="text-center text-muted">Cargando usuarios...</td></tr>';
               
               try {
                   // Llamar a la API de usuarios filtrando por NIT
@@ -507,9 +522,227 @@
           preset_change('preset-1');
           main_layout_change('vertical');
       });
+
+      // ========== FUNCIÓN DE RETIRO DE EMPLEADO ==========
+      
+      /**
+       * Retira un empleado cambiando su estado a Inactivo
+       * @param {string} empleadoId - ID del empleado a retirar
+       * @param {string} empleadoNombre - Nombre completo del empleado
+       */
+      async function retirarEmpleado(empleadoId, empleadoNombre) {
+          // Confirmar acción
+          const confirmacion = confirm(`¿Estás seguro de retirar al empleado ${empleadoNombre}?\n\nEsto cambiará su estado a Inactivo.\n\nEsta acción no se puede deshacer.`);
+          if (!confirmacion) return;
+          
+          try {
+              // Mostrar loader
+              showMessage('⏳ Procesando retiro del empleado...', 'info');
+              
+              // Enviar petición al backend
+              const response = await fetch(`${API_URL}/usuarios/${empleadoId}/estado`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ estado: 'Inactivo' })
+              });
+              
+              const result = await response.json();
+              
+              if (response.ok && result.success) {
+                  // Mostrar mensaje de éxito
+                  showMessage(`✅ ${result.message || 'Empleado retirado exitosamente.'}`, 'success');
+                  
+                  // Recargar tabla de empleados
+                  await filterAndRender();
+                  
+                  console.log('✅ Retiro exitoso:', result);
+              } else {
+                  throw new Error(result.error || 'Error al procesar el retiro');
+              }
+              
+          } catch (error) {
+              console.error('❌ Error al retirar empleado:', error);
+              showMessage(`❌ Error: ${error.message}`, 'danger');
+          }
+      }
+      
+      // ========== FIN FUNCIÓN DE RETIRO ==========
+
+      // ========== FUNCIÓN AUDITORÍA IA (JORDY) ==========
+      
+      /**
+       * Audita los datos de la planilla con Jordy (IA)
+       * Envía los datos seleccionados a /api/planillas/auditar
+       */
+      async function auditarConJordy() {
+          const checkboxes = document.querySelectorAll('input[name="usuario_checkbox"]:checked');
+          
+          if (checkboxes.length === 0) {
+              Swal.fire({
+                  icon: 'warning',
+                  title: 'Sin Datos',
+                  text: 'Por favor, selecciona al menos un usuario para auditar.',
+                  confirmButtonColor: '#0d47a1'
+              });
+              return;
+          }
+
+          const usuariosAuditar = Array.from(checkboxes).map(cb => {
+              const row = cb.closest('tr');
+              const cells = row.querySelectorAll('td');
+              return {
+                  id: cells[1].textContent.trim(),
+                  nombre: cells[2].textContent.trim(),
+                  apellido: cells[3].textContent.trim(),
+                  eps: cells[6].textContent.trim(),
+                  pension: cells[8].textContent.trim(),
+                  ibc: parseFloat(cells[12].textContent.trim().replace(/[^0-9.-]+/g, "")) || 0,
+                  total: parseFloat(cells[17].textContent.trim().replace(/[^0-9.-]+/g, "")) || 0
+              };
+          });
+
+          // Mostrar loader
+          Swal.fire({
+              title: '🤖 Jordy está analizando...',
+              html: 'Auditando <strong>' + usuariosAuditar.length + '</strong> registros...',
+              allowOutsideClick: false,
+              didOpen: () => {
+                  Swal.showLoading();
+              }
+          });
+
+          try {
+              const response = await fetch('/api/planillas/auditar', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ usuarios: usuariosAuditar })
+              });
+
+              const resultado = await response.json();
+
+              if (!response.ok) throw new Error(resultado.error || 'Error en auditoría');
+
+              // Mostrar resultado de auditoría
+              mostrarModalAuditoria(resultado);
+
+          } catch (error) {
+              console.error('Error en auditoría:', error);
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'No se pudo completar la auditoría. Intenta nuevamente.',
+                  confirmButtonColor: '#0d47a1'
+              });
+          }
+      }
+
+      /**
+       * Muestra el modal con el veredicto de la auditoría IA
+       * @param {Object} resultado - Resultado del endpoint /api/planillas/auditar
+       */
+      function mostrarModalAuditoria(resultado) {
+          const esAprobado = resultado.estado === 'aprobado';
+          const icono = esAprobado ? 'success' : 'warning';
+          const titulo = esAprobado ? '✅ Auditoría Exitosa - Todo en Orden' : '⚠️ Advertencias Detectadas por Jordy';
+
+          let mensajeHTML = `
+          <div style="text-align: left; font-size: 1rem; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 10px;">
+              <div style="display: flex; align-items: center; margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <div style="font-size: 48px; margin-right: 15px;">🤖</div>
+                  <div>
+                      <h6 style="margin: 0; font-weight: 700; color: #333;">Jordy - Auditor IA</h6>
+                      <p style="margin: 0; color: #666; font-size: 0.9rem;">Análisis Completado</p>
+                  </div>
+              </div>
+          `;
+
+          if (esAprobado) {
+              mensajeHTML += `
+                  <div style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #28a745;">
+                      <p style="color: #155724; font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">
+                          🎉 ¡Excelente! Todos los registros están correctos
+                      </p>
+                      <p style="color: #155724; margin: 0;">
+                          Jordy ha revisado <strong>${resultado.total_revisados || 0}</strong> registros y no encontró inconsistencias.
+                          Puedes proceder a descargar el archivo plano con total confianza.
+                      </p>
+                  </div>
+                  <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                      <p style="margin: 0; color: #555;">
+                          ✅ Validaciones completadas: IBC, Entidades, Aportes<br>
+                          ✅ Cálculos verificados según normativa vigente<br>
+                          ✅ Formato validado para PILA/SIMPLE
+                      </p>
+                  </div>
+              `;
+          } else {
+              mensajeHTML += `
+                  <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #ff9800;">
+                      <p style="color: #856404; font-weight: 600; margin-bottom: 10px; font-size: 1.1rem;">
+                          ⚠️ Se detectaron ${resultado.advertencias?.length || 0} advertencias
+                      </p>
+                      <p style="color: #856404; margin: 0;">
+                          Jordy encontró algunos datos que requieren tu atención antes de continuar.
+                      </p>
+                  </div>
+              `;
+
+              if (resultado.advertencias && resultado.advertencias.length > 0) {
+                  mensajeHTML += `<div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-height: 300px; overflow-y: auto;">`;
+                  mensajeHTML += `<ul style="padding-left: 0; margin: 0; list-style: none;">`;
+                  
+                  resultado.advertencias.forEach((adv, index) => {
+                      mensajeHTML += `
+                          <li style="margin-bottom: 15px; padding: 12px; background: #fff8e1; border-radius: 6px; border-left: 3px solid #ff9800;">
+                              <div style="display: flex; align-items: start;">
+                                  <span style="background: #ff9800; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold; font-size: 0.8rem;">${index + 1}</span>
+                                  <div>
+                                      <strong style="color: #333; font-size: 0.95rem;">${adv.usuario || 'Usuario'}</strong>
+                                      <p style="margin: 5px 0 0 0; color: #555; font-size: 0.9rem;">${adv.mensaje}</p>
+                                      ${adv.detalle ? `<small style="color: #777; font-style: italic; font-size: 0.85rem;">💡 ${adv.detalle}</small>` : ''}
+                                  </div>
+                              </div>
+                          </li>`;
+                  });
+                  
+                  mensajeHTML += `</ul></div>`;
+              }
+
+              mensajeHTML += `
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                      <p style="margin: 0; color: #555; font-style: italic; font-size: 0.9rem;">
+                          💡 <strong>Recomendación:</strong> Revisa y corrige estos datos en la sección "Gestión de Usuarios" antes de descargar el archivo plano.
+                      </p>
+                  </div>
+              `;
+          }
+
+          mensajeHTML += `</div>`;
+
+          Swal.fire({
+              icon: icono,
+              title: titulo,
+              html: mensajeHTML,
+              confirmButtonText: esAprobado ? '📥 Descargar Archivo Plano' : '📝 Revisar Usuarios',
+              confirmButtonColor: esAprobado ? '#28a745' : '#ff9800',
+              showCancelButton: !esAprobado,
+              cancelButtonText: '❌ Cerrar',
+              width: '700px',
+              padding: '20px',
+              customClass: {
+                  popup: 'animated fadeInDown'
+              }
+          }).then((result) => {
+              if (result.isConfirmed && esAprobado) {
+                  crearArchivoPlano();
+              }
+          });
+      }
+
+      // ========== FIN AUDITORÍA IA ==========
     </script>
 
   </body>
 </html>
-}
-gem esta bien este documento?

@@ -1,144 +1,368 @@
-<nav class="pc-sidebar">
-  <div class="navbar-wrapper">
-    <div class="m-header d-flex align-items-center py-4 px-4" style="height: 80px;">
-      <a href="/dashboard" class="b-brand d-flex align-items-center gap-3 text-decoration-none">
-        <img src="/assets/images/logo-white.svg" class="img-fluid logo logo-lg" alt="logo" style="max-height: 40px;" />
-        <img src="/assets/images/favicon.svg" class="img-fluid logo logo-sm" alt="logo" style="max-height: 40px;" />
-      </a>
-    </div>
+<!-- ============================================================================
+     HEADER CORPORATIVO - SISTEMA MONTERO
+     Estilo: Barra Azul Sólida #0056b3 (Portal Bancario/Fintech)
+============================================================================ -->
 
-    <div class="navbar-content py-3 overflow-auto" style="height: calc(100vh - 80px);">
-      <ul class="pc-navbar">
+<header class="pc-header" style="
+    background: #0056b3 !important;
+    color: #ffffff !important;
+    box-shadow: none;
+    border-bottom: 1px solid #004494;
+    height: 60px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 280px;
+    z-index: 1025;
+">
+    <div class="header-wrapper d-flex align-items-center justify-content-between px-4 h-100">
         
-        <li class="pc-item pc-caption">
-            <label>CRECIMIENTO</label>
-            <i data-feather="trending-up"></i>
-        </li>
-        <li class="pc-item">
-          <a href="/dashboard" class="pc-link">
-            <span class="pc-micon"><i data-feather="home"></i></span>
-            <span class="pc-mtext">Dashboard</span>
-          </a>
-        </li>
-        <li class="pc-item">
-          <a href="/copiloto/arl" class="pc-link">
-            <span class="pc-micon"><i data-feather="zap"></i></span>
-            <span class="pc-mtext">Copiloto ARL</span>
-          </a>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="trending-up"></i></span>
-            <span class="pc-mtext">Marketing</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/marketing/redes">Redes Sociales</a></li>
-            <li class="pc-item"><a class="pc-link" href="/marketing/campanas">CampaÃ±as</a></li>
-          </ul>
-        </li>
+        <!-- IZQUIERDA: Toggle Sidebar + Búsqueda -->
+        <div class="d-flex align-items-center">
+            <!-- Toggle Sidebar (Desktop) -->
+            <a href="#" class="pc-head-link me-3 d-none d-lg-inline-flex" id="sidebar-hide" style="color: #ffffff;">
+                <i data-feather="menu" style="width: 22px; height: 22px;"></i>
+            </a>
+            <!-- Toggle Sidebar (Mobile) -->
+            <a href="#" class="pc-head-link me-3 d-lg-none" id="mobile-collapse" style="color: #ffffff;">
+                <i data-feather="menu" style="width: 22px; height: 22px;"></i>
+            </a>
+            
+            <!-- Búsqueda Rápida -->
+            <div class="dropdown d-none d-md-block">
+                <a class="pc-head-link dropdown-toggle" data-bs-toggle="dropdown" href="#" style="color: #ffffff;">
+                    <i data-feather="search" style="width: 18px; height: 18px;"></i>
+                    <span class="ms-2 small">Buscar...</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-start p-3" style="min-width: 320px;">
+                    <form onsubmit="handleGlobalSearch(event)">
+                        <div class="input-group">
+                            <input type="search" id="headerSearchInput" class="form-control" 
+                                   placeholder="Buscar usuario, empresa, NIT..." autocomplete="off">
+                            <button class="btn btn-primary" type="submit">
+                                <i data-feather="search" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-        <li class="pc-item pc-caption">
-            <label>ADMINISTRACIÃ“N</label>
-            <i data-feather="briefcase"></i>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="database"></i></span>
-            <span class="pc-mtext">Base de Datos</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/usuarios/gestion">Usuarios</a></li>
-            <li class="pc-item"><a class="pc-link" href="/empresas/ingresar">Empresas</a></li>
-          </ul>
-        </li>
-        <li class="pc-item">
-          <a href="/unificacion" class="pc-link">
-            <span class="pc-micon"><i data-feather="git-merge"></i></span>
-            <span class="pc-mtext">UnificaciÃ³n</span>
-          </a>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="dollar-sign"></i></span>
-            <span class="pc-mtext">Contabilidad</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/pagos/recaudo">Pagos (Ingresos)</a></li>
-            <li class="pc-item"><a class="pc-link" href="/pagos/cartera">Cartera (Deudas)</a></li>
-            <li class="pc-item"><a class="pc-link" href="/pagos/planillas">Pago de Planillas</a></li>
-            <li class="pc-item"><a class="pc-link" href="/planillas/enviar">Enviar Planillas</a></li>
-            <li class="pc-item"><a class="pc-link" href="/pagos/control">Tabla General</a></li>
-          </ul>
-        </li>
+        <!-- DERECHA: Notificaciones + Configuración + Usuario -->
+        <div class="d-flex align-items-center">
+            
+            <!-- Tema Claro/Oscuro -->
+            <div class="dropdown me-2">
+                <a class="pc-head-link dropdown-toggle" data-bs-toggle="dropdown" href="#" style="color: #ffffff;">
+                    <i data-feather="sun" style="width: 18px; height: 18px;"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="#!" class="dropdown-item" onclick="layout_change('dark')">
+                        <i data-feather="moon" class="me-2" style="width: 14px; height: 14px;"></i>Oscuro
+                    </a>
+                    <a href="#!" class="dropdown-item" onclick="layout_change('light')">
+                        <i data-feather="sun" class="me-2" style="width: 14px; height: 14px;"></i>Claro
+                    </a>
+                </div>
+            </div>
 
-        <li class="pc-item pc-caption">
-            <label>OPERACIONES</label>
-            <i data-feather="activity"></i>
-        </li>
-        <li class="pc-item">
-          <a href="/novedades" class="pc-link">
-            <span class="pc-micon"><i data-feather="bell"></i></span>
-            <span class="pc-mtext">Novedades</span>
-          </a>
-        </li>
-        <li class="pc-item">
-          <a href="/formularios" class="pc-link">
-            <span class="pc-micon"><i data-feather="file-text"></i></span>
-            <span class="pc-mtext">Formularios</span>
-          </a>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="shield"></i></span>
-            <span class="pc-mtext">GestiÃ³n JurÃ­dica</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/incapacidades">Incapacidades</a></li>
-            <li class="pc-item"><a class="pc-link" href="/tutelas">Tutelas</a></li>
-            <li class="pc-item"><a class="pc-link" href="/depuraciones">Depuraciones</a></li>
-          </ul>
-        </li>
+            <!-- Notificaciones -->
+            <div class="dropdown me-2">
+                <a class="pc-head-link dropdown-toggle position-relative" data-bs-toggle="dropdown" href="#" style="color: #ffffff;">
+                    <i data-feather="bell" style="width: 18px; height: 18px;"></i>
+                    <span class="badge bg-danger rounded-circle position-absolute" 
+                          id="notifBadge" 
+                          style="top: -5px; right: -5px; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center;">
+                        0
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 300px;">
+                    <div class="p-3 border-bottom bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 text-uppercase" style="font-size: 12px;">Notificaciones</h6>
+                            <a href="#!" class="small text-primary" onclick="markAllAsRead()">Marcar leídas</a>
+                        </div>
+                    </div>
+                    <div id="notificationList" style="max-height: 280px; overflow-y: auto;">
+                        <div class="text-center py-4 text-muted small">Sin notificaciones</div>
+                    </div>
+                </div>
+            </div>
 
-        <li class="pc-item pc-caption">
-            <label>SOPORTE Y CONTROL</label>
-            <i data-feather="settings"></i>
-        </li>
-        <li class="pc-item">
-          <a href="/gestor-archivos" class="pc-link">
-            <span class="pc-micon"><i data-feather="folder"></i></span>
-            <span class="pc-mtext">Gestor de Archivos</span>
-          </a>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="info"></i></span>
-            <span class="pc-mtext">InformaciÃ³n</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/informacion/clientes">Clientes</a></li>
-            <li class="pc-item"><a class="pc-link" href="/informacion/empleados">Empleados</a></li>
-            <li class="pc-item"><a class="pc-link" href="/cotizaciones">Cotizaciones</a></li>
-            <li class="pc-item"><a class="pc-link" href="/pagos/impuestos">Pago de Impuestos</a></li>
-          </ul>
-        </li>
-        <li class="pc-item pc-hasmenu">
-          <a href="#!" class="pc-link">
-            <span class="pc-micon"><i data-feather="lock"></i></span>
-            <span class="pc-mtext">Seguridad</span>
-            <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
-          </a>
-          <ul class="pc-submenu">
-            <li class="pc-item"><a class="pc-link" href="/auditoria">AuditorÃ­a / Logs</a></li>
-            <li class="pc-item"><a class="pc-link" href="/credenciales">ContraseÃ±as</a></li>
-          </ul>
-        </li>
+            <!-- Configuración Rápida -->
+            <div class="dropdown me-3">
+                <a class="pc-head-link dropdown-toggle" data-bs-toggle="dropdown" href="#" style="color: #ffffff;">
+                    <i data-feather="settings" style="width: 18px; height: 18px;"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="#!" class="dropdown-item" onclick="openWhatsAppSupport()">
+                        <i class="ti ti-brand-whatsapp text-success me-2"></i>Soporte WhatsApp
+                    </a>
+                    <a href="#!" class="dropdown-item" onclick="lockScreen()">
+                        <i class="ti ti-lock text-warning me-2"></i>Bloquear Pantalla
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/configuracion" class="dropdown-item">
+                        <i data-feather="sliders" class="me-2" style="width: 14px; height: 14px;"></i>Configuración
+                    </a>
+                </div>
+            </div>
 
-      </ul>
+            <!-- Perfil de Usuario -->
+            <div class="dropdown">
+                <a class="pc-head-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" href="#" style="color: #ffffff;">
+                    <div class="user-avatar me-2" style="
+                        width: 36px; 
+                        height: 36px; 
+                        background: rgba(255,255,255,0.2); 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center;
+                    ">
+                        <i data-feather="user" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div class="d-none d-md-block text-start">
+                        <div class="fw-bold small" id="userNameDisplay">Usuario</div>
+                        <div class="opacity-75" style="font-size: 10px;" id="userRoleDisplay">Admin</div>
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 220px;">
+                    <div class="p-3 bg-primary text-white">
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2" style="
+                                width: 40px; 
+                                height: 40px; 
+                                background: rgba(255,255,255,0.2); 
+                                border-radius: 50%; 
+                                display: flex; 
+                                align-items: center; 
+                                justify-content: center;
+                            ">
+                                <i data-feather="user" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold" id="userNameDisplayDropdown">Usuario</div>
+                                <small class="opacity-75" id="userRoleDisplayDropdown">Administrador</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <a href="/configuracion" class="dropdown-item rounded">
+                            <i data-feather="settings" class="me-2" style="width: 14px; height: 14px;"></i>Configuración
+                        </a>
+                        <a href="#!" class="dropdown-item rounded" onclick="lockScreen()">
+                            <i data-feather="lock" class="me-2" style="width: 14px; height: 14px;"></i>Bloquear
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item rounded text-danger" id="logoutButtonHeader" onclick="handleLogout()">
+                            <i data-feather="log-out" class="me-2" style="width: 14px; height: 14px;"></i>Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</nav>
+</header>
+
+<!-- OVERLAY BLOQUEO DE PANTALLA -->
+<div id="lockScreenOverlay" class="lockscreen-overlay" style="display: none;">
+    <div class="lockscreen-modal">
+        <div class="lockscreen-icon">
+            <i data-feather="lock"></i>
+        </div>
+        <h4>Sesión Bloqueada</h4>
+        <p class="text-muted">Ingresa tu contraseña para continuar</p>
+        <div id="lockscreenError" class="alert alert-danger mb-3" style="display: none;"></div>
+        <input type="password" id="lockscreen-password" class="form-control mb-3 text-center" 
+               placeholder="Contraseña..." onkeypress="if(event.key==='Enter') desbloquearPantalla()">
+        <button class="btn btn-primary w-100" onclick="desbloquearPantalla()">
+            <i data-feather="unlock" class="me-2"></i>Desbloquear
+        </button>
+    </div>
+</div>
+
+<!-- ESTILOS DEL HEADER CORPORATIVO -->
+<style>
+/* ============================================================================
+   HEADER CORPORATIVO AZUL SÓLIDO
+   ============================================================================ */
+.pc-header {
+    background: #0056b3 !important;
+    transition: left 0.3s ease;
+}
+
+.pc-header .pc-head-link {
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.pc-header .pc-head-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Responsive: cuando sidebar está colapsado */
+@media (max-width: 1024px) {
+    .pc-header {
+        left: 0 !important;
+    }
+}
+
+/* ============================================================================
+   LOCKSCREEN OVERLAY
+   ============================================================================ */
+.lockscreen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lockscreen-modal {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.lockscreen-icon {
+    width: 60px;
+    height: 60px;
+    background: #0056b3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: #ffffff;
+}
+
+.lockscreen-icon svg {
+    width: 28px;
+    height: 28px;
+}
+</style>
+
+<!-- SCRIPTS DEL HEADER -->
+<script>
+// ============================================================================
+// FUNCIONES DEL HEADER CORPORATIVO
+// ============================================================================
+
+// Búsqueda Global
+function handleGlobalSearch(event) {
+    event.preventDefault();
+    const query = document.getElementById('headerSearchInput')?.value?.trim();
+    if (query) {
+        window.location.href = `/buscar?q=${encodeURIComponent(query)}`;
+    }
+}
+
+// Soporte WhatsApp
+function openWhatsAppSupport() {
+    const phoneNumber = '573001234567';
+    const message = encodeURIComponent('Hola, necesito ayuda con el Sistema Montero');
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+}
+
+// Bloqueo de Pantalla
+function lockScreen() {
+    const overlay = document.getElementById('lockScreenOverlay');
+    const passwordInput = document.getElementById('lockscreen-password');
+    const errorDiv = document.getElementById('lockscreenError');
+    
+    if (overlay) {
+        overlay.style.display = 'flex';
+        if (passwordInput) passwordInput.value = '';
+        if (errorDiv) errorDiv.style.display = 'none';
+        sessionStorage.setItem('isLocked', 'true');
+        setTimeout(() => passwordInput?.focus(), 100);
+    }
+}
+
+async function desbloquearPantalla() {
+    const overlay = document.getElementById('lockScreenOverlay');
+    const passwordInput = document.getElementById('lockscreen-password');
+    const errorDiv = document.getElementById('lockscreenError');
+    const password = passwordInput?.value;
+
+    if (!password) {
+        if (errorDiv) {
+            errorDiv.textContent = 'Ingresa tu contraseña';
+            errorDiv.style.display = 'block';
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/verify_password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ password: password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.valid) {
+            overlay.style.display = 'none';
+            sessionStorage.removeItem('isLocked');
+        } else {
+            if (errorDiv) {
+                errorDiv.textContent = result.error || 'Contraseña incorrecta';
+                errorDiv.style.display = 'block';
+            }
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    } catch (error) {
+        console.error('Error verificando contraseña:', error);
+        if (errorDiv) {
+            errorDiv.textContent = 'Error de conexión';
+            errorDiv.style.display = 'block';
+        }
+    }
+}
+
+// Logout
+async function handleLogout() {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        sessionStorage.clear();
+        window.location.href = '/login';
+    } catch (error) {
+        console.error('Error en logout:', error);
+        window.location.href = '/login';
+    }
+}
+
+// Marcar notificaciones como leídas
+function markAllAsRead() {
+    const badge = document.getElementById('notifBadge');
+    if (badge) badge.textContent = '0';
+}
+
+// Verificar si estaba bloqueado
+document.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('isLocked') === 'true') {
+        lockScreen();
+    }
+
+    // Inicializar iconos Feather en el header
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+});
+</script>

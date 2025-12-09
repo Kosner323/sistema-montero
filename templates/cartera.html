@@ -1,0 +1,29 @@
+<!-- Sección Speed Entry -->
+<div class="speed-entry-section">
+    <!-- ...existing code... -->
+    <input type="text" id="inputIdUsuario" class="form-control" placeholder="ID Usuario">
+    <input type="text" id="inputNombreUsuario" class="form-control" readonly placeholder="Nombre Usuario">
+    <input type="number" id="inputMonto" class="form-control" placeholder="Monto" disabled>
+    <!-- ...existing code... -->
+</div>
+
+<!-- ...existing code... -->
+
+<script src="{{ url_for('static', filename='assets/js/universal-search.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchCartera = new UniversalSearch({
+        inputId: 'inputIdUsuario',
+        mapping: {
+            'nombre': '#inputNombreUsuario'
+        },
+        callback: function(usuario) {
+            document.getElementById('inputNombreUsuario').value = `${usuario.nombre} ${usuario.apellido}`;
+            document.getElementById('inputMonto').disabled = false;
+            document.getElementById('inputMonto').focus();
+        }
+    });
+});
+</script>
+
+<!-- ...existing code... -->

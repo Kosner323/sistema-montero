@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <title>Gestor de Archivos Visual | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
+
+    <style>
+        :root {
+            --navy-primary: #0d47a1;
+            --navy-dark: #01579b;
+            --navy-light: #1976d2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--gray-50);
+        }
+
+        /* Buscador Hero */
+        .search-hero {
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--navy-dark) 100%);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.15);
+        }
+
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            color: var(--gray-400);
+            font-size: 1.5rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 60px;
+            font-size: 1.125rem;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--navy-light);
+            box-shadow: 0 4px 16px rgba(13, 71, 161, 0.2);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            padding: 0.75rem 1.5rem;
+            background: var(--navy-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--navy-dark);
+        }
+
+        /* Panel Principal: Dos Columnas */
+        .main-panel {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+            min-height: 600px;
+        }
+
+        @media (max-width: 992px) {
+            .main-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Columna Izquierda: Árbol de Carpetas */
+        .tree-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--gray-200);
+        }
+
+        .tree-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .tree-header i {
+            color: var(--navy-primary);
+            font-size: 1.5rem;
+        }
+
+        .tree-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .folder-tree {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .folder-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .folder-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .folder-toggle:hover {
+            background: var(--gray-100);
+            border-color: var(--navy-primary);
+            transform: translateX(4px);
+        }
+
+        .folder-toggle.active {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-light));
+            color: white;
+            border-color: var(--navy-primary);
+            box-shadow: 0 2px 8px rgba(13, 71, 161, 0.2);
+        }
+
+        .folder-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .folder-toggle.active .folder-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        .folder-label {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .folder-count {
+            background: var(--gray-300);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .folder-toggle.active .folder-count {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        /* Subcarpetas (Tipos de Archivo) */
+        .subfolder-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease;
+        }
+
+        .subfolder-list.expanded {
+            max-height: 500px;
+        }
+
+        .subfolder-item {
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            margin-top: 0.25rem;
+            background: white;
+            border-left: 3px solid var(--navy-light);
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .subfolder-item:hover {
+            background: var(--gray-50);
+            border-left-width: 5px;
+            padding-left: 2.3rem;
+        }
+
+        .subfolder-item.selected {
+            background: var(--gray-100);
+            border-left-color: var(--navy-primary);
+            font-weight: 600;
+        }
+
+        /* Columna Derecha: Vista Previa */
+        .preview-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--gray-200);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .preview-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .preview-title i {
+            color: var(--navy-primary);
+            font-size: 1.5rem;
+        }
+
+        .preview-title h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .preview-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-300);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .preview-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--navy-primary);
+        }
+
+        .preview-btn-primary {
+            background: var(--navy-primary);
+            color: white;
+            border-color: var(--navy-primary);
+        }
+
+        .preview-btn-primary:hover {
+            background: var(--navy-dark);
+        }
+
+        /* Contenedor de Vista Previa */
+        .preview-content {
+            min-height: 500px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 2px dashed var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-empty {
+            text-align: center;
+            color: var(--gray-400);
+        }
+
+        .preview-empty i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-txt {
+            width: 100%;
+            height: 600px;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Badge de Usuario */
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gray-100);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+
+        .user-badge i {
+            color: var(--navy-primary);
+        }
+
+        .user-badge strong {
+            color: var(--gray-700);
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+        <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+            <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+        </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+        <div class="pc-content">
+            <!-- Buscador Hero -->
+            <div class="search-hero">
+                <div class="container">
+                    <div class="search-container">
+                        <h3 class="text-white text-center mb-4">
+                            <i data-feather="search" class="inline mr-2"></i>
+                            Buscar Archivos de Usuario
+                        </h3>
+                        <div class="search-input-wrapper">
+                            <i data-feather="user" class="search-icon"></i>
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                class="search-input" 
+                                placeholder="Ingresa Cédula o Nombre del Usuario..."
+                                autocomplete="off"
+                            >
+                            <button class="search-btn" id="btnSearch">
+                                <i data-feather="search" class="inline mr-1" style="width: 18px;"></i>
+                                Buscar
+                            </button>
+                        </div>
+                        <p class="text-white text-center mt-3 mb-0" style="opacity: 0.9; font-size: 0.9rem;">
+                            Ejemplo: <strong>1234567890</strong> o <strong>Juan Pérez</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje de Feedback -->
+            <div id="feedbackMessage" class="mb-3"></div>
+
+            <!-- Usuario Seleccionado -->
+            <div id="userBadgeContainer" class="mb-3" style="display: none;">
+                <div class="user-badge">
+                    <i data-feather="user-check"></i>
+                    <span>Usuario: <strong id="userName">-</strong></span>
+                    <span class="mx-2">|</span>
+                    <span>Cédula: <strong id="userCedula">-</strong></span>
+                </div>
+            </div>
+
+            <!-- Panel Principal: Dos Columnas -->
+            <div class="main-panel" id="mainPanel" style="display: none;">
+                <!-- Columna Izquierda: Árbol de Carpetas -->
+                <div class="tree-panel">
+                    <div class="tree-header">
+                        <i data-feather="folder"></i>
+                        <h5>Archivos por Año</h5>
+                    </div>
+                    <ul class="folder-tree" id="folderTree">
+                        <!-- Se llenará dinámicamente -->
+                    </ul>
+                </div>
+
+                <!-- Columna Derecha: Vista Previa -->
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <div class="preview-title">
+                            <i data-feather="eye"></i>
+                            <h5 id="previewTitle">Vista Previa</h5>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="preview-btn" id="btnDownload" style="display: none;">
+                                <i data-feather="download" style="width: 16px;"></i>
+                                Descargar
+                            </button>
+                            <button class="preview-btn-primary" id="btnRefresh">
+                                <i data-feather="refresh-cw" style="width: 16px;"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="preview-content" id="previewContent">
+                        <div class="preview-empty">
+                            <i data-feather="file"></i>
+                            <p><strong>Selecciona un archivo del árbol</strong></p>
+                            <p>La vista previa aparecerá aquí</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+
+    <script>
+        // --- POLYFILLS PARA TEMA ---
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+
+    <script src="/assets/js/script.js"></script>
+
+    {% include '_theme_config.html' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_URL = '/api/archivos';
+
+            // Referencias DOM
+            const searchInput = document.getElementById('searchInput');
+            const btnSearch = document.getElementById('btnSearch');
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            const mainPanel = document.getElementById('mainPanel');
+            const folderTree = document.getElementById('folderTree');
+            const previewContent = document.getElementById('previewContent');
+            const previewTitle = document.getElementById('previewTitle');
+            const btnDownload = document.getElementById('btnDownload');
+            const btnRefresh = document.getElementById('btnRefresh');
+            const userBadgeContainer = document.getElementById('userBadgeContainer');
+            const userName = document.getElementById('userName');
+            const userCedula = document.getElementById('userCedula');
+
+            let currentUserId = null;
+            let currentFile = null;
+
+            // Función de Feedback
+            function showMessage(message, type = 'info') {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>`;
+                feedbackDiv.innerHTML = alertHtml;
+                
+                setTimeout(() => {
+                    const alert = feedbackDiv.querySelector('.alert');
+                    if(alert) new bootstrap.Alert(alert).close();
+                }, 5000);
+            }
+
+            // Buscar Usuario
+            async function buscarUsuario(query) {
+                if (!query || query.trim() === '') {
+                    showMessage('Por favor ingresa una cédula o nombre.', 'warning');
+                    return;
+                }
+
+                btnSearch.disabled = true;
+                btnSearch.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Buscando...';
+
+                try {
+                    // Simulación: buscar por cédula o nombre
+                    const response = await fetch(`${API_URL}/buscar?q=${encodeURIComponent(query)}`, {
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) throw new Error('Usuario no encontrado');
+
+                    const usuario = await response.json();
+                    currentUserId = usuario.id;
+
+                    // Mostrar badge de usuario
+                    userName.textContent = usuario.nombre_completo;
+                    userCedula.textContent = usuario.cedula;
+                    userBadgeContainer.style.display = 'block';
+
+                    // Cargar árbol de archivos
+                    await cargarArbolArchivos(usuario.id);
+
+                    showMessage(`✅ Usuario encontrado: ${usuario.nombre_completo}`, 'success');
+
+                } catch (error) {
+                    console.error(error);
+                    showMessage('❌ Usuario no encontrado. Verifica los datos.', 'danger');
+                    mainPanel.style.display = 'none';
+                    userBadgeContainer.style.display = 'none';
+                } finally {
+                    btnSearch.disabled = false;
+                    btnSearch.innerHTML = '<i data-feather="search" class="inline mr-1" style="width: 18px;"></i>Buscar';
+                    feather.replace();
+                }
+            }
+
+            // Cargar Árbol de Archivos
+            async function cargarArbolArchivos(usuarioId) {
+                try {
+                    const response = await fetch(`${API_URL}/arbol/${usuarioId}`, {
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) throw new Error('Error al cargar archivos');
+
+                    const arbolData = await response.json();
+                    renderizarArbol(arbolData);
+                    mainPanel.style.display = 'grid';
+
+                } catch (error) {
+                    console.error(error);
+                    showMessage('Error al cargar el árbol de archivos.', 'danger');
+                }
+            }
+
+            // Renderizar Árbol de Carpetas
+            function renderizarArbol(data) {
+                if (!data || data.length === 0) {
+                    folderTree.innerHTML = '<li class="text-muted text-center">No hay archivos disponibles</li>';
+                    return;
+                }
+
+                folderTree.innerHTML = data.map((anio, idx) => `
+                    <li class="folder-item">
+                        <div class="folder-toggle" onclick="toggleFolder(${idx})">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-label">${anio.anio}</span>
+                            <span class="folder-count">${anio.archivos.length}</span>
+                        </div>
+                        <ul class="subfolder-list" id="subfolder-${idx}">
+                            ${anio.archivos.map(archivo => `
+                                <li class="subfolder-item" onclick="cargarVistaPrevia('${archivo.tipo}', '${archivo.url}', '${archivo.nombre}')">
+                                    <i data-feather="file-text" style="width: 16px; display: inline; margin-right: 8px;"></i>
+                                    ${archivo.tipo}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </li>
+                `).join('');
+
+                feather.replace();
+            }
+
+            // Toggle Carpeta (Expandir/Contraer)
+            window.toggleFolder = function(index) {
+                const subfolder = document.getElementById(`subfolder-${index}`);
+                const toggle = subfolder.previousElementSibling;
+
+                if (subfolder.classList.contains('expanded')) {
+                    subfolder.classList.remove('expanded');
+                    toggle.classList.remove('active');
+                } else {
+                    // Cerrar todas las demás
+                    document.querySelectorAll('.subfolder-list').forEach(sf => sf.classList.remove('expanded'));
+                    document.querySelectorAll('.folder-toggle').forEach(ft => ft.classList.remove('active'));
+
+                    subfolder.classList.add('expanded');
+                    toggle.classList.add('active');
+                }
+            };
+
+            // Cargar Vista Previa
+            window.cargarVistaPrevia = function(tipo, url, nombre) {
+                currentFile = { tipo, url, nombre };
+                previewTitle.textContent = nombre;
+                btnDownload.style.display = 'flex';
+
+                // Marcar como seleccionado
+                document.querySelectorAll('.subfolder-item').forEach(item => item.classList.remove('selected'));
+                event.currentTarget.classList.add('selected');
+
+                if (tipo.toLowerCase().includes('pdf')) {
+                    previewContent.innerHTML = `<iframe class="preview-iframe" src="${url}"></iframe>`;
+                } else if (tipo.toLowerCase().includes('txt')) {
+                    fetch(url, { credentials: 'include' })
+                        .then(r => r.text())
+                        .then(text => {
+                            previewContent.innerHTML = `<pre class="preview-txt">${text}</pre>`;
+                        })
+                        .catch(() => {
+                            previewContent.innerHTML = '<p class="text-danger">Error al cargar archivo TXT</p>';
+                        });
+                } else {
+                    previewContent.innerHTML = `
+                        <div class="preview-empty">
+                            <i data-feather="file"></i>
+                            <p><strong>Vista previa no disponible</strong></p>
+                            <p>Usa el botón "Descargar" para obtener el archivo</p>
+                        </div>
+                    `;
+                    feather.replace();
+                }
+            };
+
+            // Descargar Archivo
+            btnDownload.addEventListener('click', () => {
+                if (currentFile) {
+                    window.location.href = currentFile.url;
+                }
+            });
+
+            // Actualizar Vista
+            btnRefresh.addEventListener('click', () => {
+                if (currentUserId) {
+                    cargarArbolArchivos(currentUserId);
+                    showMessage('🔄 Árbol de archivos actualizado.', 'info');
+                }
+            });
+
+            // Event Listeners
+            btnSearch.addEventListener('click', () => buscarUsuario(searchInput.value));
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') buscarUsuario(searchInput.value);
+            });
+
+            feather.replace();
+        });
+    </script>
+</body>
+</html>

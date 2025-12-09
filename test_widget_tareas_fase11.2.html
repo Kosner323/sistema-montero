@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Widget To-Do List - Fase 11.2</title>
+  
+  <!-- Bootstrap 5.3.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .test-container {
+      max-width: 500px;
+      width: 100%;
+    }
+    
+    .card {
+      animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .list-group-item {
+      transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="test-container">
+    <!-- Header Info -->
+    <div class="alert alert-light border-0 shadow-sm mb-3" role="alert">
+      <h4 class="alert-heading">
+        <i data-feather="code" class="me-2"></i>
+        Test Widget To-Do List - Fase 11.2
+      </h4>
+      <p class="mb-0">
+        <small class="text-muted">
+          <strong>Características:</strong> 
+          Input + Botón, Checkbox izquierda, Trash derecha, Enter key, localStorage persistencia, SweetAlert2
+        </small>
+      </p>
+    </div>
+    
+    <!-- Widget To-Do -->
+    <div class="card border-0 shadow-lg">
+      <div class="w-100" style="height:4px;background: linear-gradient(90deg,#667eea 0%, #764ba2 100%);"></div>
+      <div class="card-header bg-transparent border-0">
+        <h5 class="mb-0">
+          <i data-feather="check-square" class="me-2 text-primary"></i>📝 Mis Pendientes
+        </h5>
+      </div>
+      <div class="card-body">
+        <!-- Input + Botón Agregar -->
+        <div class="input-group mb-3">
+          <input 
+            type="text" 
+            class="form-control" 
+            id="nuevaTareaInput" 
+            placeholder="Nueva tarea..." 
+            maxlength="500"
+          >
+          <button class="btn btn-primary" onclick="agregarTarea()" title="Agregar tarea">
+            <i data-feather="plus" style="width:18px;height:18px;"></i>
+          </button>
+        </div>
+        
+        <!-- Lista de Tareas -->
+        <ul class="list-group list-group-flush" id="listaTareas" style="max-height: 400px; overflow-y: auto;">
+          <li class="list-group-item text-center text-muted border-0">
+            <i data-feather="inbox"></i> Sin tareas pendientes 🎉
+          </li>
+        </ul>
+        
+        <!-- Estadísticas Footer -->
+        <div class="mt-3 pt-3 border-top">
+          <small class="text-muted d-flex align-items-center gap-2">
+            <span>
+              <i data-feather="clock" style="width:14px;height:14px;"></i>
+              <span id="statPendientes">0</span> pendientes
+            </span>
+            <span>•</span>
+            <span>
+              <i data-feather="check-circle" style="width:14px;height:14px;"></i>
+              <span id="statCompletadas">0</span> completadas
+            </span>
+          </small>
+        </div>
+      </div>
+      
+      <!-- Footer Testing Buttons -->
+      <div class="card-footer bg-light border-0">
+        <div class="d-flex gap-2 justify-content-center">
+          <button class="btn btn-sm btn-outline-secondary" onclick="agregarTareaPrueba()">
+            <i data-feather="file-plus" style="width:14px;height:14px;"></i>
+            Agregar Prueba
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="limpiarTodas()">
+            <i data-feather="trash-2" style="width:14px;height:14px;"></i>
+            Limpiar Todo
+          </button>
+          <button class="btn btn-sm btn-outline-info" onclick="cargarDemostracion()">
+            <i data-feather="refresh-cw" style="width:14px;height:14px;"></i>
+            Demostración
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Testing Notes -->
+    <div class="alert alert-info border-0 shadow-sm mt-3" role="alert">
+      <h6><i data-feather="info" class="me-2"></i>Notas de Testing</h6>
+      <ul class="mb-0 small">
+        <li><strong>localStorage:</strong> Los datos persisten al recargar la página</li>
+        <li><strong>Enter Key:</strong> Presiona Enter para agregar tarea rápido</li>
+        <li><strong>Checkbox:</strong> Click para marcar completada (line-through)</li>
+        <li><strong>Trash:</strong> Confirma con SweetAlert2 antes de eliminar</li>
+        <li><strong>Límite:</strong> Máximo 500 caracteres por tarea</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // =============================================================================
+    // MOCK API CON localStorage - Simula Backend Fase 11.2
+    // =============================================================================
+    let tareas = JSON.parse(localStorage.getItem('tareas_test')) || [
+      { id: 1, descripcion: "Revisar correos del día", completada: false },
+      { id: 2, descripcion: "Preparar presentación Q4", completada: false },
+      { id: 3, descripcion: "Llamar a Juan sobre el proyecto", completada: true }
+    ];
+    
+    let nextId = Math.max(...tareas.map(t => t.id), 0) + 1;
+    
+    function guardarTareas() {
+      localStorage.setItem('tareas_test', JSON.stringify(tareas));
+    }
+
+    function cargarTareas() {
+      renderizarTareas(tareas);
+      actualizarEstadisticas();
+    }
+
+    function renderizarTareas(listaTareas) {
+      const lista = document.getElementById('listaTareas');
+      
+      if (listaTareas.length === 0) {
+        lista.innerHTML = '<li class="list-group-item text-center text-muted border-0"><i data-feather="inbox"></i> Sin tareas pendientes 🎉</li>';
+        feather.replace();
+        return;
+      }
+      
+      lista.innerHTML = '';
+      listaTareas.forEach(tarea => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center gap-2 border-0 border-bottom py-2';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input m-0 flex-shrink-0';
+        checkbox.checked = tarea.completada;
+        checkbox.onchange = () => toggleTarea(tarea.id);
+        checkbox.style.cursor = 'pointer';
+        
+        const label = document.createElement('span');
+        label.className = 'flex-grow-1';
+        label.textContent = tarea.descripcion;
+        if (tarea.completada) {
+          label.classList.add('text-decoration-line-through', 'text-muted');
+        }
+        
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn btn-sm btn-outline-danger border-0 p-1 flex-shrink-0';
+        btnDelete.innerHTML = '<i data-feather="trash-2" style="width:16px;height:16px;"></i>';
+        btnDelete.onclick = () => eliminarTarea(tarea.id);
+        btnDelete.title = 'Eliminar tarea';
+        
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        li.appendChild(btnDelete);
+        lista.appendChild(li);
+      });
+      
+      feather.replace();
+    }
+
+    function agregarTarea() {
+      const input = document.getElementById('nuevaTareaInput');
+      const descripcion = input.value.trim();
+      
+      if (!descripcion) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo vacío',
+          text: 'Por favor ingresa una descripción para la tarea',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+      
+      if (descripcion.length > 500) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Texto muy largo',
+          text: 'La descripción no puede superar 500 caracteres',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+      
+      const nuevaTarea = {
+        id: nextId++,
+        descripcion: descripcion,
+        completada: false
+      };
+      
+      tareas.push(nuevaTarea);
+      guardarTareas();
+      input.value = '';
+      cargarTareas();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Tarea agregada',
+        showConfirmButton: false,
+        timer: 1000
+      });
+    }
+
+    function toggleTarea(tareaId) {
+      const tarea = tareas.find(t => t.id === tareaId);
+      if (tarea) {
+        tarea.completada = !tarea.completada;
+        guardarTareas();
+        cargarTareas();
+      }
+    }
+
+    async function eliminarTarea(tareaId) {
+      const result = await Swal.fire({
+        title: '¿Eliminar tarea?',
+        text: "Esta acción no se puede deshacer",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#667eea',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (!result.isConfirmed) return;
+      
+      tareas = tareas.filter(t => t.id !== tareaId);
+      guardarTareas();
+      cargarTareas();
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Eliminada',
+        text: 'La tarea ha sido eliminada',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+
+    function actualizarEstadisticas() {
+      const pendientes = tareas.filter(t => !t.completada).length;
+      const completadas = tareas.filter(t => t.completada).length;
+      
+      document.getElementById('statPendientes').textContent = pendientes;
+      document.getElementById('statCompletadas').textContent = completadas;
+    }
+
+    // Testing Helper Functions
+    function agregarTareaPrueba() {
+      const ejemplos = [
+        "Revisar documentación del proyecto",
+        "Actualizar base de datos de clientes",
+        "Hacer backup del servidor",
+        "Enviar reporte semanal al equipo",
+        "Optimizar consultas SQL lentas",
+        "Implementar feature de exportación",
+        "Corregir bugs del sprint anterior"
+      ];
+      
+      const random = ejemplos[Math.floor(Math.random() * ejemplos.length)];
+      document.getElementById('nuevaTareaInput').value = random;
+      agregarTarea();
+    }
+
+    function limpiarTodas() {
+      Swal.fire({
+        title: '¿Limpiar todas las tareas?',
+        text: "Se eliminarán todas las tareas (pendientes y completadas)",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#667eea',
+        confirmButtonText: 'Sí, limpiar todo',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          tareas = [];
+          guardarTareas();
+          cargarTareas();
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Limpieza completa',
+            text: 'Todas las tareas han sido eliminadas',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        }
+      });
+    }
+
+    function cargarDemostracion() {
+      tareas = [
+        { id: 1, descripcion: "✅ Diseñar mockups de la interfaz", completada: true },
+        { id: 2, descripcion: "✅ Crear base de datos en SQLite", completada: true },
+        { id: 3, descripcion: "✅ Implementar endpoints REST API", completada: true },
+        { id: 4, descripcion: "⏳ Integrar widget en dashboard", completada: false },
+        { id: 5, descripcion: "⏳ Realizar pruebas de integración", completada: false },
+        { id: 6, descripcion: "⏳ Documentar código y API", completada: false }
+      ];
+      nextId = 7;
+      guardarTareas();
+      cargarTareas();
+      
+      Swal.fire({
+        icon: 'info',
+        title: 'Demostración cargada',
+        text: 'Se han cargado 6 tareas de ejemplo (3 completadas, 3 pendientes)',
+        confirmButtonColor: '#667eea'
+      });
+    }
+
+    // Enter key support
+    document.getElementById('nuevaTareaInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        agregarTarea();
+      }
+    });
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      cargarTareas();
+    });
+  </script>
+  
+</body>
+</html>

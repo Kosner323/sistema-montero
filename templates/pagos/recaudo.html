@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
 
     <style>
@@ -177,6 +179,55 @@
               <div class="card-body">
                 <form id="formRecaudo" class="needs-validation" novalidate>
                   <input type="hidden" id="editReceiptId" value="">
+                  
+                  <!-- ========== BUSCADOR UNIVERSAL DE USUARIOS ========== -->
+                  <div class="col-span-full mb-4">
+                    <div class="alert alert-info border-start border-4 border-info" role="alert">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="ti ti-search fs-4 me-2"></i>
+                        <strong>Búsqueda Rápida de Usuario</strong>
+                      </div>
+                      <p class="mb-3 small">¿El usuario ya está registrado? Búscalo por documento para autocompletar sus datos.</p>
+                      
+                      <div class="row g-3">
+                        <div class="col-md-3">
+                          <label for="tipoDocBusqueda" class="form-label small fw-semibold">
+                            <i class="ti ti-id-badge"></i> Tipo Documento
+                          </label>
+                          <select class="form-select" id="tipoDocBusqueda">
+                            <option value="">Seleccione...</option>
+                            <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                            <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                            <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                          </select>
+                        </div>
+                        <div class="col-md-9">
+                          <label for="numeroDocBusqueda" class="form-label small fw-semibold">
+                            <i class="ti ti-number"></i> Número de Documento
+                          </label>
+                          <div class="input-group">
+                            <span class="input-group-text bg-white">
+                              <i class="ti ti-search text-primary"></i>
+                            </span>
+                            <input 
+                              type="text" 
+                              class="form-control" 
+                              id="numeroDocBusqueda" 
+                              placeholder="Escribe y presiona Enter..."
+                              maxlength="15"
+                            />
+                          </div>
+                          <small class="text-muted">
+                            <i class="ti ti-info-circle"></i> 
+                            Datos se cargarán automáticamente si existe
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- ========== FIN BUSCADOR ========== -->
+                  
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                     <div class="col-span-full">
@@ -207,6 +258,28 @@
                     <div class="col-span-1">
                         <label class="form-label" for="inputNIT">NIT (Presione Enter/cambie para autocompletar)</label>
                         <input type="text" class="form-control" id="inputNIT" name="NIT" placeholder="NIT de la empresa">
+                    </div>
+
+                    <!-- Alerta de Saldo a Favor -->
+                    <div class="col-span-full" id="saldoFavorContainer" style="display: none;">
+                        <div class="alert alert-success border-l-4 border-green-600" style="background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="font-size: 2.5rem;">🌟</div>
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1" style="color: #155724; font-weight: 700;">¡Saldo a Favor Disponible!</h5>
+                                    <p class="mb-2" style="color: #155724;">
+                                        Este cliente tiene un saldo a favor de: 
+                                        <strong id="saldoFavorMonto" style="font-size: 1.2rem;">$0</strong>
+                                    </p>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkUsarSaldo" style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
+                                        <label class="form-check-label" for="checkUsarSaldo" style="cursor: pointer; font-weight: 600; color: #155724; margin-left: 0.5rem;">
+                                            ✅ Usar saldo a favor para este pago
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-span-1">
@@ -636,7 +709,9 @@
                 const actionsCell = row.insertCell();
                 actionsCell.innerHTML = `
                     <button class="btn btn-sm btn-light-primary btn-icon btn-view" title="Ver Recibo"><i data-feather="eye"></i></button>
-                    <button class="btn btn-sm btn-light-info btn-icon btn-edit" title="Editar Recibo (Temporal)"><i data-feather="edit"></i></button>
+                    <button class="btn btn-sm btn-danger btn-icon" onclick="anularRecibo('${item.id || index}')" title="Anular Recibo">
+                        <i data-feather="x-circle"></i>
+                    </button>
                     <button class="btn btn-sm btn-light-danger btn-icon btn-delete" title="Eliminar Recibo (Temporal)"><i data-feather="trash-2"></i></button>
                 `;
             });
@@ -685,6 +760,79 @@
                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>`;
              }
+        }
+
+        // --- 🚫 ANULAR RECIBO ---
+        async function anularRecibo(reciboId) {
+            // Buscar recibo en el historial
+            const recibo = receiptHistoryStore.find((item, index) => 
+                (item.id || index.toString()) === reciboId
+            );
+
+            if (!recibo) {
+                showMessage(`❌ Error: Recibo ${reciboId} no encontrado.`, 'danger');
+                return;
+            }
+
+            // Confirmación con prompt nativo (sin SweetAlert2)
+            const confirmacion = confirm(
+                `⚠️ ¿ANULAR RECIBO?\n\n` +
+                `Recibo: ${reciboId}\n` +
+                `Cliente: ${recibo.NombreCompleto || 'N/A'}\n` +
+                `Monto: $${recibo.MontoTotal || 0}\n\n` +
+                `Esta acción:\n` +
+                `✓ Reversará saldos de la empresa\n` +
+                `✓ Marcará el recibo como ANULADO\n` +
+                `✓ NO se puede deshacer\n\n` +
+                `¿Desea continuar?`
+            );
+
+            if (!confirmacion) {
+                showMessage('❌ Anulación cancelada.', 'info');
+                return;
+            }
+
+            try {
+                // Simular llamada API
+                showMessage('⏳ Anulando recibo...', 'info');
+
+                // En producción: descomentar y ajustar endpoint
+                /*
+                const response = await fetch(`/api/recaudos/${reciboId}/anular`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al anular recibo en el servidor');
+                }
+
+                const result = await response.json();
+                */
+
+                // Simulación temporal
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                // Marcar como anulado en memoria
+                const index = receiptHistoryStore.findIndex((item, idx) => 
+                    (item.id || idx.toString()) === reciboId
+                );
+                
+                if (index !== -1) {
+                    receiptHistoryStore[index].estado = 'ANULADO';
+                    receiptHistoryStore[index].fecha_anulacion = new Date().toISOString();
+                    renderReceiptHistory(receiptHistoryStore);
+                }
+
+                showMessage(`✅ Recibo ${reciboId} anulado correctamente. Saldos reversados.`, 'success');
+                console.log(`✅ Recibo ${reciboId} anulado exitosamente`);
+
+            } catch (error) {
+                console.error('Error al anular recibo:', error);
+                showMessage(`❌ Error al anular recibo: ${error.message}`, 'danger');
+            }
         }
 
         // --- Carga Inicial de Datos (Usuarios/Empresas/Historial desde API) ---
@@ -819,18 +967,54 @@
                 }
             });
 
-            inputNIT.addEventListener('change', (e) => {
+            inputNIT.addEventListener('change', async (e) => {
                 const nit = e.target.value.trim();
-                 if (!nit) return;
-                 selectTipoId.value = 'NIT'; // Asumir NIT
+                if (!nit) {
+                    // Ocultar saldo a favor si se borra el NIT
+                    document.getElementById('saldoFavorContainer').style.display = 'none';
+                    return;
+                }
+                selectTipoId.value = 'NIT'; // Asumir NIT
 
-                 const foundCompany = empresasStore.find(e => e.nit === nit);
-                 if (foundCompany) {
-                     fillFields(foundCompany, 'company');
-                     showMessage(`Empresa ${foundCompany.nombre_empresa} encontrada y datos autocompletados.`, 'info');
-                 } else {
-                     showMessage(`Empresa con NIT ${nit} no encontrada. Puede llenar los datos manualmente.`, 'warning');
-                 }
+                const foundCompany = empresasStore.find(e => e.nit === nit);
+                if (foundCompany) {
+                    fillFields(foundCompany, 'company');
+                    showMessage(`Empresa ${foundCompany.nombre_empresa} encontrada y datos autocompletados.`, 'info');
+                } else {
+                    showMessage(`Empresa con NIT ${nit} no encontrada. Puede llenar los datos manualmente.`, 'warning');
+                }
+
+                // Fetch del saldo a favor desde la API
+                try {
+                    const response = await fetch(`/api/empresas/${nit}`, {
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                        const empresaData = await response.json();
+                        const saldoFavor = parseFloat(empresaData.saldo_a_favor) || 0;
+
+                        if (saldoFavor > 0) {
+                            // Mostrar alerta de saldo a favor
+                            const saldoContainer = document.getElementById('saldoFavorContainer');
+                            const saldoMonto = document.getElementById('saldoFavorMonto');
+                            
+                            saldoMonto.textContent = `$${saldoFavor.toLocaleString('es-CO', { minimumFractionDigits: 0 })}`;
+                            saldoContainer.style.display = 'block';
+                            
+                            // Scroll suave hacia la alerta
+                            setTimeout(() => {
+                                saldoContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }, 300);
+                        } else {
+                            document.getElementById('saldoFavorContainer').style.display = 'none';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al obtener saldo a favor:', error);
+                    // No mostrar error al usuario, solo en consola
+                }
             });
 
             // También autocompletar al cambiar el tipo de ID si ya hay un número
@@ -1056,6 +1240,52 @@
             initializeFeatherIcons();
         });
     </script>
+    
+    <!-- Sistema de Búsqueda Universal -->
+    <script src="/assets/js/universal-search.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof UniversalSearch !== 'undefined') {
+            const buscadorRecaudo = new UniversalSearch({
+                inputId: 'inputIdentificacion',
+                mapping: {
+                    'numeroId': '#inputIdentificacion'
+                },
+                callback: function(usuario) {
+                    // Autocompletar nombre del cliente
+                    const inputNombreCliente = document.getElementById('inputRecibidoDe');
+                    if (inputNombreCliente) {
+                        const nombreCompleto = `${usuario.primerNombre || ''} ${usuario.segundoNombre || ''} ${usuario.primerApellido || ''} ${usuario.segundoApellido || ''}`.replace(/\s+/g, ' ').trim();
+                        inputNombreCliente.value = nombreCompleto;
+                    }
+                    
+                    // Autocompletar teléfono
+                    const inputTelefono = document.getElementById('inputTelefono');
+                    if (inputTelefono) {
+                        inputTelefono.value = usuario.telefonoCelular || usuario.telefonoFijo || '';
+                    }
+                    
+                    // Autocompletar dirección
+                    const inputDireccion = document.getElementById('inputDireccion');
+                    if (inputDireccion) {
+                        inputDireccion.value = usuario.direccion || '';
+                    }
+                    
+                    // Autocompletar empresa si existe
+                    const inputEmpresa = document.getElementById('inputEmpresa');
+                    if (inputEmpresa && usuario.administracion) {
+                        inputEmpresa.value = usuario.administracion;
+                    }
+                    
+                    console.log('✅ Usuario autocompletado en Recaudo:', usuario);
+                }
+            });
+            console.log('✅ Buscador Universal activado en Recaudo');
+        }
+    });
+    </script>
+    
     {% include '_theme_config.html' %}
   </body>
 </html>

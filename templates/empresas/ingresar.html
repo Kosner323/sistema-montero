@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
     <script>
       (async function checkAuthentication() {
@@ -111,222 +113,294 @@
             </div>
           </div>
         </div>
+
+        <!-- LISTADO DE EMPRESAS - ESTILO EXCEL -->
+        <div class="row mb-4">
+            <div class="col-xl-12">
+                <div class="card card-flat">
+                    <div class="card-header card-header-corporate d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i data-feather="briefcase" class="me-2"></i>
+                            LISTADO DE EMPRESAS
+                        </h5>
+                        <!-- Filtro de Estado -->
+                        <div class="btn-group" role="group" id="filtroEstado">
+                            <input type="radio" class="btn-check" name="estadoEmpresa" id="estadoActivas" value="activas" checked autocomplete="off">
+                            <label class="btn btn-sm btn-outline-light" for="estadoActivas">
+                                <i class="ti ti-check"></i> Activas
+                            </label>
+
+                            <input type="radio" class="btn-check" name="estadoEmpresa" id="estadoInactivas" value="inactivas" autocomplete="off">
+                            <label class="btn btn-sm btn-outline-light" for="estadoInactivas">
+                                <i class="ti ti-archive"></i> Inactivas
+                            </label>
+
+                            <input type="radio" class="btn-check" name="estadoEmpresa" id="estadoTodas" value="todas" autocomplete="off">
+                            <label class="btn btn-sm btn-outline-light" for="estadoTodas">
+                                <i class="ti ti-list"></i> Todas
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm table-excel" id="tablaEmpresas">
+                                <thead>
+                                    <tr>
+                                        <th>NIT</th>
+                                        <th>NOMBRE EMPRESA</th>
+                                        <th>CIUDAD</th>
+                                        <th>TELÉFONO</th>
+                                        <th>ESTADO</th>
+                                        <th class="text-center">ACCIONES</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="empresasTableBody">
+                                    <!-- Se llenará dinámicamente con JavaScript -->
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            <i data-feather="loader" class="spinner-border spinner-border-sm me-2"></i>
+                                            Cargando empresas...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULARIO DE INGRESO - ESTILO CORPORATIVO -->
         <div class="row">
             <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Ingresar Nueva Empresa</h5>
+                <div class="card card-flat">
+                    <div class="card-header card-header-corporate">
+                        <h5 class="mb-0">
+                            <i data-feather="plus-circle" class="me-2"></i>
+                            REGISTRO DE NUEVA EMPRESA
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <p>Complete el siguiente formulario con la información detallada de la empresa, su representante legal y adjuntos.</p>
+                        <p class="text-muted small mb-3">Complete todos los campos requeridos (*). Los datos se guardarán automáticamente en el sistema.</p>
 
                         <div id="feedbackMessage"></div>
 
-                        <form id="formEmpresa" action="/api/empresas" method="POST">
+                        <form id="formEmpresa" action="/api/empresas" method="POST" class="form-corporate">
 
-                            <h6 class="mb-3 mt-4 text-primary">1. Datos Generales y Afiliación</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-6">
-                                    <label for="nombre_empresa" class="form-label">Nombre de la Empresa</label>
+                            <div class="form-section-corporate">
+                                <div class="section-title">1. DATOS GENERALES Y AFILIACIÓN</div>
+                                <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label for="nombre_empresa" class="form-label">NOMBRE DE LA EMPRESA *</label>
                                     <input type="text" class="form-control" id="nombre_empresa" name="nombre_empresa" required>
                                 </div>
                                 <div class="col-md-2">
-                                    <label for="tipo_identificacion_empresa" class="form-label">Tipo ID</label>
+                                    <label for="tipo_identificacion_empresa" class="form-label">TIPO ID *</label>
                                     <select class="form-select" id="tipo_identificacion_empresa" name="tipo_identificacion_empresa" required>
                                         <option value="NIT">NIT</option>
                                         <option value="CC">CC</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="nit" class="form-label">Número ID (NIT)</label>
+                                <div class="col-md-3">
+                                    <label for="nit" class="form-label">NÚMERO ID (NIT) *</label>
                                     <input type="text" class="form-control" id="nit" name="nit" required>
                                 </div>
-
-                                <div class="col-md-4">
-                                    <label for="direccion_empresa" class="form-label">Dirección</label>
-                                    <input type="text" class="form-control" id="direccion_empresa" name="direccion">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="telefono_empresa" class="form-label">Teléfono</label>
+                                <div class="col-md-3">
+                                    <label for="telefono_empresa" class="form-label">TELÉFONO</label>
                                     <input type="text" class="form-control" id="telefono_empresa" name="telefono">
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="correo_empresa" class="form-label">Correo Electrónico</label>
+                                    <label for="correo_empresa" class="form-label">CORREO ELECTRÓNICO</label>
                                     <input type="email" class="form-control" id="correo_empresa" name="email">
                                 </div>
-
                                 <div class="col-md-4">
-                                    <label for="departamento_empresa" class="form-label">Departamento</label>
+                                    <label for="direccion_empresa" class="form-label">DIRECCIÓN</label>
+                                    <input type="text" class="form-control" id="direccion_empresa" name="direccion">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="departamento_empresa" class="form-label">DEPARTAMENTO</label>
                                     <input type="text" class="form-control" id="departamento_empresa" name="departamento_empresa">
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="ciudad_empresa" class="form-label">Ciudad</label>
+                                <div class="col-md-3">
+                                    <label for="ciudad_empresa" class="form-label">CIUDAD</label>
                                     <input type="text" class="form-control" id="ciudad_empresa" name="ciudad">
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="ibc_empresa" class="form-label">IBC (Ingreso Base de Cotización)</label>
+                                <div class="col-md-2">
+                                    <label for="ibc_empresa" class="form-label">IBC</label>
                                     <input type="number" class="form-control" id="ibc_empresa" name="ibc_empresa" min="0" step="1">
                                 </div>
-
-                                <div class="col-md-6">
-                                    <label for="afp_empresa" class="form-label">AFP (Fondo de Pensión)</label>
+                                <div class="col-md-3">
+                                    <label for="afp_empresa" class="form-label">AFP (PENSIÓN)</label>
                                     <input type="text" class="form-control" id="afp_empresa" name="afp_empresa">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
                                     <label for="arl_empresa" class="form-label">ARL</label>
                                     <input type="text" class="form-control" id="arl_empresa" name="arl_empresa">
                                 </div>
                             </div>
+                            </div>
 
-                            <h6 class="mb-3 mt-4 text-primary">2. Información Adicional de la Empresa</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-3">
-                                    <label for="tipo_empresa" class="form-label">Tipo de Empresa</label>
-                                    <select class="form-select" id="tipo_empresa" name="tipo_empresa">
-                                        <option value="">Seleccione...</option>
-                                        <option value="S.A.S.">S.A.S.</option>
-                                        <option value="S.A.">S.A.</option>
-                                        <option value="Ltda.">Ltda.</option>
-                                        <option value="Unipersonal">Unipersonal</option>
-                                        <option value="Otra">Otra</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="sector_economico" class="form-label">Sector Económico</label>
-                                    <input type="text" class="form-control" id="sector_economico" name="sector_economico" placeholder="Ej: Construcción, Servicios">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="num_empleados" class="form-label">Número de Empleados</label>
-                                    <input type="number" class="form-control" id="num_empleados" name="num_empleados" min="0">
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="fecha_constitucion" class="form-label">Fecha de Constitución</label>
-                                    <input type="date" class="form-control" id="fecha_constitucion" name="fecha_constitucion">
+                            <div class="form-section-corporate">
+                                <div class="section-title">2. INFORMACIÓN ADICIONAL DE LA EMPRESA</div>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <label for="tipo_empresa" class="form-label">TIPO DE EMPRESA</label>
+                                        <select class="form-select" id="tipo_empresa" name="tipo_empresa">
+                                            <option value="">Seleccione...</option>
+                                            <option value="S.A.S.">S.A.S.</option>
+                                            <option value="S.A.">S.A.</option>
+                                            <option value="Ltda.">Ltda.</option>
+                                            <option value="Unipersonal">Unipersonal</option>
+                                            <option value="Otra">Otra</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="sector_economico" class="form-label">SECTOR ECONÓMICO</label>
+                                        <input type="text" class="form-control" id="sector_economico" name="sector_economico" placeholder="Ej: Construcción">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="num_empleados" class="form-label">N° EMPLEADOS</label>
+                                        <input type="number" class="form-control" id="num_empleados" name="num_empleados" min="0">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="fecha_constitucion" class="form-label">FECHA CONSTITUCIÓN</label>
+                                        <input type="date" class="form-control" id="fecha_constitucion" name="fecha_constitucion">
+                                    </div>
                                 </div>
                             </div>
 
-                            <h6 class="mb-3 mt-4 text-primary">3. Datos Bancarios</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-4">
-                                    <label for="banco" class="form-label">Banco</label>
-                                    <input type="text" class="form-control" id="banco" name="banco" placeholder="Ej: Bancolombia, Davivienda">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="tipo_cuenta" class="form-label">Tipo de Cuenta</label>
-                                    <select class="form-select" id="tipo_cuenta" name="tipo_cuenta">
-                                        <option value="">Seleccione...</option>
-                                        <option value="Ahorros">Ahorros</option>
-                                        <option value="Corriente">Corriente</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="numero_cuenta" class="form-label">Número de Cuenta</label>
-                                    <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta">
-                                </div>
-                            </div>
-
-                            <h6 class="mb-3 mt-4 text-primary">4. Información Adicional de Seguridad Social</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-6">
-                                    <label for="arl" class="form-label">ARL (Nivel Riesgo)</label>
-                                    <select class="form-select" id="arl" name="arl">
-                                        <option value="">Seleccione...</option>
-                                        <option value="I">Clase I - Riesgo Mínimo</option>
-                                        <option value="II">Clase II - Riesgo Bajo</option>
-                                        <option value="III">Clase III - Riesgo Medio</option>
-                                        <option value="IV">Clase IV - Riesgo Alto</option>
-                                        <option value="V">Clase V - Riesgo Máximo</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="ccf" class="form-label">Caja de Compensación Familiar</label>
-                                    <input type="text" class="form-control" id="ccf" name="ccf" placeholder="Ej: Compensar, Colsubsidio">
+                            <div class="form-section-corporate">
+                                <div class="section-title">3. DATOS BANCARIOS</div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label for="banco" class="form-label">BANCO</label>
+                                        <input type="text" class="form-control" id="banco" name="banco" placeholder="Ej: Bancolombia">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="tipo_cuenta" class="form-label">TIPO DE CUENTA</label>
+                                        <select class="form-select" id="tipo_cuenta" name="tipo_cuenta">
+                                            <option value="">Seleccione...</option>
+                                            <option value="Ahorros">Ahorros</option>
+                                            <option value="Corriente">Corriente</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="numero_cuenta" class="form-label">NÚMERO DE CUENTA</label>
+                                        <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta">
+                                    </div>
                                 </div>
                             </div>
 
-                            <h6 class="mb-3 mt-4 text-primary">5. Datos de Representante Legal</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-4">
-                                    <label for="rep_legal_nombre" class="form-label">Nombre Completo</label>
-                                    <input type="text" class="form-control" id="rep_legal_nombre" name="rep_legal_nombre">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="rep_legal_tipo_id" class="form-label">Tipo ID</label>
-                                    <select class="form-select" id="rep_legal_tipo_id" name="rep_legal_tipo_id">
-                                        <option value="CC">Cédula de Ciudadanía (CC)</option>
-                                        <option value="CE">Cédula de Extranjería (CE)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="rep_legal_numero_id" class="form-label">Número ID</label>
-                                    <input type="text" class="form-control" id="rep_legal_numero_id" name="rep_legal_numero_id">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="rep_legal_telefono" class="form-label">Teléfono del Representante</label>
-                                    <input type="text" class="form-control" id="rep_legal_telefono" name="rep_legal_telefono">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="rep_legal_correo" class="form-label">Correo del Representante</label>
-                                    <input type="email" class="form-control" id="rep_legal_correo" name="rep_legal_correo">
+                            <div class="form-section-corporate">
+                                <div class="section-title">4. SEGURIDAD SOCIAL</div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label for="arl" class="form-label">ARL (NIVEL RIESGO)</label>
+                                        <select class="form-select" id="arl" name="arl">
+                                            <option value="">Seleccione...</option>
+                                            <option value="I">Clase I - Mínimo</option>
+                                            <option value="II">Clase II - Bajo</option>
+                                            <option value="III">Clase III - Medio</option>
+                                            <option value="IV">Clase IV - Alto</option>
+                                            <option value="V">Clase V - Máximo</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="ccf" class="form-label">CAJA DE COMPENSACIÓN</label>
+                                        <input type="text" class="form-control" id="ccf" name="ccf" placeholder="Ej: Compensar">
+                                    </div>
                                 </div>
                             </div>
 
-                            <h6 class="mb-3 mt-4 text-primary">6. Documentación Digital</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-6">
-                                    <label for="logoEmpresa" class="form-label">Logo de la Empresa (PNG/JPG)</label>
-                                    <input class="form-control" type="file" id="logoEmpresa" name="logoEmpresa" accept="image/*">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="cedulaRepresentante" class="form-label">Cédula Representante Legal (PDF)</label>
-                                    <input class="form-control" type="file" id="cedulaRepresentante" name="cedulaRepresentante" accept=".pdf">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="rut" class="form-label">RUT (PDF)</label>
-                                    <input class="form-control" type="file" id="rut" name="rut" accept=".pdf">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="camaraComercio" class="form-label">Cámara de Comercio (PDF)</label>
-                                    <input class="form-control" type="file" id="camaraComercio" name="camaraComercio" accept=".pdf">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="certificadoARL" class="form-label">Certificado ARL (PDF)</label>
-                                    <input class="form-control" type="file" id="certificadoARL" name="certificadoARL" accept=".pdf">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="cuentaBancaria" class="form-label">Cuenta Bancaria (PDF)</label>
-                                    <input class="form-control" type="file" id="cuentaBancaria" name="cuentaBancaria" accept=".pdf">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="carta" class="form-label">Carta (PDF)</label>
-                                    <input class="form-control" type="file" id="carta" name="carta" accept=".pdf">
-                                </div>
-                                <div class="col-md-12">
-                                    <label for="otrosAdjuntos" class="form-label">Otros Documentos Adjuntos (Múltiples Archivos)</label>
-                                    <input class="form-control" type="file" id="otrosAdjuntos" name="otrosAdjuntos" multiple>
+                            <div class="form-section-corporate">
+                                <div class="section-title">5. REPRESENTANTE LEGAL</div>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <label for="rep_legal_nombre" class="form-label">NOMBRE COMPLETO</label>
+                                        <input type="text" class="form-control" id="rep_legal_nombre" name="rep_legal_nombre">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="rep_legal_tipo_id" class="form-label">TIPO ID</label>
+                                        <select class="form-select" id="rep_legal_tipo_id" name="rep_legal_tipo_id">
+                                            <option value="CC">CC</option>
+                                            <option value="CE">CE</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="rep_legal_numero_id" class="form-label">NÚMERO ID</label>
+                                        <input type="text" class="form-control" id="rep_legal_numero_id" name="rep_legal_numero_id">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="rep_legal_telefono" class="form-label">TELÉFONO</label>
+                                        <input type="text" class="form-control" id="rep_legal_telefono" name="rep_legal_telefono">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="rep_legal_correo" class="form-label">CORREO ELECTRÓNICO</label>
+                                        <input type="email" class="form-control" id="rep_legal_correo" name="rep_legal_correo">
+                                    </div>
                                 </div>
                             </div>
 
-                            <h6 class="mb-3 mt-4 text-primary">7. Firma Digital del Representante</h6>
-                            <div class="row g-3 mb-4 border rounded p-3">
-                                <div class="col-md-8">
-                                    <canvas id="signatureCanvas" width="500" height="150"></canvas>
-                                    <small class="form-text text-muted">Dibuje la firma en el espacio superior.</small>
+                            <div class="form-section-corporate">
+                                <div class="section-title">6. DOCUMENTACIÓN DIGITAL</div>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <label for="logoEmpresa" class="form-label">LOGO (PNG/JPG)</label>
+                                        <input class="form-control form-control-sm" type="file" id="logoEmpresa" name="logoEmpresa" accept="image/*">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="cedulaRepresentante" class="form-label">CÉDULA REP. LEGAL</label>
+                                        <input class="form-control form-control-sm" type="file" id="cedulaRepresentante" name="cedulaRepresentante" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="rut" class="form-label">RUT (PDF)</label>
+                                        <input class="form-control form-control-sm" type="file" id="rut" name="rut" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="camaraComercio" class="form-label">CÁMARA COMERCIO</label>
+                                        <input class="form-control form-control-sm" type="file" id="camaraComercio" name="camaraComercio" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="certificadoARL" class="form-label">CERTIFICADO ARL</label>
+                                        <input class="form-control form-control-sm" type="file" id="certificadoARL" name="certificadoARL" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="cuentaBancaria" class="form-label">CUENTA BANCARIA</label>
+                                        <input class="form-control form-control-sm" type="file" id="cuentaBancaria" name="cuentaBancaria" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="carta" class="form-label">CARTA (PDF)</label>
+                                        <input class="form-control form-control-sm" type="file" id="carta" name="carta" accept=".pdf">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="otrosAdjuntos" class="form-label">OTROS ADJUNTOS</label>
+                                        <input class="form-control form-control-sm" type="file" id="otrosAdjuntos" name="otrosAdjuntos" multiple>
+                                    </div>
                                 </div>
-                                <div class="col-md-4 d-flex align-items-center">
-                                    <button type="button" class="btn btn-outline-danger w-100" id="clearSignatureBtn">
-                                        <i class="ph-duotone ph-x me-2"></i> Limpiar Firma
-                                    </button>
-                                </div>
-                                <input type="hidden" id="firmaDigitalBase64" name="firmaDigitalBase64">
                             </div>
 
-                            <div class="mt-4 text-end">
-                                <button type="button" class="btn btn-info me-2" id="btnLlenarPruebaEmpresa">
-                                    <i data-feather="terminal" class="me-2"></i> Llenar Datos de Prueba
+                            <div class="form-section-corporate">
+                                <div class="section-title">7. FIRMA DIGITAL DEL REPRESENTANTE</div>
+                                <div class="row g-2">
+                                    <div class="col-md-8">
+                                        <canvas id="signatureCanvas" width="500" height="150"></canvas>
+                                        <small class="form-text text-muted">Dibuje la firma en el espacio superior.</small>
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-center">
+                                        <button type="button" class="btn btn-outline-danger w-100" id="clearSignatureBtn">
+                                            <i class="ph-duotone ph-x me-2"></i> LIMPIAR FIRMA
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="firmaDigitalBase64" name="firmaDigitalBase64">
+                                </div>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-between align-items-center border-top pt-3">
+                                <button type="button" class="btn btn-outline-secondary" id="btnLlenarPruebaEmpresa">
+                                    <i data-feather="terminal" class="me-2"></i> DATOS DE PRUEBA
                                 </button>
-                                <button type="submit" class="btn btn-primary" id="btnGuardarEmpresa">
-                                    <i data-feather="save" class="me-2"></i> GUARDAR EMPRESA EN SERVIDOR
+                                <button type="submit" class="btn btn-primary btn-lg" id="btnGuardarEmpresa">
+                                    <i data-feather="save" class="me-2"></i> GUARDAR EMPRESA
                                 </button>
                             </div>
                         </form>
@@ -789,7 +863,140 @@
 
             // Inicializar Feather Icons al cargar el DOM
             initializeFeatherIcons();
+
+            // Cargar listado de empresas
+            cargarListadoEmpresas();
+
+            // Event listeners para filtros de estado
+            document.querySelectorAll('input[name="estadoEmpresa"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    cargarListadoEmpresas();
+                });
+            });
         });
+
+        // ============================================================
+        // GESTIÓN DE LISTADO DE EMPRESAS
+        // ============================================================
+
+        async function cargarListadoEmpresas() {
+            const tbody = document.getElementById('empresasTableBody');
+            const filtroEstado = document.querySelector('input[name="estadoEmpresa"]:checked').value;
+
+            try {
+                const response = await fetch('/api/empresas', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar empresas');
+                }
+
+                const empresas = await response.json();
+                tbody.innerHTML = '';
+
+                // Filtrar según estado seleccionado
+                const empresasFiltradas = empresas.filter(emp => {
+                    if (filtroEstado === 'activas') return emp.estado === 'activa' || !emp.estado;
+                    if (filtroEstado === 'inactivas') return emp.estado === 'inactiva';
+                    return true; // todas
+                });
+
+                if (empresasFiltradas.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No hay empresas ${filtroEstado === 'todas' ? '' : filtroEstado}
+                            </td>
+                        </tr>
+                    `;
+                    feather.replace();
+                    return;
+                }
+
+                empresasFiltradas.forEach(empresa => {
+                    const estado = empresa.estado || 'activa';
+                    const esInactiva = estado === 'inactiva';
+                    const fila = document.createElement('tr');
+                    fila.className = esInactiva ? 'table-secondary' : '';
+                    fila.style.opacity = esInactiva ? '0.6' : '1';
+
+                    fila.innerHTML = `
+                        <td><strong>${empresa.nit || 'N/A'}</strong></td>
+                        <td>${empresa.nombre_empresa || 'Sin nombre'}</td>
+                        <td>${empresa.ciudad || 'N/A'}</td>
+                        <td>${empresa.telefono || 'N/A'}</td>
+                        <td>
+                            <span class="badge bg-${esInactiva ? 'secondary' : 'success'}">
+                                ${esInactiva ? 'Inactiva' : 'Activa'}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <button 
+                                class="btn btn-sm btn-${esInactiva ? 'success' : 'warning'}" 
+                                onclick="toggleEstadoEmpresa('${empresa.id}', '${estado}')"
+                                title="${esInactiva ? 'Activar' : 'Archivar'}"
+                            >
+                                <i class="ti ti-${esInactiva ? 'check' : 'archive'}"></i>
+                            </button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(fila);
+                });
+
+                feather.replace();
+
+            } catch (error) {
+                console.error('Error cargando empresas:', error);
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error al cargar empresas</td></tr>`;
+                feather.replace();
+            }
+        }
+
+        async function toggleEstadoEmpresa(empresaId, estadoActual) {
+            const nuevoEstado = estadoActual === 'inactiva' ? 'activa' : 'inactiva';
+            const accion = nuevoEstado === 'inactiva' ? 'archivar' : 'activar';
+
+            const result = await Swal.fire({
+                title: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} empresa?`,
+                text: `Esta empresa será marcada como ${nuevoEstado}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: `Sí, ${accion}`,
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await fetch(`/api/empresas/${empresaId}/estado`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (!response.ok) throw new Error('Error al cambiar estado');
+
+                Swal.fire({
+                    title: '¡Éxito!',
+                    text: `Empresa ${nuevoEstado === 'inactiva' ? 'archivada' : 'activada'} correctamente`,
+                    icon: 'success',
+                    timer: 2000
+                });
+
+                cargarListadoEmpresas();
+
+            } catch (error) {
+                Swal.fire('Error', `No se pudo ${accion} la empresa`, 'error');
+            }
+        }
     </script>
 
     <!-- SweetAlert2 -->

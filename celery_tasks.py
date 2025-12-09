@@ -26,7 +26,10 @@ from models.orm_models import (
     Pago,
     Empresa,
     Usuario,
-    PortalUser
+    PortalUser,
+    DepuracionPendiente,
+    Novedad,
+    DeudaCartera
 )
 
 # Importar notification_service desde routes/
@@ -260,6 +263,172 @@ def check_pending_payments():
 
     except Exception as e:
         print(f"[ERROR] Tareas: Error en check_pending_payments: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "failed", "error": str(e)}
+
+
+@celery_app.task
+def check_depuraciones_pendientes():
+    """
+    Busca depuraciones en estado 'Esperando Respuesta' con más de 15 días de antigüedad
+    y crea alertas automáticas en novedades para hacer seguimiento.
+
+    FASE 10.4: Automatización de recordatorios para casos estancados
+    """
+    try:
+        # Crear app context para acceder a la base de datos
+        app = create_app()
+        with app.app_context():
+            # Fecha límite (hace 15 días)
+            fifteen_days_ago = datetime.now() - timedelta(days=15)
+            fecha_limite = fifteen_days_ago.strftime("%Y-%m-%d")
+
+            # Consulta usando ORM: depuraciones en espera >= 15 días
+            depuraciones_antiguas = DepuracionPendiente.query.filter(
+                DepuracionPendiente.estado == 'Esperando Respuesta',
+                DepuracionPendiente.created_at <= fecha_limite
+            ).all()
+
+            if depuraciones_antiguas:
+                print(f"[INFO] Tareas: {len(depuraciones_antiguas)} depuraciones antiguas encontradas.")
+                alertas_creadas = 0
+                alertas_fallidas = 0
+
+                for depuracion in depuraciones_antiguas:
+                    try:
+                        # Verificar si ya existe una alerta reciente (últimos 7 días) para evitar duplicados
+                        siete_dias_atras = datetime.now() - timedelta(days=7)
+                        alerta_existente = Novedad.query.filter(
+                            Novedad.subject.like(f"%caso #{depuracion.id}%"),
+                            Novedad.creationDate >= siete_dias_atras.strftime("%Y-%m-%d")
+                        ).first()
+
+                        if alerta_existente:
+                            print(f"[INFO] Tareas: Ya existe alerta reciente para depuración #{depuracion.id}, omitiendo...")
+                            continue
+
+                        # Crear alerta en novedades
+                        nueva_alerta = Novedad(
+                            subject=f"⏳ SEGUIMIENTO: Verificar respuesta de entidad para caso #{depuracion.id}",
+                            description=f"La depuración de '{depuracion.entidad_nombre}' (Causa: {depuracion.causa}) lleva más de 15 días en estado 'Esperando Respuesta'. Se requiere verificación urgente.",
+                            status="Pendiente",
+                            priorityText="Alta",
+                            priority=3,
+                            assignedTo="Atención al Cliente",
+                            client=depuracion.entidad_nombre or "Sin nombre"
+                        )
+
+                        db.session.add(nueva_alerta)
+                        db.session.commit()
+
+                        alertas_creadas += 1
+                        print(f"[SUCCESS] Alerta creada para depuración #{depuracion.id} ({depuracion.entidad_nombre})")
+
+                    except Exception as dep_error:
+                        print(f"[ERROR] Tareas: Error procesando depuración #{depuracion.id}: {dep_error}")
+                        db.session.rollback()
+                        alertas_fallidas += 1
+                        continue
+
+                print(f"[INFO] Tareas: Procesamiento completado. Alertas creadas: {alertas_creadas}, Fallidas: {alertas_fallidas}")
+            else:
+                print("[INFO] Tareas: No se encontraron depuraciones antiguas en 'Esperando Respuesta'.")
+
+            return {
+                "status": "success",
+                "depuraciones_encontradas": len(depuraciones_antiguas),
+                "alertas_creadas": alertas_creadas if depuraciones_antiguas else 0
+            }
+
+    except Exception as e:
+        print(f"[ERROR] Tareas: Error en check_depuraciones_pendientes: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "failed", "error": str(e)}
+
+
+@celery_app.task
+def check_recordatorios_cobro():
+    """
+    EL DESPERTADOR: Verifica recordatorios de cobro programados para HOY
+    y genera novedades automáticas para que el equipo de cobranza actúe.
+
+    AGENDA DE COBROS PERSONALIZADA: Ejecutar diariamente a las 8:00 AM
+    """
+    try:
+        # Crear app context para acceder a la base de datos
+        app = create_app()
+        with app.app_context():
+            # Fecha de hoy
+            fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+
+            print(f"[INFO] Tareas: Verificando recordatorios de cobro para {fecha_hoy}...")
+
+            # Consulta usando ORM: deudas con recordatorio para HOY
+            deudas_con_recordatorio = DeudaCartera.query.filter(
+                DeudaCartera.fecha_recordatorio_cobro == fecha_hoy
+            ).all()
+
+            if deudas_con_recordatorio:
+                print(f"[INFO] Tareas: {len(deudas_con_recordatorio)} recordatorios encontrados para hoy.")
+                alertas_creadas = 0
+                alertas_fallidas = 0
+
+                for deuda in deudas_con_recordatorio:
+                    try:
+                        # Verificar si ya existe una alerta reciente (hoy) para evitar duplicados
+                        alerta_existente = Novedad.query.filter(
+                            Novedad.subject.like(f"%RECORDATORIO COBRO%deuda #{deuda.id}%"),
+                            Novedad.creationDate >= fecha_hoy
+                        ).first()
+
+                        if alerta_existente:
+                            print(f"[INFO] Tareas: Ya existe alerta para deuda #{deuda.id}, omitiendo...")
+                            continue
+
+                        # Construir nombre del cliente
+                        nombre_cliente = deuda.nombre_usuario or f"Usuario {deuda.usuario_id}"
+                        if deuda.nombre_empresa:
+                            nombre_cliente += f" ({deuda.nombre_empresa})"
+
+                        # Crear alerta/novedad automática
+                        nueva_alerta = Novedad(
+                            subject=f"⏰ RECORDATORIO COBRO: {nombre_cliente} - deuda #{deuda.id}",
+                            description=f"Recordatorio programado para cobrar a '{nombre_cliente}' por ${float(deuda.monto):,.2f} ({deuda.entidad}). Estado: {deuda.estado}. Días de mora: {deuda.dias_mora or 0}. Programado por Admin.",
+                            status="Pendiente",
+                            priorityText="Alta",
+                            priority=3,  # Alta prioridad
+                            assignedTo="Cobranza",
+                            client=nombre_cliente,
+                            creationDate=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        )
+
+                        db.session.add(nueva_alerta)
+                        db.session.commit()
+
+                        alertas_creadas += 1
+                        print(f"[SUCCESS] Alerta creada para deuda #{deuda.id} ({nombre_cliente}) - ${float(deuda.monto):,.2f}")
+
+                    except Exception as deuda_error:
+                        print(f"[ERROR] Tareas: Error procesando deuda #{deuda.id}: {deuda_error}")
+                        db.session.rollback()
+                        alertas_fallidas += 1
+                        continue
+
+                print(f"[INFO] Tareas: Procesamiento completado. Alertas creadas: {alertas_creadas}, Fallidas: {alertas_fallidas}")
+            else:
+                print(f"[INFO] Tareas: No hay recordatorios programados para {fecha_hoy}.")
+
+            return {
+                "status": "success",
+                "fecha": fecha_hoy,
+                "recordatorios_encontrados": len(deudas_con_recordatorio),
+                "alertas_creadas": alertas_creadas if deudas_con_recordatorio else 0
+            }
+
+    except Exception as e:
+        print(f"[ERROR] Tareas: Error en check_recordatorios_cobro: {e}")
         import traceback
         traceback.print_exc()
         return {"status": "failed", "error": str(e)}

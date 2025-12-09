@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from logger import logger
 from extensions import db
-from models.orm_models import Pago, Empresa
+from models.orm_models import Pago, Empresa, Novedad, Usuario
 
 # --- IMPORTACIÓN CENTRALIZADA ---
 try:
@@ -90,9 +90,11 @@ def add_pago():
         - tipo_pago: Tipo de pago (nomina, prima, etc.) (requerido)
         - fecha_pago: Fecha del pago (opcional, default: hoy)
         - referencia: Referencia o número de comprobante (opcional)
+        - valor_deuda: Valor que realmente debe (opcional, para detectar excedentes)
+        - valor_pagado: Valor que efectivamente pagó (opcional, si no se envía se usa 'monto')
 
     Returns:
-        JSON con el pago creado
+        JSON con el pago creado y datos de excedente si aplica
     """
     try:
         data = request.get_json()
@@ -117,6 +119,40 @@ def add_pago():
 
         fecha_pago = data.get("fecha_pago", datetime.now().strftime("%Y-%m-%d"))
 
+        # ==================== FASE 10.4: DETECCIÓN DE EXCEDENTES ====================
+        excedente_generado = 0.0
+        saldo_favor_actualizado = False
+
+        # Obtener valores para detección de excedente
+        valor_deuda = data.get("valor_deuda")  # Lo que realmente debe
+        valor_pagado = data.get("valor_pagado", monto)  # Lo que efectivamente pagó
+
+        if valor_deuda is not None:
+            try:
+                valor_deuda = float(valor_deuda)
+                valor_pagado = float(valor_pagado)
+
+                # Detectar excedente
+                if valor_pagado > valor_deuda:
+                    excedente_generado = valor_pagado - valor_deuda
+
+                    # Actualizar saldo a favor de la empresa
+                    empresa = Empresa.query.filter_by(nit=data["empresa_nit"]).first()
+                    if empresa:
+                        saldo_anterior = empresa.saldo_a_favor or 0.0
+                        empresa.saldo_a_favor = saldo_anterior + excedente_generado
+                        db.session.add(empresa)
+                        saldo_favor_actualizado = True
+
+                        logger.info(f"💰 Saldo a favor generado: ${excedente_generado:,.2f} para empresa {data['empresa_nit']}")
+                        logger.info(f"   Saldo anterior: ${saldo_anterior:,.2f} → Saldo nuevo: ${empresa.saldo_a_favor:,.2f}")
+                    else:
+                        logger.warning(f"⚠️ No se encontró empresa con NIT {data['empresa_nit']} para actualizar saldo a favor")
+
+            except (ValueError, TypeError) as ve:
+                logger.warning(f"Error al procesar valores de deuda/pago para excedente: {ve}")
+        # =============================================================================
+
         # ✅ Crear nuevo pago usando ORM
         nuevo_pago = Pago(
             usuario_id=data["usuario_id"],
@@ -133,8 +169,61 @@ def add_pago():
 
         logger.info(f"Nuevo pago registrado con ID: {nuevo_pago.id} por un monto de {monto}")
 
-        # Devolver el registro completo
-        return jsonify(nuevo_pago.to_dict()), 201
+        # ==================== AUTOMATIZACIÓN: NOTIFICAR A OPERACIONES ====================
+        # REGLA DE NEGOCIO: Cuando entra dinero, notificar al área operativa
+        try:
+            # Obtener datos del usuario y empresa para la notificación
+            usuario = Usuario.query.filter_by(numeroId=data["usuario_id"]).first()
+            empresa = Empresa.query.filter_by(nit=data["empresa_nit"]).first()
+
+            # Construir nombre del cliente para la notificación
+            if usuario:
+                nombre_cliente = f"{usuario.primerNombre or ''} {usuario.primerApellido or ''}".strip()
+                if not nombre_cliente:
+                    nombre_cliente = f"Usuario {data['usuario_id']}"
+            else:
+                nombre_cliente = f"Usuario {data['usuario_id']}"
+
+            # Agregar nombre de empresa si existe
+            if empresa:
+                nombre_cliente += f" ({empresa.nombre_empresa})"
+
+            # Crear la novedad automática
+            nueva_novedad = Novedad(
+                subject=f"💰 PAGO RECIBIDO: {nombre_cliente}",
+                description=f"Se recibió pago por valor de ${monto:,.2f} concepto {data['tipo_pago']}. ACCIÓN REQUERIDA: Verificar si requiere Planilla o Afiliación.",
+                status="Pendiente",
+                priorityText="Alta",
+                priority=3,  # Alta prioridad
+                client=nombre_cliente,
+                creationDate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                assignedTo="Operaciones"
+            )
+
+            db.session.add(nueva_novedad)
+            db.session.commit()
+
+            logger.info(f"✅ Notificación automática creada (Novedad ID: {nueva_novedad.id}) para pago ID: {nuevo_pago.id}")
+
+        except Exception as notif_error:
+            # CRÍTICO: Si falla la notificación, NO fallar el pago
+            # El dinero es prioridad, la notificación es secundaria
+            db.session.rollback()  # Rollback solo de la novedad, el pago ya está committed
+            logger.error(f"⚠️ ERROR al crear notificación automática para pago ID {nuevo_pago.id}: {notif_error}", exc_info=True)
+            logger.warning(f"⚠️ El pago fue registrado exitosamente pero la notificación falló. Revisar manualmente.")
+
+        # =================================================================================
+
+        # Devolver el registro completo con información de excedente
+        response_data = nuevo_pago.to_dict()
+
+        # FASE 10.4: Incluir información de excedente si se generó
+        if excedente_generado > 0:
+            response_data['excedente_generado'] = excedente_generado
+            response_data['saldo_favor_actualizado'] = saldo_favor_actualizado
+            response_data['mensaje_excedente'] = f"Se generó un saldo a favor de ${excedente_generado:,.2f}"
+
+        return jsonify(response_data), 201
 
     except IntegrityError as ie:
         db.session.rollback()

@@ -7,10 +7,10 @@ REM =========================================================
 title Sistema de Formularios PDF - Inicializador
 color 0A
 
-REM Definir rutas absolutas (AJUSTAR ESTAS RUTAS SI SON DIFERENTES)
-SET PROJECT_ROOT=D:\Mi-App-React\src\dashboard
-SET VENV_PYTHON=D:\Mi-App-React\BUILD\venv\Scripts\python.exe
-SET VENV_PIP=D:\Mi-App-React\BUILD\venv\Scripts\pip.exe
+REM Definir rutas absolutas (CORREGIDO: Usa la raíz del proyecto)
+SET PROJECT_ROOT=D:\Mi-App-React
+SET VENV_PYTHON=D:\Mi-App-React\.venv\Scripts\python.exe
+SET VENV_PIP=D:\Mi-App-React\.venv\Scripts\pip.exe
 
 echo.
 echo ========================================
@@ -123,12 +123,12 @@ echo   SERVIDOR FLASK BACKEND
 echo ========================================
 echo.
 REM === CORRECCIÓN APLICADA AQUÍ ===
-echo [INFO] URL: http://localhost:5000/ingresoportal.html
+echo [INFO] URL: http://localhost:5000/login
 echo [INFO] Para detener: Ctrl+C
 echo.
 
-REM Abrir navegador automÃ¡ticamente (esperar 3 segundos)
-start "" cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:5000/ingresoportal.html"
+REM Abrir navegador automáticamente (esperar 3 segundos)
+start "" cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:5000/login"
 
 REM Iniciar servidor (usa el Python del VENV)
 "%VENV_PYTHON%" app.py

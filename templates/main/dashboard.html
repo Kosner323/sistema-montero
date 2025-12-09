@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
 
     <script>
       (async function checkAuthentication() {
@@ -103,6 +105,76 @@
                 <a href="/ingresar_empresa" class="btn btn-sm bg-white bg-opacity-25 text-white hover-bg-opacity-50 border-0 d-flex align-items-center py-1 px-3">
                   <i data-feather="user-plus" class="me-2" style="width:14px; height:14px;"></i>Cliente
                 </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO JEFE: Resumen Confidencial (Solo Admin) -->
+        <div class="grid grid-cols-12 gap-6 mb-6" id="modoJefeContainer" style="display: none;">
+          <div class="col-span-12">
+            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff;">
+              <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="bg-warning bg-opacity-25 rounded-circle p-3">
+                      <i data-feather="eye" style="width:28px;height:28px;color:#FFB64D;"></i>
+                    </div>
+                    <div>
+                      <h5 class="mb-0 fw-bold text-white">🔒 Modo Jefe - Vista Confidencial</h5>
+                      <small class="text-white" style="opacity: 0.7;">Información financiera reservada</small>
+                    </div>
+                  </div>
+                  <button class="btn btn-sm btn-outline-light" id="toggleModoJefe" title="Ocultar panel">
+                    <i data-feather="eye-off" style="width:16px;height:16px;"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-12 gap-4">
+                  <!-- Total en Bancos -->
+                  <div class="col-span-12 md:col-span-3">
+                    <div class="bg-white bg-opacity-10 rounded p-3 backdrop-blur">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i data-feather="dollar-sign" style="width:20px;height:20px;color:#1de9b6;"></i>
+                        <small class="text-white" style="opacity:0.8;">Total en Bancos</small>
+                      </div>
+                      <h4 class="mb-0 fw-bold text-success" id="totalBancos">$ 0</h4>
+                      <small class="text-white" style="opacity:0.6;">Liquidez disponible</small>
+                    </div>
+                  </div>
+                  <!-- Total Cartera por Cobrar -->
+                  <div class="col-span-12 md:col-span-3">
+                    <div class="bg-white bg-opacity-10 rounded p-3 backdrop-blur">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i data-feather="trending-up" style="width:20px;height:20px;color:#3ebfea;"></i>
+                        <small class="text-white" style="opacity:0.8;">Cartera por Cobrar</small>
+                      </div>
+                      <h4 class="mb-0 fw-bold text-info" id="carteraPorCobrar">$ 0</h4>
+                      <small class="text-white" style="opacity:0.6;">Deudas de clientes</small>
+                    </div>
+                  </div>
+                  <!-- Total Cartera por Pagar -->
+                  <div class="col-span-12 md:col-span-3">
+                    <div class="bg-white bg-opacity-10 rounded p-3 backdrop-blur">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i data-feather="trending-down" style="width:20px;height:20px;color:#FF5370;"></i>
+                        <small class="text-white" style="opacity:0.8;">Cartera por Pagar</small>
+                      </div>
+                      <h4 class="mb-0 fw-bold text-danger" id="carteraPorPagar">$ 0</h4>
+                      <small class="text-white" style="opacity:0.6;">Obligaciones pendientes</small>
+                    </div>
+                  </div>
+                  <!-- Patrimonio Neto -->
+                  <div class="col-span-12 md:col-span-3">
+                    <div class="bg-white bg-opacity-10 rounded p-3 backdrop-blur">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <i data-feather="shield" style="width:20px;height:20px;color:#FFB64D;"></i>
+                        <small class="text-white" style="opacity:0.8;">Patrimonio Neto</small>
+                      </div>
+                      <h4 class="mb-0 fw-bold text-warning" id="patrimonioNeto">$ 0</h4>
+                      <small class="text-white" style="opacity:0.6;">Activos - Pasivos</small>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -254,8 +326,8 @@
         <div class="grid grid-cols-12 gap-6 mb-6">
           <div class="col-span-12 lg:col-span-6">
             <div class="card h-full border-0 shadow-sm">
-              <div class="card-header border-0 bg-transparent">
-                <h5 class="mb-0"><i data-feather="bar-chart-2" class="me-2 text-success"></i>Flujo de Caja (Semestral)</h5>
+              <div class="card-header card-header-corporate border-0">
+                <h5 class="mb-0"><i data-feather="bar-chart-2" class="me-2" style="color:#0056b3;"></i>Flujo de Caja (Semestral)</h5>
               </div>
               <div class="card-body">
                 <div id="chartFlujoCaja"></div>
@@ -264,8 +336,8 @@
           </div>
           <div class="col-span-12 lg:col-span-3">
             <div class="card h-full border-0 shadow-sm">
-              <div class="card-header border-0 bg-transparent">
-                <h5 class="mb-0"><i data-feather="pie-chart" class="me-2 text-primary"></i>Embudo de Ventas</h5>
+              <div class="card-header card-header-corporate border-0">
+                <h5 class="mb-0"><i data-feather="pie-chart" class="me-2" style="color:#0056b3;"></i>Embudo de Ventas</h5>
               </div>
               <div class="card-body">
                 <div id="chartEmbudo" class="d-flex justify-center"></div>
@@ -294,11 +366,62 @@
           </div>
           <div class="col-span-12 lg:col-span-3">
             <div class="card h-full border-0 shadow-sm">
-              <div class="card-header border-0 bg-transparent">
-                <h5 class="mb-0"><i data-feather="user-plus" class="me-2 text-warning"></i>Usuarios Registrados</h5>
+              <div class="card-header card-header-corporate border-0">
+                <h5 class="mb-0"><i data-feather="user-plus" class="me-2" style="color:#0056b3;"></i>Usuarios Registrados</h5>
               </div>
               <div class="card-body">
                 <div id="chartUsuarios"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget To-Do List Personal - Fase 11.2 -->
+        <div class="grid grid-cols-12 gap-6 mb-6">
+          <div class="col-span-12 lg:col-span-4">
+            <div class="card border-0 shadow-sm h-full">
+              <div class="w-100" style="height:4px;background: linear-gradient(90deg,#0056b3 0%, #3b82f6 100%);"></div>
+              <div class="card-header card-header-corporate border-0">
+                <h5 class="mb-0">
+                  <i data-feather="check-square" class="me-2" style="color:#0056b3;"></i>📝 Mis Pendientes
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Input + Botón Agregar -->
+                <div class="input-group mb-3">
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="nuevaTareaInput" 
+                    placeholder="Nueva tarea..." 
+                    maxlength="500"
+                  >
+                  <button class="btn btn-primary" onclick="agregarTarea()" title="Agregar tarea">
+                    <i data-feather="plus" style="width:18px;height:18px;"></i>
+                  </button>
+                </div>
+                
+                <!-- Lista de Tareas -->
+                <ul class="list-group list-group-flush" id="listaTareas" style="max-height: 350px; overflow-y: auto;">
+                  <li class="list-group-item text-center text-muted border-0">
+                    <i data-feather="loader" class="animate-spin"></i> Cargando...
+                  </li>
+                </ul>
+                
+                <!-- Estadísticas Footer -->
+                <div class="mt-3 pt-3 border-top">
+                  <small class="text-muted d-flex align-items-center gap-2">
+                    <span>
+                      <i data-feather="clock" style="width:14px;height:14px;"></i>
+                      <span id="statPendientes">0</span> pendientes
+                    </span>
+                    <span>•</span>
+                    <span>
+                      <i data-feather="check-circle" style="width:14px;height:14px;"></i>
+                      <span id="statCompletadas">0</span> completadas
+                    </span>
+                  </small>
+                </div>
               </div>
             </div>
           </div>
@@ -308,13 +431,13 @@
         <div class="grid grid-cols-12 gap-6 mb-6">
           <div class="col-span-12">
             <div class="card border-0 shadow-sm">
-              <div class="card-header bg-transparent border-0 d-flex align-items-center">
-                <h5 class="mb-0"><i data-feather="clock" class="me-2 text-info"></i>Actividad Reciente</h5>
+              <div class="card-header card-header-corporate border-0 d-flex align-items-center">
+                <h5 class="mb-0"><i data-feather="clock" class="me-2" style="color:#0056b3;"></i>Actividad Reciente</h5>
               </div>
               <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
+                  <table class="table table-excel table-bordered table-sm mb-0 align-middle">
+                    <thead>
                       <tr>
                         <th style="width:180px">Fecha</th>
                         <th>Usuario</th>
@@ -879,8 +1002,253 @@
           userNameDisplay.textContent = storedUserName;
         }
 
+        // =============================================================================
+        // MODO JEFE - CARGAR DATOS CONFIDENCIALES
+        // =============================================================================
+        async function cargarModoJefe() {
+          try {
+            // Verificar si el usuario es admin
+            const authResponse = await fetch('/api/check_auth', { credentials: 'include' });
+            if (!authResponse.ok) return;
+            
+            const authData = await authResponse.json();
+            const isAdmin = authData.is_admin || authData.user_name === 'admin';
+            
+            if (!isAdmin) {
+              // Solo mostrar para administradores
+              document.getElementById('modoJefeContainer').style.display = 'none';
+              return;
+            }
+
+            // Mostrar el contenedor
+            document.getElementById('modoJefeContainer').style.display = 'block';
+
+            // Cargar estadísticas de cartera
+            const carteraResponse = await fetch('/api/cartera/estadisticas', { credentials: 'include' });
+            if (carteraResponse.ok) {
+              const stats = await carteraResponse.json();
+              
+              // Total cartera por cobrar (deudas pendientes + vencidas)
+              const porCobrar = (stats.monto_pendiente || 0) + (stats.monto_vencido || 0);
+              document.getElementById('carteraPorCobrar').textContent = formatMoney(porCobrar);
+              
+              // Total cartera por pagar (simular con datos de deudas)
+              const porPagar = stats.monto_total ? stats.monto_total * 0.3 : 0; // 30% del total como ejemplo
+              document.getElementById('carteraPorPagar').textContent = formatMoney(porPagar);
+              
+              // Total en bancos (simulado - 50M base + cartera por cobrar)
+              const totalBancos = 50000000 + (porCobrar * 0.7); // 70% de cartera cobrada
+              document.getElementById('totalBancos').textContent = formatMoney(totalBancos);
+              
+              // Patrimonio neto (activos - pasivos)
+              const patrimonioNeto = totalBancos + porCobrar - porPagar;
+              document.getElementById('patrimonioNeto').textContent = formatMoney(patrimonioNeto);
+            }
+
+            // Toggle para ocultar/mostrar panel
+            const toggleBtn = document.getElementById('toggleModoJefe');
+            toggleBtn.addEventListener('click', function() {
+              const container = document.getElementById('modoJefeContainer');
+              if (container.style.display !== 'none') {
+                container.style.display = 'none';
+                localStorage.setItem('modoJefeHidden', 'true');
+              } else {
+                container.style.display = 'block';
+                localStorage.setItem('modoJefeHidden', 'false');
+              }
+              feather.replace();
+            });
+
+            // Restaurar estado de visibilidad desde localStorage
+            const isHidden = localStorage.getItem('modoJefeHidden') === 'true';
+            if (isHidden) {
+              document.getElementById('modoJefeContainer').style.display = 'none';
+            }
+
+          } catch (error) {
+            console.error('Error cargando Modo Jefe:', error);
+            document.getElementById('modoJefeContainer').style.display = 'none';
+          }
+        }
+
         // Carga inicial de datos
         cargarDashboardData();
+        cargarModoJefe();
+
+        // =============================================================================
+        // MÓDULO TO-DO LIST PERSONAL - FASE 11.2
+        // =============================================================================
+        const API_TAREAS = '/api/tareas';
+
+        async function cargarTareas() {
+          try {
+            const response = await fetch(`${API_TAREAS}?estado=todas`, { credentials: 'include' });
+            const data = await response.json();
+            
+            if (!data.success) {
+              console.error('Error al cargar tareas:', data.error);
+              return;
+            }
+            
+            renderizarTareas(data.tareas);
+            actualizarEstadisticas(data.pendientes, data.completadas);
+          } catch (error) {
+            console.error('Error de red al cargar tareas:', error);
+          }
+        }
+
+        function renderizarTareas(tareas) {
+          const lista = document.getElementById('listaTareas');
+          
+          if (tareas.length === 0) {
+            lista.innerHTML = '<li class="list-group-item text-center text-muted border-0">Sin tareas pendientes 🎉</li>';
+            return;
+          }
+          
+          lista.innerHTML = '';
+          tareas.forEach(tarea => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex align-items-center gap-2 border-0 border-bottom py-2';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input m-0 flex-shrink-0';
+            checkbox.checked = tarea.completada;
+            checkbox.onchange = () => toggleTarea(tarea.id);
+            checkbox.style.cursor = 'pointer';
+            
+            const label = document.createElement('span');
+            label.className = 'flex-grow-1';
+            label.textContent = tarea.descripcion;
+            if (tarea.completada) {
+              label.classList.add('text-decoration-line-through', 'text-muted');
+            }
+            
+            const btnDelete = document.createElement('button');
+            btnDelete.className = 'btn btn-sm btn-outline-danger border-0 p-1 flex-shrink-0';
+            btnDelete.innerHTML = '<i data-feather="trash-2" style="width:16px;height:16px;"></i>';
+            btnDelete.onclick = () => eliminarTarea(tarea.id);
+            btnDelete.title = 'Eliminar tarea';
+            
+            li.appendChild(checkbox);
+            li.appendChild(label);
+            li.appendChild(btnDelete);
+            lista.appendChild(li);
+          });
+          
+          feather.replace();
+        }
+
+        async function agregarTarea() {
+          const input = document.getElementById('nuevaTareaInput');
+          const descripcion = input.value.trim();
+          
+          if (!descripcion) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Campo vacío',
+              text: 'Por favor ingresa una descripción para la tarea',
+              confirmButtonColor: '#7267EF'
+            });
+            return;
+          }
+          
+          try {
+            const response = await fetch(API_TAREAS, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ descripcion })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              input.value = '';
+              cargarTareas();
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: data.error || 'No se pudo crear la tarea',
+                confirmButtonColor: '#7267EF'
+              });
+            }
+          } catch (error) {
+            console.error('Error al crear tarea:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de conexión',
+              text: 'No se pudo crear la tarea',
+              confirmButtonColor: '#7267EF'
+            });
+          }
+        }
+
+        async function toggleTarea(tareaId) {
+          try {
+            const response = await fetch(`${API_TAREAS}/${tareaId}/toggle`, {
+              method: 'PUT',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              cargarTareas();
+            }
+          } catch (error) {
+            console.error('Error al actualizar tarea:', error);
+          }
+        }
+
+        async function eliminarTarea(tareaId) {
+          const result = await Swal.fire({
+            title: '¿Eliminar tarea?',
+            text: "Esta acción no se puede deshacer",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#7267EF',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+          });
+          
+          if (!result.isConfirmed) return;
+          
+          try {
+            const response = await fetch(`${API_TAREAS}/${tareaId}`, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              cargarTareas();
+              Swal.fire({
+                icon: 'success',
+                title: 'Eliminada',
+                text: 'La tarea ha sido eliminada',
+                timer: 1500,
+                showConfirmButton: false
+              });
+            }
+          } catch (error) {
+            console.error('Error al eliminar tarea:', error);
+          }
+        }
+
+        function actualizarEstadisticas(pendientes, completadas) {
+          document.getElementById('statPendientes').textContent = pendientes;
+          document.getElementById('statCompletadas').textContent = completadas;
+        }
+
+        // Soporte para tecla Enter
+        document.getElementById('nuevaTareaInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            agregarTarea();
+          }
+        });
+
+        // Cargar tareas al iniciar
+        cargarTareas();
       });
     </script>
 

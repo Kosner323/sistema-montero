@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
     <script>
       (async function checkAuthentication() {
@@ -120,10 +122,37 @@
 
           <form id="formAfiliado" enctype="multipart/form-data">
             <div class="card p-4">
-              <h3 class="mb-4">ðŸ“Š CAMPOS DE DATOS DEL AFILIADO</h3>
+              <h3 class="mb-4">📊 CAMPOS DE DATOS DEL AFILIADO</h3>
+
+              <!-- 👥 TIPO DE COTIZANTE - SWITCH GRANDE -->
+              <fieldset class="mb-4 p-4 border rounded shadow-sm bg-light">
+                <legend class="fw-bold fs-4 mb-3">
+                  <i data-feather="users" style="width: 24px; height: 24px; vertical-align: middle;"></i>
+                  👥 ¿Tipo de Cotizante?
+                </legend>
+                <div class="btn-group btn-group-lg w-100 mb-3" role="group" aria-label="Tipo de cotizante">
+                  <input type="radio" class="btn-check" name="tipoCotizante" id="tipoDependiente" value="Dependiente" checked>
+                  <label class="btn btn-outline-primary d-flex flex-column align-items-center p-3" for="tipoDependiente">
+                    <i data-feather="briefcase" style="width: 32px; height: 32px;" class="mb-2"></i>
+                    <strong>DEPENDIENTE</strong>
+                    <small class="text-muted">Empleado de empresa</small>
+                  </label>
+                  <input type="radio" class="btn-check" name="tipoCotizante" id="tipoIndependiente" value="Independiente">
+                  <label class="btn btn-outline-success d-flex flex-column align-items-center p-3" for="tipoIndependiente">
+                    <i data-feather="user" style="width: 32px; height: 32px;" class="mb-2"></i>
+                    <strong>INDEPENDIENTE</strong>
+                    <small class="text-muted">Cuenta propia</small>
+                  </label>
+                </div>
+                <div class="alert alert-info mb-0" role="alert">
+                  <i data-feather="info" style="width: 16px; height: 16px;"></i>
+                  <strong>Dependiente:</strong> Empleado con empresa asignada (IBC 100%) | 
+                  <strong>Independiente:</strong> Trabajador por cuenta propia (IBC 40%)
+                </div>
+              </fieldset>
 
               <fieldset class="mb-4 p-3 border rounded">
-                <legend class="fw-bold">ðŸ“‘ DOCUMENTOS DE IDENTIFICACIÃ“N</legend>
+                <legend class="fw-bold">🔑 DOCUMENTOS DE IDENTIFICACIÓN</legend>
                 <div class="row g-3">
                   <div class="col-md-4">
                     <label for="tipoId" class="form-label">Tipo de ID</label>
@@ -279,7 +308,7 @@
                         <input type="text" class="form-control" id="ccfCosto" name="ccfCosto" placeholder="Ej: 50.000">
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-3" id="campoEmpresa">
                         <label for="administracion" class="form-label">AdministraciÃ³n/Empresa</label>
                         <input type="text" class="form-control" id="administracion" name="administracion" list="listaEmpresasAdmin" placeholder="Empresa a la que pertenece">
                          <datalist id="listaEmpresasAdmin"></datalist>
@@ -636,6 +665,27 @@
             const loader = document.querySelector('.loader-bg');
             if (loader) loader.style.display = 'none'; // Ocultar pre-loader
 
+            // 👥 TOGGLE TIPO COTIZANTE - Mostrar/Ocultar campo Empresa
+            const radioDependiente = document.getElementById('tipoDependiente');
+            const radioIndependiente = document.getElementById('tipoIndependiente');
+            const campoEmpresa = document.getElementById('campoEmpresa');
+
+            function toggleCampoEmpresa() {
+                if (radioIndependiente.checked) {
+                    campoEmpresa.style.display = 'none';
+                    console.log('✅ Campo Empresa OCULTO (Independiente seleccionado)');
+                } else {
+                    campoEmpresa.style.display = 'block';
+                    console.log('✅ Campo Empresa VISIBLE (Dependiente seleccionado)');
+                }
+            }
+
+            if (radioDependiente && radioIndependiente) {
+                radioDependiente.addEventListener('change', toggleCampoEmpresa);
+                radioIndependiente.addEventListener('change', toggleCampoEmpresa);
+                toggleCampoEmpresa(); // Ejecutar al cargar
+            }
+
             // Cargar lista de empresas para el datalist 'administracion'
             try {
                 const response = await fetch('/api/empresas', { credentials: 'include' });
@@ -726,6 +776,28 @@
 
             // LÃ³gica de beneficiarios
             setupBeneficiaryLogic();
+
+            // ðŸ'¼ LÃ³gica Tipo Cotizante - Mostrar/Ocultar Empresa
+            const radioDependiente = document.getElementById('tipoDependiente');
+            const radioIndependiente = document.getElementById('tipoIndependiente');
+            const campoEmpresa = document.getElementById('campoEmpresa');
+
+            function toggleEmpresaField() {
+                if (radioIndependiente.checked) {
+                    campoEmpresa.style.display = 'none';
+                    document.getElementById('administracion').removeAttribute('required');
+                } else {
+                    campoEmpresa.style.display = 'block';
+                    // Opcional: descomentar si el campo debe ser obligatorio
+                    // document.getElementById('administracion').setAttribute('required', 'required');
+                }
+            }
+
+            if (radioDependiente && radioIndependiente) {
+                radioDependiente.addEventListener('change', toggleEmpresaField);
+                radioIndependiente.addEventListener('change', toggleEmpresaField);
+                toggleEmpresaField(); // Ejecutar al cargar
+            }
 
             // Inicializar iconos Feather
             initializeFeatherIcons();

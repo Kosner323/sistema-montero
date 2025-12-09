@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Visual - Botón Programar Recordatorio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabler-icons-webfont@latest/tabler-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <style>
+        :root {
+            --navy-primary: #0d47a1;
+            --navy-dark: #01579b;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--navy-dark) 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border: none;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-dark));
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .table-responsive {
+            border-radius: 0 0 12px 12px;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            border-color: #d39e00;
+            transform: scale(1.05);
+        }
+
+        .row-pendiente {
+            background-color: #fff5f5;
+        }
+
+        .modal-header.bg-primary {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-dark)) !important;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .badge {
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+
+        .demo-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="demo-note">
+            <h5 class="mb-2">📋 Prueba Visual - Botón "Programar Recordatorio"</h5>
+            <p class="mb-0"><strong>Instrucciones:</strong> Haz clic en el botón <span class="badge bg-warning">⏰</span> de cualquier fila para abrir el modal de programación. La funcionalidad está completamente simulada.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="list"></i>
+                    Tabla de Control de Pagos - Demo
+                </h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
+                                <th>Estado Pago</th>
+                                <th>Monto Pendiente</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDemo">
+                            <tr class="row-pendiente">
+                                <td>1001</td>
+                                <td>Juan Carlos Pérez</td>
+                                <td>Tech Solutions SAS</td>
+                                <td><span class="badge bg-danger">PENDIENTE</span></td>
+                                <td class="text-danger fw-bold">$450,000</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-success" title="Marcar como Pagado">
+                                        <i data-feather="check-circle"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success ms-1" title="WhatsApp">
+                                        <i class="ti ti-brand-whatsapp"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning ms-1" onclick="abrirModalProgramar('1001', 'Juan Carlos Pérez', 450000, 'Tech Solutions SAS')" title="Programar Recordatorio">
+                                        <i data-feather="clock"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="row-pendiente">
+                                <td>1002</td>
+                                <td>María Fernanda López</td>
+                                <td>Innovate Corp</td>
+                                <td><span class="badge bg-danger">PENDIENTE</span></td>
+                                <td class="text-danger fw-bold">$320,500</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-success" title="Marcar como Pagado">
+                                        <i data-feather="check-circle"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success ms-1" title="WhatsApp">
+                                        <i class="ti ti-brand-whatsapp"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning ms-1" onclick="abrirModalProgramar('1002', 'María Fernanda López', 320500, 'Innovate Corp')" title="Programar Recordatorio">
+                                        <i data-feather="clock"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>1003</td>
+                                <td>Carlos Alberto Ruiz</td>
+                                <td>Global Services LTDA</td>
+                                <td><span class="badge bg-success">PAGADO</span></td>
+                                <td class="text-muted">$0</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-warning" onclick="abrirModalProgramar('1003', 'Carlos Alberto Ruiz', 0, 'Global Services LTDA')" title="Programar Recordatorio">
+                                        <i data-feather="clock"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="row-pendiente">
+                                <td>1004</td>
+                                <td>Ana Patricia Gómez</td>
+                                <td>Digital Marketing SA</td>
+                                <td><span class="badge bg-danger">PENDIENTE</span></td>
+                                <td class="text-danger fw-bold">$575,800</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-success" title="Marcar como Pagado">
+                                        <i data-feather="check-circle"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success ms-1" title="WhatsApp">
+                                        <i class="ti ti-brand-whatsapp"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning ms-1" onclick="abrirModalProgramar('1004', 'Ana Patricia Gómez', 575800, 'Digital Marketing SA')" title="Programar Recordatorio">
+                                        <i data-feather="clock"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-2">🎯 Funcionalidad Implementada:</h6>
+                <ul class="mb-0">
+                    <li>✅ Botón <strong>⏰ Programar</strong> en cada fila</li>
+                    <li>✅ Modal con fecha (HTML5 datepicker)</li>
+                    <li>✅ Validación de fecha mínima (hoy)</li>
+                    <li>✅ POST a <code>/api/finanzas/programar-cobro</code></li>
+                    <li>✅ Toast de confirmación con formato colombiano</li>
+                    <li>✅ Campo de notas opcional</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Programar Recordatorio de Cobro -->
+    <div class="modal fade" id="modalProgramarRecordatorio" tabindex="-1" aria-labelledby="modalProgramarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalProgramarLabel">
+                        <i data-feather="clock" class="inline me-2"></i>
+                        Programar Recordatorio de Cobro
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cliente/Empresa</label>
+                        <p class="text-muted mb-0" id="recordatorioClienteNombre">-</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Monto Pendiente</label>
+                        <p class="text-danger mb-0" style="font-size: 1.2rem; font-weight: 700;" id="recordatorioMonto">$0</p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recordatorioFecha" class="form-label fw-bold">
+                            <i data-feather="calendar" class="inline me-1"></i>
+                            Fecha del Recordatorio
+                        </label>
+                        <input type="date" class="form-control" id="recordatorioFecha" required min="">
+                        <small class="text-muted">Selecciona la fecha en la que deseas recibir el recordatorio.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recordatorioNotas" class="form-label fw-bold">Notas (Opcional)</label>
+                        <textarea class="form-control" id="recordatorioNotas" rows="3" placeholder="Agrega notas o detalles adicionales..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="inline me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarRecordatorio">
+                        <i data-feather="check" class="inline me-1"></i>
+                        Guardar Recordatorio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        feather.replace();
+
+        let datosRecordatorioActual = {};
+
+        function abrirModalProgramar(clienteId, nombreCompleto, monto, empresa) {
+            datosRecordatorioActual = {
+                clienteId: clienteId,
+                nombreCompleto: nombreCompleto,
+                monto: monto,
+                empresa: empresa
+            };
+
+            document.getElementById('recordatorioClienteNombre').textContent = `${nombreCompleto} (${empresa})`;
+            document.getElementById('recordatorioMonto').textContent = `$${monto.toLocaleString('es-CO')}`;
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('recordatorioFecha').setAttribute('min', hoy);
+            document.getElementById('recordatorioFecha').value = '';
+            document.getElementById('recordatorioNotas').value = '';
+
+            const modal = new bootstrap.Modal(document.getElementById('modalProgramarRecordatorio'));
+            modal.show();
+            
+            setTimeout(() => feather.replace(), 300);
+        }
+
+        async function guardarRecordatorio() {
+            const fecha = document.getElementById('recordatorioFecha').value;
+            const notas = document.getElementById('recordatorioNotas').value;
+
+            if (!fecha) {
+                alert('⚠️ Por favor selecciona una fecha para el recordatorio.');
+                return;
+            }
+
+            const payload = {
+                cliente_id: datosRecordatorioActual.clienteId,
+                nombre_completo: datosRecordatorioActual.nombreCompleto,
+                empresa: datosRecordatorioActual.empresa,
+                monto: datosRecordatorioActual.monto,
+                fecha_recordatorio: fecha,
+                notas: notas || ''
+            };
+
+            console.log('📤 Payload enviado:', payload);
+
+            // Simulación de guardado (en producción haría POST a /api/finanzas/programar-cobro)
+            try {
+                // Simulación de delay de red
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalProgramarRecordatorio'));
+                modal.hide();
+
+                // Mostrar Toast de éxito
+                const fechaFormateada = new Date(fecha).toLocaleDateString('es-CO', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+                mostrarToast(
+                    '✅ Recordatorio Programado', 
+                    `Recordatorio programado para el ${fechaFormateada}. Te avisaré en Novedades.`,
+                    'success'
+                );
+
+                console.log('✅ Recordatorio guardado (simulación)');
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                mostrarToast(
+                    '❌ Error', 
+                    'No se pudo programar el recordatorio. Intenta nuevamente.',
+                    'danger'
+                );
+            }
+        }
+
+        function mostrarToast(titulo, mensaje, tipo = 'info') {
+            const colorMap = {
+                'success': '#28a745',
+                'danger': '#dc3545',
+                'warning': '#ffc107',
+                'info': '#17a2b8'
+            };
+
+            const iconMap = {
+                'success': '✅',
+                'danger': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            };
+
+            const toastContainer = document.getElementById('toastContainer');
+
+            const toastHTML = `
+                <div class="toast align-items-center text-white border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: ${colorMap[tipo]}; min-width: 350px;">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${iconMap[tipo]} ${titulo}</strong><br>
+                            ${mensaje}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+            toast.show();
+
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        document.getElementById('btnGuardarRecordatorio').addEventListener('click', guardarRecordatorio);
+    </script>
+</body>
+</html>

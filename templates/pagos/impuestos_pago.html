@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
     <script>
       (async function checkAuthentication() {
@@ -75,9 +77,42 @@
           margin-right: 10rem;
           transform: none;
       }
+      
+      #modalSubirPago .modal-dialog {
+          max-width: 500px !important;
+          margin: 1.75rem auto;
+      }
+      
       /* Estilo para feedback */
       #feedbackMessage {
           margin-bottom: 1rem;
+      }
+      
+      /* Badges de estado mejorados */
+      .badge-pendiente {
+          background-color: #ffc107;
+          color: #000;
+      }
+      
+      .badge-vencido {
+          background-color: #dc3545;
+          color: #fff;
+          animation: pulse 2s infinite;
+      }
+      
+      .badge-pagado {
+          background-color: #28a745;
+          color: #fff;
+      }
+      
+      @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+      }
+      
+      /* Estilo para filas vencidas */
+      .table-danger {
+          background-color: #f8d7da !important;
       }
     </style>
 
@@ -124,13 +159,19 @@
               </div>
               <div class="card-body">
                 <div class="grid grid-cols-12 gap-x-3 mb-4">
-                    <div class="col-span-12 sm:col-span-6 md:col-span-4">
+                    <div class="col-span-12 sm:col-span-6 md:col-span-3">
+                        <label for="filterAnio" class="form-label font-medium">Año:</label>
+                        <select class="form-select" id="filterAnio">
+                            <option value="todos" selected>Todos los Años</option>
+                        </select>
+                    </div>
+                    <div class="col-span-12 sm:col-span-6 md:col-span-3">
                         <label for="filterEmpresa" class="form-label font-medium">Empresa:</label>
                         <select class="form-select" id="filterEmpresa">
                             <option value="todos" selected>Todas las Empresas</option>
                             </select>
                     </div>
-                    <div class="col-span-12 sm:col-span-6 md:col-span-4">
+                    <div class="col-span-12 sm:col-span-6 md:col-span-3">
                         <label for="filterImpuesto" class="form-label font-medium">Impuesto:</label>
                         <select class="form-select" id="filterImpuesto">
                             <option value="todos" selected>TODOS</option>
@@ -142,7 +183,7 @@
                             <option value="Predial">Predial</option>
                         </select>
                     </div>
-                    <div class="col-span-12 md:col-span-4 self-end mt-4 md:mt-0">
+                    <div class="col-span-12 md:col-span-3 self-end mt-4 md:mt-0">
                         <button type="button" class="btn btn-primary w-full" id="btnAplicarFiltros">
                             <i data-feather="filter" class="me-2"></i>Aplicar Filtros
                         </button>
@@ -161,8 +202,9 @@
                                 <th>Empresa</th>
                                 <th>Tipo de Impuesto</th>
                                 <th>Periodo</th>
-                                <th>Fecha Límite Pago</th>
+                                <th>Vencimiento</th>
                                 <th>Estado</th>
+                                <th>Comprobante</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -228,6 +270,68 @@
         </div>
     </div>
 
+    <!-- ========== MODAL SUBIR PAGO ========== -->
+    <div class="modal fade" id="modalSubirPago" tabindex="-1" aria-labelledby="modalSubirPagoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalSubirPagoLabel">
+                        <i data-feather="upload" class="mr-2"></i> Registrar Pago de Impuesto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>ℹ️ Información:</strong>
+                        <p id="infoPagoEmpresa" class="mb-0 mt-2">-</p>
+                    </div>
+
+                    <form id="formSubirPago" enctype="multipart/form-data">
+                        <input type="hidden" id="pagoImpuestoId" name="impuesto_id">
+
+                        <div class="mb-3">
+                            <label for="pagoFecha" class="form-label fw-bold">Fecha de Pago <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="pagoFecha" name="fecha_pago" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoValor" class="form-label fw-bold">Valor Pagado (COP) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="pagoValor" name="valor_pagado" 
+                                       placeholder="Ej: 1500000" step="0.01" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoComprobante" class="form-label fw-bold">Archivo Comprobante <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="pagoComprobante" name="comprobante" 
+                                   accept=".pdf,.jpg,.jpeg,.png" required>
+                            <div class="form-text">
+                                Formatos aceptados: PDF, JPG, PNG (máx. 10MB)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoObservaciones" class="form-label fw-bold">Observaciones</label>
+                            <textarea class="form-control" id="pagoObservaciones" name="observaciones" rows="2" 
+                                      placeholder="Notas adicionales (opcional)"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnConfirmarPago">
+                        <i data-feather="check-circle" class="mr-1"></i> Confirmar Pago
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========== FIN MODAL SUBIR PAGO ========== -->
+
     {% include '_footer.html' %}
 
     <div class="floting-button fixed bottom-[50px] right-[30px] z-[1030]">
@@ -261,12 +365,26 @@
             
             const tablaTbody = document.getElementById('tablaImpuestosBody');
             const filtroEmpresaSelect = document.getElementById('filterEmpresa');
+            const filtroAnioSelect = document.getElementById('filterAnio');
             const modalEmpresaSelect = document.getElementById('inputEmpresa');
             const feedbackDiv = document.getElementById('feedbackMessage');
             const btnSubir = document.getElementById('btnSubirFormulario');
             const formNuevoImpuesto = document.getElementById('formNuevoImpuesto');
             const modalElement = document.getElementById('newFormularioModal');
             const modalInstance = new bootstrap.Modal(modalElement);
+            
+            // Modal de pago
+            const modalPagoElement = document.getElementById('modalSubirPago');
+            const modalPagoInstance = new bootstrap.Modal(modalPagoElement);
+            const formSubirPago = document.getElementById('formSubirPago');
+            const btnConfirmarPago = document.getElementById('btnConfirmarPago');
+
+            // Poblar años (últimos 5 años + actual + próximo)
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear + 1; i >= currentYear - 5; i--) {
+                filtroAnioSelect.add(new Option(i, i));
+            }
+            filtroAnioSelect.value = currentYear; // Seleccionar año actual por defecto
 
             // --- Funciones de Feedback ---
             function showMessage(message, type = 'info', container = feedbackDiv) {
@@ -292,25 +410,31 @@
 
             // Cargar y mostrar registros de impuestos
             async function loadImpuestos() {
-                tablaTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Cargando registros...</td></tr>';
+                tablaTbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Cargando registros...</td></tr>';
                 
                 const empresaNit = filtroEmpresaSelect.value;
                 const tipoImpuesto = document.getElementById('filterImpuesto').value;
+                const anio = filtroAnioSelect.value;
                 
                 try {
-                    const response = await fetch(`${API_URL}/impuestos?empresa_nit=${empresaNit}&tipo_impuesto=${tipoImpuesto}`, { 
-                        credentials: 'include' 
-                    });
+                    let url = `${API_URL}/impuestos?empresa_nit=${empresaNit}&tipo_impuesto=${tipoImpuesto}`;
+                    if (anio !== 'todos') {
+                        url += `&anio=${anio}`;
+                    }
+                    
+                    const response = await fetch(url, { credentials: 'include' });
                     
                     if (!response.ok) {
                          const err = await response.json();
                          throw new Error(err.error || 'Error al cargar registros');
                     }
-                    const data = await response.json();
+                    const rawData = await response.json();
+                    // Soporte para respuesta paginada o array directo
+                    const data = rawData.items ? rawData.items : (Array.isArray(rawData) ? rawData : []);
                     renderTable(data);
                 } catch (error) {
                     console.error('Error en loadImpuestos:', error);
-                    tablaTbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+                    tablaTbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error: ${error.message}</td></tr>`;
                 } finally {
                     feather.replace(); // Recargar iconos
                 }
@@ -373,13 +497,123 @@
                 // TODO: El backend necesita una ruta como /api/impuestos/<id>/archivo
                 alert('Funcionalidad para ver el PDF no implementada en el backend.');
             }
+            
+            // Ver comprobante de pago
+            window.verComprobante = function(id) {
+                // TODO: El backend necesita una ruta como /api/impuestos/<id>/comprobante
+                alert('Funcionalidad para ver comprobante de pago no implementada en el backend.');
+            }
+            
+            // Abrir modal de subir pago
+            window.abrirModalPago = function(id, empresaNombre, tipoImpuesto, periodo) {
+                console.log('📤 Abriendo modal de pago para impuesto ID:', id);
+                
+                // Cargar datos en el modal
+                document.getElementById('pagoImpuestoId').value = id;
+                document.getElementById('infoPagoEmpresa').innerHTML = `
+                    <strong>Empresa:</strong> ${empresaNombre}<br>
+                    <strong>Impuesto:</strong> ${tipoImpuesto}<br>
+                    <strong>Periodo:</strong> ${periodo}
+                `;
+                
+                // Limpiar formulario
+                formSubirPago.reset();
+                document.getElementById('pagoImpuestoId').value = id; // Restaurar ID después del reset
+                
+                // Establecer fecha actual por defecto
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('pagoFecha').value = today;
+                
+                // Abrir modal
+                modalPagoInstance.show();
+                
+                // Recargar iconos
+                setTimeout(() => feather.replace(), 100);
+            }
+            
+            // Confirmar y enviar pago
+            btnConfirmarPago.addEventListener('click', async function() {
+                if (!formSubirPago.checkValidity()) {
+                    formSubirPago.reportValidity();
+                    return;
+                }
+                
+                const impuestoId = document.getElementById('pagoImpuestoId').value;
+                const comprobanteInput = document.getElementById('pagoComprobante');
+                
+                // Validar archivo
+                if (!comprobanteInput.files || comprobanteInput.files.length === 0) {
+                    alert('⚠️ Debe cargar el archivo comprobante de pago.');
+                    return;
+                }
+                
+                const archivo = comprobanteInput.files[0];
+                
+                // Validar tamaño (máx. 10MB)
+                if (archivo.size > 10 * 1024 * 1024) {
+                    alert('⚠️ El archivo es demasiado grande. El tamaño máximo es 10MB.');
+                    return;
+                }
+                
+                // Validar tipo
+                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(archivo.type)) {
+                    alert('⚠️ Formato de archivo no válido. Solo se permiten PDF, JPG y PNG.');
+                    return;
+                }
+                
+                // Confirmar acción
+                const confirmacion = confirm('¿Confirma que desea registrar este pago?');
+                if (!confirmacion) return;
+                
+                // Preparar FormData
+                const formData = new FormData(formSubirPago);
+                
+                // Mostrar loader
+                const originalBtnHtml = btnConfirmarPago.innerHTML;
+                btnConfirmarPago.disabled = true;
+                btnConfirmarPago.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+                
+                try {
+                    const response = await fetch(`${API_URL}/impuestos/${impuestoId}/pagar`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error al registrar el pago');
+                    }
+                    
+                    // Cerrar modal
+                    modalPagoInstance.hide();
+                    
+                    // Mostrar mensaje de éxito
+                    showMessage(`✅ ${result.message || 'Pago registrado exitosamente.'}`, 'success');
+                    
+                    // Recargar tabla
+                    await loadImpuestos();
+                    
+                    console.log('✅ Pago registrado:', result);
+                    
+                } catch (error) {
+                    console.error('❌ Error al registrar pago:', error);
+                    showMessage(`❌ Error: ${error.message}`, 'danger');
+                } finally {
+                    btnConfirmarPago.disabled = false;
+                    btnConfirmarPago.innerHTML = originalBtnHtml;
+                    feather.replace();
+                }
+            });
 
             // --- Funciones de Renderizado y Eventos ---
             
             function renderTable(data) {
                 tablaTbody.innerHTML = '';
                 if (data.length === 0) {
-                    tablaTbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No se encontraron registros de impuestos para los filtros seleccionados.</td></tr>';
+                    tablaTbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No se encontraron registros de impuestos para los filtros seleccionados.</td></tr>';
                     return;
                 }
                 
@@ -393,17 +627,46 @@
                     deadlineDate.setHours(0, 0, 0, 0); // Normalizar
                     
                     let estado = imp.estado;
-                    let badgeClass = 'bg-warning';
+                    let badgeClass = 'badge-pendiente';
                     
                     if (estado === 'Pendiente de Pago' && deadlineDate < today) {
                         estado = '¡VENCIDO!';
-                        badgeClass = 'bg-danger';
+                        badgeClass = 'badge-vencido';
                     } else if (estado === 'Pagado') {
-                        badgeClass = 'bg-success';
+                        badgeClass = 'badge-pagado';
+                    } else if (estado === 'Pendiente de Pago') {
+                        badgeClass = 'badge-pendiente';
                     }
 
                     const row = document.createElement('tr');
                     if(estado === '¡VENCIDO!') row.classList.add('table-danger');
+                    
+                    // Columna de comprobante
+                    let comprobanteHtml = '<span class="text-muted">-</span>';
+                    if (imp.comprobante_pago) {
+                        comprobanteHtml = `<button class="btn btn-sm btn-outline-primary" onclick="verComprobante(${imp.id})" title="Ver Comprobante">
+                            <i data-feather="file-text"></i> Ver
+                        </button>`;
+                    }
+                    
+                    // Columna de acciones
+                    let accionesHtml = '';
+                    if (estado === 'Pagado') {
+                        accionesHtml = `
+                            <button class="btn btn-sm btn-icon btn-outline-info" title="Ver Formulario" onclick="verFormulario(${imp.id})">
+                                <i data-feather="eye"></i>
+                            </button>
+                        `;
+                    } else {
+                        accionesHtml = `
+                            <button class="btn btn-sm btn-icon btn-outline-info" title="Ver Formulario" onclick="verFormulario(${imp.id})">
+                                <i data-feather="eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-success" onclick="abrirModalPago(${imp.id}, '${imp.empresa_nombre}', '${imp.tipo_impuesto}', '${imp.periodo}')" title="Subir Pago">
+                                <i data-feather="upload"></i> Subir Pago
+                            </button>
+                        `;
+                    }
                     
                     row.innerHTML = `
                         <td>${imp.empresa_nit}</td>
@@ -412,13 +675,8 @@
                         <td>${imp.periodo}</td>
                         <td>${imp.fecha_limite}</td>
                         <td><span class="badge ${badgeClass}">${estado}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-icon btn-outline-info" title="Ver Formulario" onclick="verFormulario(${imp.id})"><i data-feather="eye"></i></button>
-                            ${estado !== 'Pagado' ? 
-                                `<button class="btn btn-sm btn-icon btn-outline-success" title="Marcar como Pagado" onclick="marcarComoPagado(${imp.id})"><i data-feather="check-circle"></i></button>` : 
-                                `<button class="btn btn-sm btn-icon btn-outline-secondary" title="Ver Soporte de Pago" onclick="alert('Funcionalidad para ver soporte de pago no implementada.')"><i data-feather="paperclip"></i></button>`
-                            }
-                        </td>
+                        <td>${comprobanteHtml}</td>
+                        <td>${accionesHtml}</td>
                     `;
                     tablaTbody.appendChild(row);
                 });

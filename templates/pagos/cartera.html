@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
 
     <script>
       (async function checkAuthentication() {
@@ -161,13 +163,205 @@
           </div>
         </div>
 
+        <!-- ========== CONSOLA DE DIGITACIÓN RÁPIDA ========== -->
+        <div class="card mb-4" style="border-left: 4px solid #0056b3;">
+          <div class="card-header card-header-corporate" style="background: linear-gradient(135deg, #e8f0fe 0%, #d4e4fc 100%);">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="mb-1 fw-bold" style="color: #0056b3;">
+                  <i data-feather="zap" class="me-2"></i>
+                  Consola de Digitación Rápida
+                </h5>
+                <p class="mb-0 small text-muted">Agregue múltiples deudas manualmente de forma rápida</p>
+              </div>
+              <span class="badge fs-6 px-3 py-2" style="background-color: #0056b3;">
+                <i data-feather="layers" class="me-1"></i>
+                <span id="contadorTemporal">0</span> pendientes
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- ========== BUSCADOR UNIVERSAL DE USUARIOS ========== -->
+            <div class="col-12 mb-4">
+              <div class="alert alert-info border-start border-4 border-info" role="alert">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="ti ti-search fs-4 me-2"></i>
+                  <strong>Búsqueda Rápida de Usuario</strong>
+                </div>
+                <p class="mb-3 small">¿El usuario ya está registrado? Búscalo por documento para autocompletar sus datos.</p>
+                
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label for="tipoDocBusqueda" class="form-label small fw-semibold">
+                      <i class="ti ti-id-badge"></i> Tipo Documento
+                    </label>
+                    <select class="form-select" id="tipoDocBusqueda">
+                      <option value="">Seleccione...</option>
+                      <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                      <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                      <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div class="col-md-9">
+                    <label for="numeroDocBusqueda" class="form-label small fw-semibold">
+                      <i class="ti ti-number"></i> Número de Documento
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-white">
+                        <i class="ti ti-search text-primary"></i>
+                      </span>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="numeroDocBusqueda" 
+                        placeholder="Escribe y presiona Enter..."
+                        maxlength="15"
+                      />
+                    </div>
+                    <small class="text-muted">
+                      <i class="ti ti-info-circle"></i> 
+                      Datos se cargarán automáticamente si existe
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- ========== FIN BUSCADOR ========== -->
+
+            <!-- Formulario de Ingreso Rápido -->
+            <form id="formDigitacionRapida" class="mb-3">
+              <div class="row g-2 align-items-end">
+                <div class="col-md-2">
+                  <label for="inputIdUsuario" class="form-label small fw-semibold">ID Usuario</label>
+                  <input 
+                    type="text" 
+                    class="form-control form-control-sm" 
+                    id="inputIdUsuario" 
+                    list="usuariosDatalist"
+                    placeholder="Cédula..."
+                    required
+                  >
+                  <datalist id="usuariosDatalist"></datalist>
+                  <small class="text-muted d-block" id="nombreUsuarioDisplay">-</small>
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="inputNitEmpresa" class="form-label small fw-semibold">NIT Empresa</label>
+                  <input 
+                    type="text" 
+                    class="form-control form-control-sm" 
+                    id="inputNitEmpresa" 
+                    list="empresasDatalist"
+                    placeholder="NIT..."
+                    required
+                  >
+                  <datalist id="empresasDatalist"></datalist>
+                  <small class="text-muted d-block" id="nombreEmpresaDisplay">-</small>
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="selectEntidad" class="form-label small fw-semibold">Entidad</label>
+                  <select class="form-select form-select-sm" id="selectEntidad" required>
+                    <option value="">Seleccione...</option>
+                    <option value="EPS">EPS</option>
+                    <option value="ARL">ARL</option>
+                    <option value="AFP">AFP (Pensión)</option>
+                    <option value="CCF">Caja de Compensación</option>
+                    <option value="ICBF">ICBF</option>
+                    <option value="SENA">SENA</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="inputMonto" class="form-label small fw-semibold">Monto (COP)</label>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      id="inputMonto" 
+                      placeholder="0"
+                      min="0"
+                      step="1000"
+                      required
+                    >
+                  </div>
+                </div>
+                
+                <div class="col-md-2">
+                  <label for="inputDiasMora" class="form-label small fw-semibold">Días Mora</label>
+                  <div class="input-group input-group-sm">
+                    <input 
+                      type="number" 
+                      class="form-control" 
+                      id="inputDiasMora" 
+                      placeholder="0"
+                      min="0"
+                      required
+                    >
+                    <span class="input-group-text">días</span>
+                  </div>
+                </div>
+                
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-success btn-sm w-100">
+                    <i data-feather="plus-circle" class="me-1" style="width: 16px; height: 16px;"></i>
+                    Agregar (+)
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Tabla Temporal de Deudas Pendientes -->
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+              <table class="table table-excel table-bordered table-sm" id="tablaDigitacionTemporal">
+                <thead>
+                  <tr>
+                    <th style="width: 40px;">#</th>
+                    <th>ID Usuario</th>
+                    <th>Nombre Usuario</th>
+                    <th>NIT Empresa</th>
+                    <th>Nombre Empresa</th>
+                    <th>Entidad</th>
+                    <th class="text-end">Monto</th>
+                    <th class="text-center">Días Mora</th>
+                    <th class="text-center" style="width: 80px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyDigitacionTemporal">
+                  <tr>
+                    <td colspan="9" class="text-center text-muted py-4">
+                      <i data-feather="inbox" class="me-2"></i>
+                      No hay deudas pendientes de guardar
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Botón Final de Guardado -->
+            <div class="d-flex justify-content-end gap-2 mt-3">
+              <button type="button" class="btn btn-outline-secondary" onclick="limpiarTablaTemporal()">
+                <i data-feather="trash-2" class="me-1" style="width: 16px; height: 16px;"></i>
+                Limpiar Todo
+              </button>
+              <button type="button" class="btn btn-primary btn-lg" id="btnGuardarTodo" onclick="guardarTodasLasDeudas()" disabled>
+                <i data-feather="save" class="me-2" style="width: 20px; height: 20px;"></i>
+                💾 Guardar Todo (<span id="contadorGuardar">0</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- ========== FIN CONSOLA DE DIGITACIÓN RÁPIDA ========== -->
+
         <!-- Tarjeta Principal con Pestañas -->
         <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="card-header card-header-corporate d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
               <i class="ti ti-file-invoice"></i> Control de Flujo de Caja
             </h5>
-            <a href="/cartera/crear" class="btn btn-primary btn-sm">
+            <a href="/cartera/crear" class="btn btn-corporate btn-sm">
               <i class="ti ti-plus"></i> Nueva Obligación
             </a>
           </div>
@@ -176,13 +370,13 @@
             <!-- Nav Tabs -->
             <ul class="nav nav-tabs mb-3" id="carteraTabs" role="tablist">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="tab-cobrar" data-bs-toggle="tab" data-bs-target="#content-cobrar" type="button" role="tab">
-                  <i class="ti ti-arrow-down-circle"></i> 📥 Cuentas por Cobrar (Clientes)
+                <button class="nav-link active" id="tab-entidades" data-bs-toggle="tab" data-bs-target="#content-entidades" type="button" role="tab">
+                  <i class="ti ti-building-bank"></i> 💳 Deudas Entidades (Seguridad Social)
                 </button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="tab-pagar" data-bs-toggle="tab" data-bs-target="#content-pagar" type="button" role="tab">
-                  <i class="ti ti-arrow-up-circle"></i> 📤 Seguridad Social (Pasivos)
+                <button class="nav-link" id="tab-clientes" data-bs-toggle="tab" data-bs-target="#content-clientes" type="button" role="tab">
+                  <i class="ti ti-users"></i> 📋 Cobro a Clientes
                 </button>
               </li>
             </ul>
@@ -190,37 +384,10 @@
             <!-- Tab Content -->
             <div class="tab-content" id="carteraTabContent">
               
-              <!-- TAB 1: Cuentas por Cobrar -->
-              <div class="tab-pane fade show active" id="content-cobrar" role="tabpanel">
+              <!-- TAB 1: Deudas Entidades (Seguridad Social) -->
+              <div class="tab-pane fade show active" id="content-entidades" role="tabpanel">
                 <div class="table-responsive">
-                  <table class="table table-hover table-bordered text-sm whitespace-nowrap" id="tabla-cobrar">
-                    <thead>
-                      <tr>
-                        <th>Cliente</th>
-                        <th>Concepto</th>
-                        <th>Fecha Vencimiento</th>
-                        <th class="text-end">Monto</th>
-                        <th class="text-end">Pagado</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody id="tbody-cobrar">
-                      <tr>
-                        <td colspan="7" class="text-center text-muted">
-                          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                          Cargando cuentas por cobrar...
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- TAB 2: Seguridad Social -->
-              <div class="tab-pane fade" id="content-pagar" role="tabpanel">
-                <div class="table-responsive">
-                  <table class="table table-hover table-bordered text-sm whitespace-nowrap" id="tabla-pagar">
+                  <table class="table table-excel table-bordered table-sm" id="tabla-pagar">
                     <thead>
                       <tr>
                         <th>Empresa</th>
@@ -238,6 +405,40 @@
                         <td colspan="8" class="text-center text-muted">
                           <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                           Cargando obligaciones de seguridad social...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- TAB 2: Cobro a Clientes -->
+              <div class="tab-pane fade" id="content-clientes" role="tabpanel">
+                <div class="alert alert-info mb-3" role="alert">
+                  <i class="ti ti-info-circle me-2"></i>
+                  <strong>Gestión de Cobros:</strong> Clientes con saldos pendientes. Genere cuentas de cobro y envíe recordatorios por WhatsApp.
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table table-excel table-bordered table-sm" id="tabla-cobrar">
+                    <thead>
+                      <tr>
+                        <th>Cliente</th>
+                        <th>NIT/CC</th>
+                        <th>Contacto</th>
+                        <th>Teléfono</th>
+                        <th>Concepto</th>
+                        <th>Fecha Vencimiento</th>
+                        <th class="text-end">Saldo Pendiente</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-cobrar">
+                      <tr>
+                        <td colspan="9" class="text-center text-muted">
+                          <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                          Cargando clientes con saldos pendientes...
                         </td>
                       </tr>
                     </tbody>
@@ -336,7 +537,7 @@
         function renderCuentasCobrar() {
           const tbody = document.getElementById('tbody-cobrar');
           if (cuentasCobrar.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted"><i class="ti ti-inbox"></i> No hay cuentas por cobrar registradas</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted"><i class="ti ti-inbox"></i> No hay clientes con saldos pendientes</td></tr>';
             return;
           }
           tbody.innerHTML = cuentasCobrar.map(cuenta => {
@@ -344,8 +545,33 @@
             const rowClass = esVencida ? 'row-vencida' : '';
             const estadoBadge = getBadgeEstado(esVencida ? 'Vencido' : cuenta.estado);
             const montoPendiente = cuenta.monto - (cuenta.monto_pagado || 0);
-            return `<tr class="${rowClass}"><td><strong>${cuenta.nombre_empresa || cuenta.empresa_nit}</strong><br><small class="text-muted">NIT: ${cuenta.empresa_nit}</small></td><td>${cuenta.concepto}</td><td>${formatDate(cuenta.fecha_vencimiento)}${esVencida ? '<br><span class="badge bg-danger">VENCIDA</span>' : ''}</td><td class="text-end monto">${formatMoney(cuenta.monto)}</td><td class="text-end monto">${formatMoney(cuenta.monto_pagado || 0)}</td><td class="text-center">${estadoBadge}</td><td class="text-center">${cuenta.estado !== 'Pagado' ? `<button class="btn btn-sm btn-success" onclick="marcarPagadaCobrar(${cuenta.id}, ${montoPendiente})"><i class="ti ti-check"></i> Pagar</button>` : '<span class="text-muted">—</span>'}</td></tr>`;
+            const telefono = cuenta.telefono || '';
+            const tieneWhatsApp = telefono && telefono.length >= 10;
+            
+            return `<tr class="${rowClass}">
+              <td><strong>${cuenta.nombre_empresa || cuenta.cliente}</strong></td>
+              <td>${cuenta.empresa_nit || cuenta.nit || 'N/A'}</td>
+              <td>${cuenta.contacto || 'N/A'}</td>
+              <td>${telefono || 'Sin teléfono'}</td>
+              <td>${cuenta.concepto}</td>
+              <td>${formatDate(cuenta.fecha_vencimiento)}${esVencida ? '<br><span class="badge bg-danger">VENCIDA</span>' : ''}</td>
+              <td class="text-end monto">${formatMoney(montoPendiente)}</td>
+              <td class="text-center">${estadoBadge}</td>
+              <td class="text-center">
+                <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-info" onclick="generarCuentaCobro(${cuenta.id}, '${cuenta.nombre_empresa || cuenta.cliente}')" title="Generar Cuenta de Cobro">
+                    <i class="ti ti-file-invoice"></i>
+                  </button>
+                  ${tieneWhatsApp ? `
+                    <button class="btn btn-sm btn-success" onclick="enviarWhatsAppCobro('${telefono}', '${cuenta.nombre_empresa || cuenta.cliente}', ${montoPendiente})" title="Enviar por WhatsApp">
+                      <i data-feather="message-circle" class="w-4 h-4"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>`;
           }).join('');
+          feather.replace();
         }
         
         async function cargarObligacionesPagar() {
@@ -397,6 +623,85 @@
           }
         };
         
+        /**
+         * Generar cuenta de cobro en PDF
+         */
+        window.generarCuentaCobro = async function(cuentaId, clienteNombre) {
+          try {
+            Swal.fire({
+              title: 'Generando Cuenta de Cobro...',
+              html: `Cliente: <strong>${clienteNombre}</strong>`,
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              didOpen: () => { Swal.showLoading(); }
+            });
+
+            const response = await fetch(`/api/cartera/cobrar/${cuentaId}/cuenta-cobro`, {
+              method: 'GET',
+              credentials: 'include'
+            });
+
+            if (!response.ok) throw new Error('Error al generar cuenta de cobro');
+
+            // Descargar PDF
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cuenta_cobro_${clienteNombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            Swal.fire({
+              icon: 'success',
+              title: '¡Cuenta de Cobro Generada!',
+              text: 'El PDF se ha descargado correctamente',
+              timer: 2000,
+              showConfirmButton: false
+            });
+
+            console.log('✅ Cuenta de cobro generada para:', clienteNombre);
+
+          } catch (error) {
+            console.error('❌ Error generando cuenta de cobro:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: error.message
+            });
+          }
+        };
+
+        /**
+         * Enviar recordatorio de cobro por WhatsApp
+         */
+        window.enviarWhatsAppCobro = function(telefono, clienteNombre, montoPendiente) {
+          if (!telefono) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Sin Teléfono',
+              text: 'Este cliente no tiene un número de teléfono registrado'
+            });
+            return;
+          }
+
+          // Limpiar el número
+          const telefonoLimpio = telefono.replace(/\D/g, '');
+
+          // Mensaje predefinido de cobro
+          const mensaje = `Hola ${clienteNombre},\n\nLe recordamos que tiene un saldo pendiente de ${formatMoney(montoPendiente)} por concepto de servicios prestados.\n\nPor favor proceda con el pago a la brevedad posible.\n\n¡Gracias!\nMontero y Negocio`;
+
+          // Generar URL de WhatsApp
+          const whatsappURL = `https://wa.me/57${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+
+          // Abrir WhatsApp Web
+          window.open(whatsappURL, '_blank');
+
+          console.log('📱 WhatsApp abierto para cobro a:', clienteNombre);
+        };
+        
         window.marcarPagadaSS = async function(obligacionId) {
           const { value: formValues } = await Swal.fire({
             title: 'Registrar Pago de Planilla',
@@ -436,7 +741,285 @@
           };
           return badges[estado] || `<span class="badge bg-secondary">${estado}</span>`;
         }
+        
+        // ========== CONSOLA DE DIGITACIÓN RÁPIDA ==========
+        let deudas_temporales = [];
+        let usuariosCache = [];
+        let empresasCache = [];
+        
+        // Cargar usuarios y empresas al iniciar
+        async function cargarDatosAutocomplete() {
+          try {
+            // Cargar usuarios
+            const respUsuarios = await fetch('/api/usuarios');
+            const dataUsuarios = await respUsuarios.json();
+            usuariosCache = dataUsuarios.items ? dataUsuarios.items : (Array.isArray(dataUsuarios) ? dataUsuarios : []);
+            
+            // Cargar empresas
+            const respEmpresas = await fetch('/api/empresas');
+            const dataEmpresas = await respEmpresas.json();
+            empresasCache = dataEmpresas.items ? dataEmpresas.items : (Array.isArray(dataEmpresas) ? dataEmpresas : []);
+            
+            // Poblar datalists
+            poblarDatalistUsuarios();
+            poblarDatalistEmpresas();
+          } catch (error) {
+            console.error('Error cargando datos para autocompletado:', error);
+          }
+        }
+        
+        function poblarDatalistUsuarios() {
+          const datalist = document.getElementById('usuariosDatalist');
+          datalist.innerHTML = usuariosCache.map(u => {
+            const nombre = u.nombre || u.primer_nombre + ' ' + u.primer_apellido;
+            return `<option value="${u.id_usuario || u.identificacion}">${u.id_usuario || u.identificacion} - ${nombre}</option>`;
+          }).join('');
+        }
+        
+        function poblarDatalistEmpresas() {
+          const datalist = document.getElementById('empresasDatalist');
+          datalist.innerHTML = empresasCache.map(e => {
+            return `<option value="${e.nit}">${e.nit} - ${e.nombre}</option>`;
+          }).join('');
+        }
+        
+        // Actualizar displays cuando se selecciona
+        document.getElementById('inputIdUsuario')?.addEventListener('input', function(e) {
+          const valor = e.target.value.split(' - ')[0].trim();
+          const usuario = usuariosCache.find(u => (u.id_usuario || u.identificacion) == valor);
+          const display = document.getElementById('nombreUsuarioDisplay');
+          if (usuario) {
+            const nombre = usuario.nombre || usuario.primer_nombre + ' ' + usuario.primer_apellido;
+            display.textContent = nombre;
+            display.classList.add('text-success');
+          } else {
+            display.textContent = '-';
+            display.classList.remove('text-success');
+          }
+        });
+        
+        document.getElementById('inputNitEmpresa')?.addEventListener('input', function(e) {
+          const valor = e.target.value.split(' - ')[0].trim();
+          const empresa = empresasCache.find(emp => emp.nit == valor);
+          const display = document.getElementById('nombreEmpresaDisplay');
+          if (empresa) {
+            display.textContent = empresa.nombre;
+            display.classList.add('text-success');
+          } else {
+            display.textContent = '-';
+            display.classList.remove('text-success');
+          }
+        });
+        
+        // Manejar submit del formulario de digitación
+        document.getElementById('formDigitacionRapida')?.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const idUsuario = document.getElementById('inputIdUsuario').value.split(' - ')[0].trim();
+          const nitEmpresa = document.getElementById('inputNitEmpresa').value.split(' - ')[0].trim();
+          const entidad = document.getElementById('selectEntidad').value;
+          const monto = parseFloat(document.getElementById('inputMonto').value);
+          const diasMora = parseInt(document.getElementById('inputDiasMora').value);
+          
+          // Buscar nombres
+          const usuario = usuariosCache.find(u => (u.id_usuario || u.identificacion) == idUsuario);
+          const empresa = empresasCache.find(e => e.nit == nitEmpresa);
+          
+          if (!usuario) {
+            Swal.fire('Error', 'Usuario no encontrado', 'error');
+            return;
+          }
+          
+          if (!empresa) {
+            Swal.fire('Error', 'Empresa no encontrada', 'error');
+            return;
+          }
+          
+          // Agregar a la tabla temporal
+          const deuda = {
+            id_temporal: Date.now(),
+            id_usuario: idUsuario,
+            nombre_usuario: usuario.nombre || usuario.primer_nombre + ' ' + usuario.primer_apellido,
+            nit_empresa: nitEmpresa,
+            nombre_empresa: empresa.nombre,
+            entidad: entidad,
+            monto: monto,
+            dias_mora: diasMora
+          };
+          
+          deudas_temporales.push(deuda);
+          renderTablaDigitacion();
+          
+          // Limpiar formulario
+          e.target.reset();
+          document.getElementById('nombreUsuarioDisplay').textContent = '-';
+          document.getElementById('nombreEmpresaDisplay').textContent = '-';
+          document.getElementById('inputIdUsuario').focus();
+          
+          // Feedback visual
+          Swal.fire({
+            icon: 'success',
+            title: 'Agregado',
+            text: 'Deuda agregada a la lista temporal',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        });
+        
+        function renderTablaDigitacion() {
+          const tbody = document.getElementById('tbodyDigitacionTemporal');
+          const contador = deudas_temporales.length;
+          
+          document.getElementById('contadorTemporal').textContent = contador;
+          document.getElementById('contadorGuardar').textContent = contador;
+          document.getElementById('btnGuardarTodo').disabled = contador === 0;
+          
+          if (contador === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-4"><i data-feather="inbox" class="me-2"></i>No hay deudas pendientes de guardar</td></tr>`;
+            feather.replace();
+            return;
+          }
+          
+          tbody.innerHTML = deudas_temporales.map((deuda, idx) => `
+            <tr>
+              <td class="text-center">${idx + 1}</td>
+              <td><code>${deuda.id_usuario}</code></td>
+              <td>${deuda.nombre_usuario}</td>
+              <td><code>${deuda.nit_empresa}</code></td>
+              <td>${deuda.nombre_empresa}</td>
+              <td><span class="badge bg-info">${deuda.entidad}</span></td>
+              <td class="text-end"><strong>$${deuda.monto.toLocaleString('es-CO')}</strong></td>
+              <td class="text-center">${deuda.dias_mora > 0 ? `<span class="badge bg-danger">${deuda.dias_mora} días</span>` : '<span class="badge bg-success">0 días</span>'}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-danger" onclick="eliminarDeudaTemporal(${deuda.id_temporal})" title="Eliminar">
+                  <i data-feather="trash-2" style="width: 14px; height: 14px;"></i>
+                </button>
+              </td>
+            </tr>
+          `).join('');
+          
+          feather.replace();
+        }
+        
+        window.eliminarDeudaTemporal = function(idTemporal) {
+          deudas_temporales = deudas_temporales.filter(d => d.id_temporal !== idTemporal);
+          renderTablaDigitacion();
+        }
+        
+        window.limpiarTablaTemporal = function() {
+          if (deudas_temporales.length === 0) return;
+          
+          Swal.fire({
+            title: '¿Limpiar todo?',
+            text: `Se eliminarán ${deudas_temporales.length} deuda(s) pendiente(s)`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, limpiar',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              deudas_temporales = [];
+              renderTablaDigitacion();
+              Swal.fire('Limpiado', 'Tabla temporal limpiada', 'success');
+            }
+          });
+        }
+        
+        window.guardarTodasLasDeudas = async function() {
+          if (deudas_temporales.length === 0) return;
+          
+          const resultado = await Swal.fire({
+            title: 'Confirmar Guardado',
+            html: `¿Desea guardar <strong>${deudas_temporales.length}</strong> deuda(s) manualmente ingresada(s)?<br><small class="text-muted">Esta acción no se puede deshacer</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '💾 Guardar Todo',
+            cancelButtonText: 'Cancelar'
+          });
+          
+          if (!resultado.isConfirmed) return;
+          
+          try {
+            const response = await fetch('/api/cartera/deudas/batch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ deudas: deudas_temporales })
+            });
+            
+            if (!response.ok) throw new Error('Error al guardar');
+            
+            const data = await response.json();
+            
+            Swal.fire({
+              icon: 'success',
+              title: '¡Guardado Exitoso!',
+              html: `Se guardaron <strong>${data.guardadas || deudas_temporales.length}</strong> deuda(s) en el sistema`,
+              confirmButtonColor: '#10b981'
+            });
+            
+            // Limpiar y recargar
+            deudas_temporales = [];
+            renderTablaDigitacion();
+            cargarCartera();
+          } catch (error) {
+            console.error('Error guardando deudas:', error);
+            Swal.fire('Error', 'No se pudieron guardar las deudas: ' + error.message, 'error');
+          }
+        }
+        
+        // Inicializar autocompletado
+        cargarDatosAutocomplete();
+        // ========== FIN CONSOLA DE DIGITACIÓN RÁPIDA ==========
       });
+    </script>
+
+    <!-- Sistema de Búsqueda Universal -->
+    <script src="/assets/js/universal-search.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof UniversalSearch !== 'undefined') {
+            // Buscar el input de ID de usuario en Speed Entry
+            const buscadorCartera = new UniversalSearch({
+                inputId: 'inputIdUsuario',
+                mapping: {
+                    'numeroId': '#inputIdUsuario'
+                },
+                callback: function(usuario) {
+                    // Autocompletar ID de usuario en el formulario
+                    const inputIdUsuario = document.getElementById('inputIdUsuario');
+                    if (inputIdUsuario && usuario.numeroId) {
+                        inputIdUsuario.value = usuario.numeroId;
+                        
+                        // Actualizar display de nombre
+                        const nombreDisplay = document.getElementById('nombreUsuarioDisplay');
+                        if (nombreDisplay) {
+                            const nombreCompleto = `${usuario.primerNombre || ''} ${usuario.primerApellido || ''}`.trim();
+                            nombreDisplay.textContent = nombreCompleto;
+                            nombreDisplay.classList.add('text-success');
+                            nombreDisplay.classList.remove('text-danger');
+                        }
+                        
+                        // Desbloquear campo de Monto (Speed Entry)
+                        const inputMonto = document.getElementById('inputMonto');
+                        if (inputMonto) {
+                            inputMonto.disabled = false;
+                            inputMonto.focus();
+                        }
+                        
+                        console.log('✅ Usuario encontrado en cartera:', usuario);
+                    }
+                }
+            });
+            console.log('✅ Buscador Universal activado en Cartera (Speed Entry)');
+        }
+    });
     </script>
 
   </body>

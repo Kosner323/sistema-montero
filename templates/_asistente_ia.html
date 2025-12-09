@@ -1,0 +1,855 @@
+<!-- ========================================================================
+     ASISTENTE IA MONTERO - Widget de Chat Flotante
+     Componente omnipresente para interacción con el Cerebro del Sistema
+     ======================================================================== -->
+
+<style>
+  /* ============================================================
+     ESTILOS DEL ASISTENTE IA MONTERO
+     ============================================================ */
+
+  /* === BOTÓN FLOTANTE (FAB - Floating Action Button) === */
+  .ai-assistant-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  .ai-assistant-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.6);
+  }
+
+  .ai-assistant-fab:active {
+    transform: scale(0.95);
+  }
+
+  /* Icono del cerebro/robot */
+  .ai-assistant-fab .icon {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  /* Indicador de estado online */
+  .ai-assistant-fab .status-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: #10b981;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+
+  /* Animación de pulso suave */
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6), 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+  }
+
+  @keyframes statusPulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+
+  /* === VENTANA DE CHAT === */
+  .ai-assistant-widget {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 380px;
+    height: 600px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: none;
+    flex-direction: column;
+    z-index: 9999;
+    overflow: hidden;
+    animation: slideInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .ai-assistant-widget.active {
+    display: flex;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* === HEADER DEL CHAT === */
+  .ai-chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ai-chat-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    backdrop-filter: blur(10px);
+  }
+
+  .ai-chat-title h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .ai-chat-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  .ai-chat-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .ai-chat-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .ai-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+  }
+
+  .ai-chat-btn.voice-active {
+    background: rgba(16, 185, 129, 0.3);
+    animation: voicePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes voicePulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+  }
+
+  /* === BODY DEL CHAT (Área de mensajes) === */
+  .ai-chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Scrollbar personalizado */
+  .ai-chat-body::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .ai-chat-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .ai-chat-body::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 3px;
+  }
+
+  .ai-chat-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.5);
+  }
+
+  /* === BURBUJAS DE MENSAJES === */
+  .message-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    word-wrap: break-word;
+    animation: messageSlideIn 0.3s ease;
+    position: relative;
+  }
+
+  @keyframes messageSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mensaje del sistema (izquierda, gris) */
+  .message-system {
+    align-self: flex-start;
+    background: #ffffff;
+    color: #2d3748;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .message-system::before {
+    content: '🧠';
+    position: absolute;
+    left: -32px;
+    top: 0;
+    font-size: 24px;
+  }
+
+  /* Mensaje del usuario (derecha, azul) */
+  .message-user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  .message-timestamp {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* Estilo para contenido formateado en mensajes del sistema */
+  .message-system ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+    font-size: 13px;
+  }
+
+  .message-system li {
+    margin: 4px 0;
+  }
+
+  .message-system strong {
+    font-weight: 600;
+    color: #1a202c;
+  }
+
+  .message-system em {
+    font-style: italic;
+    color: #4a5568;
+  }
+
+  /* Indicador de escritura */
+  .typing-indicator {
+    display: none;
+    align-self: flex-start;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+  }
+
+  .typing-indicator.active {
+    display: block;
+  }
+
+  .typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #cbd5e0;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 2px;
+    animation: typingBounce 1.4s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* === FOOTER DEL CHAT (Input de texto) === */
+  .ai-chat-footer {
+    padding: 16px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .ai-chat-input {
+    flex: 1;
+    border: 2px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 12px 16px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+  }
+
+  .ai-chat-input:focus {
+    border-color: #667eea;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .ai-chat-input::placeholder {
+    color: #a0aec0;
+  }
+
+  .ai-chat-send-btn,
+  .ai-chat-mic-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 18px;
+  }
+
+  .ai-chat-send-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .ai-chat-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  }
+
+  .ai-chat-send-btn:active {
+    transform: scale(0.95);
+  }
+
+  .ai-chat-mic-btn {
+    background: #f7fafc;
+    color: #667eea;
+    border: 2px solid #e2e8f0;
+  }
+
+  .ai-chat-mic-btn:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 480px) {
+    .ai-assistant-widget {
+      width: calc(100vw - 16px);
+      height: calc(100vh - 120px);
+      right: 8px;
+      bottom: 90px;
+    }
+
+    .ai-assistant-fab {
+      bottom: 16px;
+      right: 16px;
+      width: 56px;
+      height: 56px;
+    }
+  }
+</style>
+
+<!-- ============================================================
+     BOTÓN FLOTANTE (FAB)
+     ============================================================ -->
+<button class="ai-assistant-fab" id="aiAssistantToggle" aria-label="Abrir Asistente IA Montero">
+  <span class="icon">🧠</span>
+  <span class="status-badge" title="Online"></span>
+</button>
+
+<!-- ============================================================
+     VENTANA DE CHAT
+     ============================================================ -->
+<div class="ai-assistant-widget" id="aiAssistantWidget">
+  <!-- HEADER -->
+  <div class="ai-chat-header">
+    <div class="ai-chat-header-info">
+      <div class="ai-chat-avatar">🧠</div>
+      <div class="ai-chat-title">
+        <h5>Asistente Montero</h5>
+        <p class="ai-chat-subtitle">Cerebro del Sistema • Online</p>
+      </div>
+    </div>
+    <div class="ai-chat-actions">
+      <button class="ai-chat-btn" id="aiVoiceToggle" aria-label="Activar/Silenciar Voz" title="Voz activada">
+        <i class="ti ti-volume"></i>
+      </button>
+      <button class="ai-chat-btn" id="aiChatMinimize" aria-label="Minimizar chat">
+        <i class="ti ti-minus"></i>
+      </button>
+      <button class="ai-chat-btn" id="aiChatClose" aria-label="Cerrar chat">
+        <i class="ti ti-x"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- BODY (Área de mensajes) -->
+  <div class="ai-chat-body" id="aiChatBody">
+    <!-- Mensaje de bienvenida del sistema -->
+    <div class="message-bubble message-system">
+      <div>👋 ¡Hola! Soy el Asistente Montero, el cerebro del sistema.</div>
+      <div class="message-timestamp">Hace unos momentos</div>
+    </div>
+    <div class="message-bubble message-system">
+      <div>¿En qué puedo ayudarte hoy? Puedo asistirte con:</div>
+      <ul style="margin: 8px 0 0 0; padding-left: 20px; font-size: 13px;">
+        <li>Gestión de usuarios y empresas</li>
+        <li>Generación de reportes</li>
+        <li>Consultas sobre el sistema</li>
+        <li>Análisis de datos</li>
+      </ul>
+      <div class="message-timestamp">Hace unos momentos</div>
+    </div>
+
+    <!-- Indicador de escritura (oculto por defecto) -->
+    <div class="typing-indicator" id="typingIndicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
+  </div>
+
+  <!-- FOOTER (Input de texto) -->
+  <div class="ai-chat-footer">
+    <input 
+      type="text" 
+      class="ai-chat-input" 
+      id="aiChatInput" 
+      placeholder="Escribe tu pregunta aquí..."
+      autocomplete="off"
+    />
+    <button class="ai-chat-mic-btn" id="aiChatMic" aria-label="Mensaje de voz" title="Próximamente: Voz">
+      <i class="ti ti-microphone"></i>
+    </button>
+    <button class="ai-chat-send-btn" id="aiChatSend" aria-label="Enviar mensaje">
+      <i class="ti ti-send"></i>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT - Lógica del Widget
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // Elementos DOM
+  const fabButton = document.getElementById('aiAssistantToggle');
+  const chatWidget = document.getElementById('aiAssistantWidget');
+  const closeBtn = document.getElementById('aiChatClose');
+  const minimizeBtn = document.getElementById('aiChatMinimize');
+  const sendBtn = document.getElementById('aiChatSend');
+  const micBtn = document.getElementById('aiChatMic');
+  const voiceToggleBtn = document.getElementById('aiVoiceToggle');
+  const chatInput = document.getElementById('aiChatInput');
+  const chatBody = document.getElementById('aiChatBody');
+  const typingIndicator = document.getElementById('typingIndicator');
+
+  // Estado de la voz
+  let voiceEnabled = true;
+
+  // Toggle del widget
+  function toggleWidget() {
+    chatWidget.classList.toggle('active');
+    if (chatWidget.classList.contains('active')) {
+      chatInput.focus();
+      scrollToBottom();
+    }
+  }
+
+  // Cerrar widget
+  function closeWidget() {
+    chatWidget.classList.remove('active');
+  }
+
+  // Scroll al final del chat
+  function scrollToBottom() {
+    setTimeout(() => {
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }, 100);
+  }
+
+  // Obtener timestamp formateado
+  function getTimestamp() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  // Agregar mensaje al chat
+  function addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-bubble ${isUser ? 'message-user' : 'message-system'}`;
+    
+    const contentDiv = document.createElement('div');
+    
+    // Si no es mensaje de usuario, permitir HTML básico para formato
+    if (!isUser) {
+      // Convertir markdown simple a HTML
+      const formattedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **negrita**
+        .replace(/\*(.*?)\*/g, '<em>$1</em>') // *cursiva*
+        .replace(/`(.*?)`/g, '<code style="background:#f1f5f9;padding:2px 6px;border-radius:3px;font-size:12px;">$1</code>'); // `código`
+      
+      contentDiv.innerHTML = formattedText;
+    } else {
+      contentDiv.textContent = text;
+    }
+    
+    const timestampDiv = document.createElement('div');
+    timestampDiv.className = 'message-timestamp';
+    timestampDiv.textContent = getTimestamp();
+    
+    messageDiv.appendChild(contentDiv);
+    messageDiv.appendChild(timestampDiv);
+    
+    chatBody.insertBefore(messageDiv, typingIndicator);
+    scrollToBottom();
+  }
+
+  // Mostrar indicador de escritura
+  function showTypingIndicator() {
+    typingIndicator.classList.add('active');
+    scrollToBottom();
+  }
+
+  // Ocultar indicador de escritura
+  function hideTypingIndicator() {
+    typingIndicator.classList.remove('active');
+  }
+
+  // Enviar mensaje
+  async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // Agregar mensaje del usuario
+    addMessage(message, true);
+    chatInput.value = '';
+
+    // Mostrar indicador de escritura
+    showTypingIndicator();
+
+    try {
+      // Llamada al backend real
+      const response = await fetch('/api/asistente/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: message })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Ocultar indicador y mostrar respuesta
+      hideTypingIndicator();
+      addMessage(data.response, false);
+
+      // Leer respuesta en voz alta (TTS)
+      if (voiceEnabled) {
+        speakText(data.response);
+      }
+
+    } catch (error) {
+      // Manejo de errores
+      hideTypingIndicator();
+      console.error('❌ Error al comunicarse con el backend:', error);
+      addMessage('❌ Lo siento, ocurrió un error al procesar tu mensaje. Por favor, intenta de nuevo.', false);
+    }
+  }
+
+  // Event Listeners
+  fabButton.addEventListener('click', toggleWidget);
+  closeBtn.addEventListener('click', closeWidget);
+  minimizeBtn.addEventListener('click', closeWidget);
+  sendBtn.addEventListener('click', sendMessage);
+
+  // Enter para enviar mensaje
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  // =============================================================================
+  // SÍNTESIS DE VOZ (TTS - Text To Speech)
+  // =============================================================================
+  function speakText(text) {
+    // Cancelar cualquier lectura en curso
+    window.speechSynthesis.cancel();
+
+    // Limpiar markdown y HTML para TTS
+    const cleanText = text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Eliminar **negrita**
+      .replace(/\*(.*?)\*/g, '$1')     // Eliminar *cursiva*
+      .replace(/`(.*?)`/g, '$1')       // Eliminar `código`
+      .replace(/<[^>]*>/g, '')         // Eliminar tags HTML
+      .replace(/❌|✅|🎯|📊|💰|🔄|⚠️/g, ''); // Eliminar emojis comunes
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    // Configuración de la voz
+    utterance.lang = 'es-ES'; // Español de España
+    utterance.rate = 1.0;     // Velocidad normal
+    utterance.pitch = 1.0;    // Tono normal
+    utterance.volume = 0.9;   // Volumen 90%
+
+    // Buscar una voz en español
+    const voices = window.speechSynthesis.getVoices();
+    const spanishVoice = voices.find(voice => 
+      voice.lang.startsWith('es-') || voice.lang === 'es'
+    );
+    
+    if (spanishVoice) {
+      utterance.voice = spanishVoice;
+      console.log('🗣️ Usando voz:', spanishVoice.name);
+    }
+
+    // Eventos
+    utterance.onstart = () => {
+      console.log('🗣️ Inicio de lectura TTS');
+      voiceToggleBtn.classList.add('voice-active');
+    };
+
+    utterance.onend = () => {
+      console.log('🗣️ Fin de lectura TTS');
+      voiceToggleBtn.classList.remove('voice-active');
+    };
+
+    utterance.onerror = (event) => {
+      console.error('❌ Error en TTS:', event.error);
+      voiceToggleBtn.classList.remove('voice-active');
+    };
+
+    // Reproducir
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Toggle de voz
+  function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    
+    if (voiceEnabled) {
+      voiceToggleBtn.innerHTML = '<i class="ti ti-volume"></i>';
+      voiceToggleBtn.title = 'Voz activada';
+      console.log('🔊 Voz activada');
+    } else {
+      voiceToggleBtn.innerHTML = '<i class="ti ti-volume-off"></i>';
+      voiceToggleBtn.title = 'Voz silenciada';
+      window.speechSynthesis.cancel(); // Detener cualquier lectura en curso
+      console.log('🔇 Voz silenciada');
+    }
+  }
+
+  // Cargar voces cuando estén disponibles
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      const voices = window.speechSynthesis.getVoices();
+      console.log('🗣️ Voces disponibles:', voices.length);
+      voices.filter(v => v.lang.startsWith('es')).forEach(v => {
+        console.log(`  - ${v.name} (${v.lang})`);
+      });
+    };
+  }
+
+  // Event listener del botón de voz
+  voiceToggleBtn.addEventListener('click', toggleVoice);
+
+  // =============================================================================
+  // RECONOCIMIENTO DE VOZ (STT - Speech To Text)
+  // =============================================================================
+  let recognition = null;
+  let isListening = false;
+
+  // Verificar compatibilidad del navegador
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    // Cuando se inicia el reconocimiento
+    recognition.onstart = function() {
+      isListening = true;
+      micBtn.style.background = 'linear-gradient(135deg, #FF5370 0%, #ff7991 100%)';
+      micBtn.style.color = '#ffffff';
+      micBtn.style.animation = 'pulseGlow 1s ease-in-out infinite';
+      micBtn.innerHTML = '<i class="ti ti-microphone" style="animation: none;"></i>';
+      micBtn.title = 'Escuchando...';
+      console.log('🎙️ Reconocimiento de voz iniciado');
+    };
+
+    // Cuando termina el reconocimiento
+    recognition.onend = function() {
+      isListening = false;
+      micBtn.style.background = '#f7fafc';
+      micBtn.style.color = '#667eea';
+      micBtn.style.animation = 'none';
+      micBtn.innerHTML = '<i class="ti ti-microphone"></i>';
+      micBtn.title = 'Mensaje de voz';
+      console.log('🎙️ Reconocimiento de voz detenido');
+    };
+
+    // Cuando se recibe un resultado
+    recognition.onresult = function(event) {
+      const transcript = event.results[0][0].transcript;
+      console.log('🎯 Transcripción:', transcript);
+      
+      // Poner el texto transcrito en el input
+      chatInput.value = transcript;
+      
+      // Enviar automáticamente el mensaje después de 1 segundo
+      setTimeout(() => {
+        if (chatInput.value.trim()) {
+          sendMessage();
+        }
+      }, 1000);
+    };
+
+    // Manejo de errores
+    recognition.onerror = function(event) {
+      console.error('❌ Error en reconocimiento de voz:', event.error);
+      isListening = false;
+      micBtn.style.background = '#f7fafc';
+      micBtn.style.color = '#667eea';
+      micBtn.style.animation = 'none';
+      micBtn.innerHTML = '<i class="ti ti-microphone"></i>';
+      
+      let errorMsg = 'Error al reconocer voz.';
+      switch(event.error) {
+        case 'no-speech':
+          errorMsg = 'No se detectó ninguna voz. Intenta de nuevo.';
+          break;
+        case 'audio-capture':
+          errorMsg = 'No se pudo acceder al micrófono. Verifica los permisos.';
+          break;
+        case 'not-allowed':
+          errorMsg = 'Permiso de micrófono denegado. Habilítalo en la configuración del navegador.';
+          break;
+        case 'network':
+          errorMsg = 'Error de red. Verifica tu conexión a Internet.';
+          break;
+      }
+      
+      addMessage('❌ ' + errorMsg, false);
+    };
+
+    // Evento del botón de micrófono
+    micBtn.addEventListener('click', () => {
+      if (!isListening) {
+        try {
+          recognition.start();
+        } catch (error) {
+          console.error('❌ Error al iniciar reconocimiento:', error);
+          addMessage('❌ Error al iniciar el reconocimiento de voz. Intenta de nuevo.', false);
+        }
+      } else {
+        recognition.stop();
+      }
+    });
+
+  } else {
+    // Navegador no compatible
+    console.warn('⚠️ Web Speech API no compatible en este navegador');
+    micBtn.addEventListener('click', () => {
+      addMessage('❌ Tu navegador no soporta reconocimiento de voz. Usa Google Chrome o Microsoft Edge.', false);
+    });
+    micBtn.title = 'Reconocimiento de voz no disponible';
+  }
+
+  // Cerrar con ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && chatWidget.classList.contains('active')) {
+      closeWidget();
+      if (isListening && recognition) {
+        recognition.stop();
+      }
+    }
+  });
+
+  console.log('🧠 Asistente IA Montero cargado correctamente');
+  console.log('🎙️ Web Speech API:', SpeechRecognition ? 'DISPONIBLE' : 'NO DISPONIBLE');
+})();
+</script>

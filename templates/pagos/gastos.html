@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gastos Rápidos - Caja Menor | Portal Montero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Sistema de registro rápido de gastos - Caja Menor" />
+    <meta name="author" content="Montero y Negocio" />
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
+
+    <style>
+      /* ============================================================
+         ESTILOS PERSONALIZADOS - GASTOS RÁPIDOS
+         ============================================================ */
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+      }
+
+      .page-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .page-header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a202c;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .page-header p {
+        margin: 8px 0 0 0;
+        color: #718096;
+        font-size: 14px;
+      }
+
+      /* Tarjeta de entrada de gastos */
+      .expense-entry-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        margin-bottom: 24px;
+      }
+
+      .expense-entry-card h3 {
+        margin: 0 0 24px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* Input gigante para el monto */
+      .amount-input-wrapper {
+        position: relative;
+        margin-bottom: 24px;
+      }
+
+      .amount-input-wrapper .currency-symbol {
+        position: absolute;
+        left: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 36px;
+        font-weight: 700;
+        color: #667eea;
+        pointer-events: none;
+      }
+
+      .amount-input {
+        width: 100%;
+        border: 3px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px 24px 24px 64px;
+        font-size: 36px;
+        font-weight: 700;
+        color: #1a202c;
+        outline: none;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+      }
+
+      .amount-input:focus {
+        border-color: #667eea;
+        background: #ffffff;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+
+      .amount-input::placeholder {
+        color: #cbd5e0;
+        font-weight: 600;
+      }
+
+      /* Input de concepto */
+      .concept-input {
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        font-size: 16px;
+        color: #2d3748;
+        outline: none;
+        transition: all 0.2s ease;
+        background: #f8f9fa;
+        margin-bottom: 24px;
+      }
+
+      .concept-input:focus {
+        border-color: #667eea;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      /* Botones de categoría */
+      .category-selector {
+        margin-bottom: 24px;
+      }
+
+      .category-selector label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .category-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .category-btn {
+        background: #f7fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .category-btn .icon {
+        font-size: 28px;
+      }
+
+      .category-btn .label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .category-btn:hover {
+        border-color: #cbd5e0;
+        background: #edf2f7;
+        transform: translateY(-2px);
+      }
+
+      .category-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .category-btn.active .label {
+        color: #ffffff;
+      }
+
+      /* Botón principal de registro */
+      .register-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 14px;
+        padding: 18px 32px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+      }
+
+      .register-btn:active {
+        transform: translateY(0);
+      }
+
+      .register-btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      /* Tabla resumen del día */
+      .daily-summary-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .daily-summary-card h3 {
+        margin: 0 0 24px 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .total-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .expenses-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .expenses-table thead tr {
+        background: #f7fafc;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .expenses-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 700;
+        color: #4a5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .expenses-table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+        transition: background 0.2s ease;
+      }
+
+      .expenses-table tbody tr:hover {
+        background: #f8f9fa;
+      }
+
+      .expenses-table td {
+        padding: 16px;
+        font-size: 14px;
+        color: #2d3748;
+      }
+
+      .expense-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f7fafc;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .expense-amount {
+        font-weight: 700;
+        font-size: 16px;
+        color: #f5576c;
+      }
+
+      .expense-time {
+        font-size: 12px;
+        color: #718096;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: #a0aec0;
+      }
+
+      .empty-state .icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+      }
+
+      .empty-state p {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      /* Tarjeta de Balance del Día */
+      .balance-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        color: #ffffff;
+        margin-top: 24px;
+      }
+
+      .balance-card h3 {
+        margin: 0 0 24px 0;
+        font-size: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .balance-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .balance-item {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .balance-item .label {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .balance-item .amount {
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .balance-item.ingresos .amount {
+        color: #10b981;
+      }
+
+      .balance-item.egresos .amount {
+        color: #f5576c;
+      }
+
+      .balance-item.neto .amount {
+        font-size: 28px;
+      }
+
+      .balance-bar {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        height: 12px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .balance-bar-fill {
+        background: linear-gradient(90deg, #10b981 0%, #f5576c 100%);
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+
+      /* Animación de carga */
+      .loading {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+      }
+
+      .loading.active {
+        display: flex;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e2e8f0;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Notificación de éxito */
+      .success-toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        display: none;
+        align-items: center;
+        gap: 12px;
+        z-index: 10000;
+        animation: slideInRight 0.4s ease;
+      }
+
+      .success-toast.active {
+        display: flex;
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .expense-entry-card,
+        .daily-summary-card {
+          padding: 20px;
+        }
+
+        .amount-input {
+          font-size: 28px;
+          padding: 20px 20px 20px 56px;
+        }
+
+        .amount-input-wrapper .currency-symbol {
+          font-size: 28px;
+          left: 20px;
+        }
+
+        .category-buttons {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+
+    <script>
+      (async function checkAuthentication() {
+        const loader = document.querySelector('.loader-bg');
+        if (loader) loader.style.display = 'flex';
+
+        try {
+          const response = await fetch('/api/check_auth', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            window.location.href = '/login';
+            return;
+          }
+
+          const data = await response.json();
+
+          if (!data.authenticated) {
+            window.location.href = '/login';
+          } else {
+            if (loader) loader.style.display = 'none';
+            sessionStorage.setItem('userName', data.user_name);
+            sessionStorage.setItem('userId', data.user_id);
+          }
+        } catch (error) {
+          console.error('Error de autenticación:', error);
+          window.location.href = '/login';
+        }
+      })();
+    </script>
+  </head>
+
+  <body data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" data-pc-theme="light">
+    <div class="loader-bg">
+      <div class="loader-track">
+        <div class="loader-fill"></div>
+      </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <!-- ============================================================
+         CONTENIDO PRINCIPAL
+         ============================================================ -->
+    <div class="pc-container">
+      <div class="pc-content">
+        <!-- Encabezado de página -->
+        <div class="page-header">
+          <h1>
+            <span style="font-size: 32px;">💸</span>
+            Gastos Rápidos - Caja Menor
+          </h1>
+          <p>Registra tus gastos diarios de forma rápida sin necesidad de soporte obligatorio</p>
+        </div>
+
+        <div class="row">
+          <!-- Columna izquierda: Formulario de entrada -->
+          <div class="col-md-5">
+            <div class="expense-entry-card">
+              <h3>
+                <span>✍️</span>
+                Registrar Nuevo Gasto
+              </h3>
+
+              <form id="expenseForm">
+                <!-- Monto -->
+                <div class="amount-input-wrapper">
+                  <span class="currency-symbol">$</span>
+                  <input 
+                    type="text" 
+                    class="amount-input" 
+                    id="amount" 
+                    placeholder="0" 
+                    autocomplete="off"
+                    required
+                  />
+                </div>
+
+                <!-- Concepto -->
+                <input 
+                  type="text" 
+                  class="concept-input" 
+                  id="concept" 
+                  placeholder="¿En qué gastaste? (Ej: Taxi a reunión con cliente)" 
+                  required
+                />
+
+                <!-- Categoría -->
+                <div class="category-selector">
+                  <label>Categoría</label>
+                  <div class="category-buttons">
+                    <div class="category-btn" data-category="Transporte">
+                      <span class="icon">🚕</span>
+                      <span class="label">Transporte</span>
+                    </div>
+                    <div class="category-btn" data-category="Alimentación">
+                      <span class="icon">☕</span>
+                      <span class="label">Comida</span>
+                    </div>
+                    <div class="category-btn" data-category="Oficina">
+                      <span class="icon">📎</span>
+                      <span class="label">Papelería</span>
+                    </div>
+                    <div class="category-btn" data-category="Servicios">
+                      <span class="icon">⚡</span>
+                      <span class="label">Servicios</span>
+                    </div>
+                    <div class="category-btn" data-category="Marketing">
+                      <span class="icon">📢</span>
+                      <span class="label">Marketing</span>
+                    </div>
+                    <div class="category-btn" data-category="Otro">
+                      <span class="icon">💼</span>
+                      <span class="label">Otro</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Botón de registro -->
+                <button type="submit" class="register-btn" id="registerBtn">
+                  <i class="ti ti-check" style="font-size: 24px;"></i>
+                  Registrar Gasto
+                </button>
+              </form>
+
+              <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Resumen del día -->
+          <div class="col-md-7">
+            <div class="daily-summary-card">
+              <h3>
+                <span>📊 Gastos de Hoy</span>
+                <span class="total-badge" id="totalBadge">$0</span>
+              </h3>
+
+              <div id="tableContainer">
+                <table class="expenses-table" id="expensesTable">
+                  <thead>
+                    <tr>
+                      <th>Hora</th>
+                      <th>Concepto</th>
+                      <th>Categoría</th>
+                      <th>Monto</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expensesTableBody">
+                    <!-- Se llenará dinámicamente -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="empty-state" id="emptyState">
+                <div class="icon">📋</div>
+                <p>No hay gastos registrados hoy</p>
+              </div>
+
+              <div class="loading" id="tableLoadingIndicator">
+                <div class="spinner"></div>
+              </div>
+            </div>
+
+            <!-- Balance del Día -->
+            <div class="balance-card">
+              <h3>
+                <span>💰</span>
+                Balance del Día
+              </h3>
+
+              <div class="balance-grid">
+                <div class="balance-item ingresos">
+                  <div class="label">Ingresos</div>
+                  <div class="amount" id="ingresosAmount">$0</div>
+                </div>
+                <div class="balance-item egresos">
+                  <div class="label">Egresos</div>
+                  <div class="amount" id="egresosAmount">$0</div>
+                </div>
+                <div class="balance-item neto">
+                  <div class="label">Neto</div>
+                  <div class="amount" id="netoAmount">$0</div>
+                </div>
+              </div>
+
+              <div class="balance-bar">
+                <div class="balance-bar-fill" id="balanceBarFill" style="width: 50%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast de éxito -->
+    <div class="success-toast" id="successToast">
+      <i class="ti ti-check" style="font-size: 24px;"></i>
+      <span id="toastMessage">Gasto registrado exitosamente</span>
+    </div>
+
+    {% include '_asistente_ia.html' %}
+
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/bootstrap.min.js"></script>
+    <script src="/assets/js/fonts/custom-font.js"></script>
+    <script src="/assets/js/pcoded.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+
+    <script>
+      // ============================================================
+      // LÓGICA DE GASTOS RÁPIDOS
+      // ============================================================
+
+      let selectedCategory = null;
+      let todayExpenses = [];
+
+      // Elementos DOM
+      const expenseForm = document.getElementById('expenseForm');
+      const amountInput = document.getElementById('amount');
+      const conceptInput = document.getElementById('concept');
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const registerBtn = document.getElementById('registerBtn');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const tableLoadingIndicator = document.getElementById('tableLoadingIndicator');
+      const successToast = document.getElementById('successToast');
+      const toastMessage = document.getElementById('toastMessage');
+      const totalBadge = document.getElementById('totalBadge');
+      const expensesTableBody = document.getElementById('expensesTableBody');
+      const tableContainer = document.getElementById('tableContainer');
+      const emptyState = document.getElementById('emptyState');
+      const ingresosAmount = document.getElementById('ingresosAmount');
+      const egresosAmount = document.getElementById('egresosAmount');
+      const netoAmount = document.getElementById('netoAmount');
+      const balanceBarFill = document.getElementById('balanceBarFill');
+
+      // ============================================================
+      // FORMATEO DE NÚMEROS
+      // ============================================================
+
+      function formatCurrency(value) {
+        return new Intl.NumberFormat('es-CO', {
+          style: 'currency',
+          currency: 'COP',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(value);
+      }
+
+      function parseCurrency(value) {
+        return parseFloat(value.replace(/[^0-9.-]/g, '')) || 0;
+      }
+
+      // Auto-formateo del input de monto
+      amountInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/[^0-9]/g, '');
+        if (value) {
+          const number = parseInt(value);
+          e.target.value = number.toLocaleString('es-CO');
+        }
+      });
+
+      // ============================================================
+      // SELECCIÓN DE CATEGORÍA
+      // ============================================================
+
+      categoryButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          categoryButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedCategory = btn.dataset.category;
+        });
+      });
+
+      // ============================================================
+      // MOSTRAR TOAST
+      // ============================================================
+
+      function showToast(message, duration = 3000) {
+        toastMessage.textContent = message;
+        successToast.classList.add('active');
+        setTimeout(() => {
+          successToast.classList.remove('active');
+        }, duration);
+      }
+
+      // ============================================================
+      // ACTUALIZAR BALANCE DEL DÍA
+      // ============================================================
+
+      function updateBalance(totalEgresos) {
+        // Por ahora ingresos = 0 (se puede conectar a otro endpoint)
+        const ingresos = 0;
+        const egresos = totalEgresos;
+        const neto = ingresos - egresos;
+
+        // Actualizar montos
+        ingresosAmount.textContent = formatCurrency(ingresos);
+        egresosAmount.textContent = formatCurrency(egresos);
+        netoAmount.textContent = formatCurrency(neto);
+
+        // Actualizar color del neto
+        if (neto >= 0) {
+          netoAmount.style.color = '#10b981';
+        } else {
+          netoAmount.style.color = '#f5576c';
+        }
+
+        // Actualizar barra de balance
+        const total = ingresos + egresos;
+        const percentage = total > 0 ? (egresos / total) * 100 : 50;
+        balanceBarFill.style.width = percentage + '%';
+      }
+
+      // ============================================================
+      // CARGAR GASTOS DEL DÍA
+      // ============================================================
+
+      async function loadTodayExpenses() {
+        tableLoadingIndicator.classList.add('active');
+        tableContainer.style.display = 'none';
+        emptyState.style.display = 'none';
+
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const response = await fetch(`/api/finanzas/egresos?fecha_inicio=${today}&fecha_fin=${today}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          todayExpenses = data.egresos || [];
+
+          // Actualizar total
+          const total = todayExpenses.reduce((sum, expense) => sum + parseFloat(expense.monto), 0);
+          totalBadge.textContent = formatCurrency(total);
+
+          // Actualizar balance del día
+          updateBalance(total);
+
+          // Renderizar tabla
+          if (todayExpenses.length === 0) {
+            emptyState.style.display = 'block';
+          } else {
+            renderExpensesTable();
+            tableContainer.style.display = 'block';
+          }
+
+        } catch (error) {
+          console.error('❌ Error al cargar gastos:', error);
+          emptyState.style.display = 'block';
+        } finally {
+          tableLoadingIndicator.classList.remove('active');
+        }
+      }
+
+      // ============================================================
+      // RENDERIZAR TABLA
+      // ============================================================
+
+      function renderExpensesTable() {
+        expensesTableBody.innerHTML = '';
+
+        // Ordenar por fecha descendente (más reciente primero)
+        const sortedExpenses = [...todayExpenses].sort((a, b) => 
+          new Date(b.fecha) - new Date(a.fecha)
+        );
+
+        sortedExpenses.forEach(expense => {
+          const row = document.createElement('tr');
+          
+          const time = new Date(expense.fecha).toLocaleTimeString('es-CO', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const categoryIcon = getCategoryIcon(expense.categoria);
+
+          row.innerHTML = `
+            <td class="expense-time">${time}</td>
+            <td>${expense.concepto}</td>
+            <td>
+              <span class="expense-category">
+                <span>${categoryIcon}</span>
+                <span>${expense.categoria || 'Sin categoría'}</span>
+              </span>
+            </td>
+            <td class="expense-amount">${formatCurrency(expense.monto)}</td>
+          `;
+
+          expensesTableBody.appendChild(row);
+        });
+      }
+
+      // ============================================================
+      // OBTENER ICONO DE CATEGORÍA
+      // ============================================================
+
+      function getCategoryIcon(category) {
+        const icons = {
+          'Transporte': '🚕',
+          'Alimentación': '☕',
+          'Oficina': '📎',
+          'Servicios': '⚡',
+          'Marketing': '📢',
+          'Otro': '💼'
+        };
+        return icons[category] || '💼';
+      }
+
+      // ============================================================
+      // REGISTRAR GASTO
+      // ============================================================
+
+      expenseForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Validar categoría
+        if (!selectedCategory) {
+          alert('⚠️ Por favor selecciona una categoría');
+          return;
+        }
+
+        // Validar monto
+        const amount = parseCurrency(amountInput.value);
+        if (amount <= 0) {
+          alert('⚠️ Por favor ingresa un monto válido');
+          return;
+        }
+
+        // Deshabilitar formulario
+        registerBtn.disabled = true;
+        loadingIndicator.classList.add('active');
+        expenseForm.style.display = 'none';
+
+        try {
+          const userId = sessionStorage.getItem('userId');
+          
+          const payload = {
+            usuario_id: userId,
+            monto: amount,
+            concepto: conceptInput.value.trim(),
+            categoria: selectedCategory,
+            soporte_opcional: null
+          };
+
+          console.log('📤 Enviando gasto:', payload);
+
+          const response = await fetch('/api/finanzas/egresos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Error ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log('✅ Gasto registrado:', data);
+
+          // Limpiar formulario
+          amountInput.value = '';
+          conceptInput.value = '';
+          categoryButtons.forEach(b => b.classList.remove('active'));
+          selectedCategory = null;
+
+          // Mostrar toast de éxito
+          showToast(`✅ Gasto de ${formatCurrency(amount)} registrado`);
+
+          // Recargar tabla
+          await loadTodayExpenses();
+
+        } catch (error) {
+          console.error('❌ Error al registrar gasto:', error);
+          alert(`❌ Error: ${error.message}`);
+        } finally {
+          registerBtn.disabled = false;
+          loadingIndicator.classList.remove('active');
+          expenseForm.style.display = 'block';
+        }
+      });
+
+      // ============================================================
+      // INICIALIZACIÓN
+      // ============================================================
+
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('💸 Módulo de Gastos Rápidos cargado');
+        loadTodayExpenses();
+      });
+    </script>
+  </body>
+</html>

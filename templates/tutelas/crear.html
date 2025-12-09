@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
 
     <style>
         .form-section-header {
@@ -63,6 +65,54 @@
                         </div>
                         <div class="card-body">
                             <form id="formTutela">
+
+                                <!-- ========== BUSCADOR UNIVERSAL DE USUARIOS ========== -->
+                                <div class="col-12 mb-4">
+                                  <div class="alert alert-info border-start border-4 border-info" role="alert">
+                                    <div class="d-flex align-items-center mb-2">
+                                      <i class="ti ti-search fs-4 me-2"></i>
+                                      <strong>Búsqueda Rápida de Usuario</strong>
+                                    </div>
+                                    <p class="mb-3 small">¿El usuario ya está registrado? Búscalo por documento para autocompletar sus datos.</p>
+                                    
+                                    <div class="row g-3">
+                                      <div class="col-md-3">
+                                        <label for="tipoDocBusqueda" class="form-label small fw-semibold">
+                                          <i class="ti ti-id-badge"></i> Tipo Documento
+                                        </label>
+                                        <select class="form-select" id="tipoDocBusqueda">
+                                          <option value="">Seleccione...</option>
+                                          <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                                          <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                                          <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                                          <option value="Pasaporte">Pasaporte</option>
+                                        </select>
+                                      </div>
+                                      <div class="col-md-9">
+                                        <label for="numeroDocBusqueda" class="form-label small fw-semibold">
+                                          <i class="ti ti-number"></i> Número de Documento
+                                        </label>
+                                        <div class="input-group">
+                                          <span class="input-group-text bg-white">
+                                            <i class="ti ti-search text-primary"></i>
+                                          </span>
+                                          <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            id="numeroDocBusqueda" 
+                                            placeholder="Escribe y presiona Enter..."
+                                            maxlength="15"
+                                          />
+                                        </div>
+                                        <small class="text-muted">
+                                          <i class="ti ti-info-circle"></i> 
+                                          Datos se cargarán automáticamente si existe
+                                        </small>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <!-- ========== FIN BUSCADOR ========== -->
 
                                 <!-- Información de la Empresa -->
                                 <h6 class="form-section-header">Información de la Empresa</h6>
@@ -328,6 +378,47 @@
                 formTutela.addEventListener('submit', registerTutela);
             }
         });
+    </script>
+    
+    <!-- Sistema de Búsqueda Universal -->
+    <script src="/assets/js/universal-search.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof initUniversalSearch !== 'undefined') {
+            const buscador = initUniversalSearch({
+                tipoIdField: 'tipoDocBusqueda',
+                numeroIdField: 'numeroDocBusqueda',
+                fieldMapping: {
+                    primerNombre: 'usuarioNombre',
+                    primerApellido: 'usuarioApellido'
+                },
+                autoLock: true,
+                onSuccess: function(usuario) {
+                    // Autocompletar tipo de ID y número de cédula
+                    const modalTipoId = document.getElementById('modalTipoId');
+                    const numeroCedula = document.getElementById('numeroCedula');
+                    
+                    if (modalTipoId && usuario.tipoId) {
+                        modalTipoId.value = usuario.tipoId;
+                    }
+                    
+                    if (numeroCedula && usuario.numeroId) {
+                        numeroCedula.value = usuario.numeroId;
+                    }
+                    
+                    // Ocultar mensaje de validación de usuario
+                    const feedbackEl = document.getElementById('userValidationFeedback');
+                    if (feedbackEl) {
+                        feedbackEl.style.display = 'none';
+                    }
+                    
+                    console.log('✅ Usuario autocompletado en Tutelas:', usuario);
+                }
+            });
+            console.log('✅ Buscador Universal activado en Tutelas');
+        }
+    });
     </script>
 </body>
 </html>

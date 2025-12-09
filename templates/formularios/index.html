@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     
     <!-- SweetAlert2 para alertas modernas -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -106,6 +108,98 @@
         </div>
 
         <div id="feedbackMessage" class="mb-4"></div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- BLOQUE NUEVO: GENERADOR AUTOMÁTICO DE FORMULARIOS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="card mb-3" style="border-left: 4px solid #3b82f6;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">
+                            <i class="ph-duotone ph-file-pdf me-2 text-primary"></i>
+                            Generador Automático de Formularios
+                        </h4>
+                        <p class="text-muted mb-0">Genere formularios pre-llenados de afiliación con los datos del usuario</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
+                        <i class="ti ti-wand me-1"></i> Automático
+                    </span>
+                </div>
+                
+                <form id="formGeneradorAuto" onsubmit="generarFormularioAutomatico(event)">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                <i class="ti ti-template me-2"></i>Escoger Plantilla de Formulario
+                            </label>
+                            <select id="selectPlantillaFormulario" class="form-select form-select-lg" required>
+                                <option value="">-- Seleccione una plantilla --</option>
+                                <optgroup label="📋 Formularios EPS">
+                                    <option value="eps_sura">EPS Sura - Afiliación</option>
+                                    <option value="eps_sanitas">EPS Sanitas - Afiliación</option>
+                                    <option value="eps_compensar">EPS Compensar - Afiliación</option>
+                                    <option value="eps_salud_total">EPS Salud Total - Afiliación</option>
+                                </optgroup>
+                                <optgroup label="💼 Formularios AFP">
+                                    <option value="afp_porvenir">Porvenir - Afiliación Pensión</option>
+                                    <option value="afp_proteccion">Protección - Afiliación Pensión</option>
+                                    <option value="afp_colfondos">Colfondos - Afiliación Pensión</option>
+                                    <option value="afp_old_mutual">Old Mutual - Afiliación Pensión</option>
+                                </optgroup>
+                                <optgroup label="🛡️ Formularios ARL">
+                                    <option value="arl_sura">ARL Sura - Afiliación</option>
+                                    <option value="arl_positiva">ARL Positiva - Afiliación</option>
+                                    <option value="arl_bolivar">ARL Bolívar - Afiliación</option>
+                                </optgroup>
+                                <optgroup label="👨‍👩‍👧 Formularios Caja de Compensación">
+                                    <option value="ccf_compensar">Compensar - Afiliación</option>
+                                    <option value="ccf_colsubsidio">Colsubsidio - Afiliación</option>
+                                    <option value="ccf_cafam">Cafam - Afiliación</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                <i class="ti ti-id-badge me-2"></i>Cédula del Usuario
+                            </label>
+                            <input 
+                                type="text" 
+                                id="inputCedulaGenerador" 
+                                class="form-control form-control-lg" 
+                                placeholder="Ej: 1234567890" 
+                                list="usuariosDatalist"
+                                required
+                            >
+                            <datalist id="usuariosDatalist">
+                                <!-- Se llenará dinámicamente con usuarios -->
+                            </datalist>
+                            <div class="form-text">
+                                <i class="ti ti-info-circle me-1"></i>
+                                Escriba para autocompletar con usuarios existentes
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="btnGenerarPDF">
+                                <i class="ti ti-download me-2"></i>
+                                Generar y Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Zona de información adicional -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info mb-0" role="alert">
+                            <i class="ti ti-info-circle me-2"></i>
+                            <strong>¿Cómo funciona?</strong> 
+                            El sistema tomará los datos del usuario (nombre, cédula, dirección, empresa, etc.) y los insertará automáticamente en el formulario de la entidad seleccionada, generando un PDF listo para firmar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- ═══════════════════════════════════════════════════════════ -->
         <!-- BLOQUE 1: VERIFICADOR DE IDENTIDAD -->
@@ -378,6 +472,7 @@
                 usuariosStore = data.items || data.usuarios || [];
                 
                 renderizarTablaUsuarios(usuariosStore);
+                poblarDatalistUsuarios(); // ✅ Llenar datalist para autocompletado
                 
                 document.getElementById('totalUsuariosBadge').textContent = `${usuariosStore.length} usuarios`;
             } catch (error) {
@@ -605,6 +700,97 @@
             } finally {
                 inputElement.value = '';
             }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // GENERADOR AUTOMÁTICO DE FORMULARIOS
+        // ═══════════════════════════════════════════════════════════════
+        
+        /**
+         * Generar formulario automático con datos pre-llenados
+         */
+        async function generarFormularioAutomatico(event) {
+            event.preventDefault();
+            
+            const plantilla = document.getElementById('selectPlantillaFormulario').value;
+            const cedula = document.getElementById('inputCedulaGenerador').value;
+            const btnGenerar = document.getElementById('btnGenerarPDF');
+            
+            if (!plantilla || !cedula) {
+                showMessage('⚠️ Por favor seleccione una plantilla e ingrese una cédula', 'warning');
+                return;
+            }
+
+            try {
+                // Cambiar estado del botón
+                const originalBtnHtml = btnGenerar.innerHTML;
+                btnGenerar.disabled = true;
+                btnGenerar.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Generando PDF...';
+
+                showMessage('⏳ Generando formulario automático...', 'info');
+
+                // Llamar al endpoint de generación
+                const response = await fetch(`${API_URL}/formularios/generar-pdf`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        plantilla: plantilla,
+                        cedula: cedula
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al generar formulario');
+                }
+
+                // Descargar PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `formulario_${plantilla}_${cedula}_${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showMessage('✅ Formulario generado y descargado exitosamente', 'success');
+                
+                // Resetear formulario
+                document.getElementById('formGeneradorAuto').reset();
+
+                console.log('✅ Formulario generado:', plantilla, 'para usuario:', cedula);
+
+            } catch (error) {
+                console.error('❌ Error generando formulario:', error);
+                showMessage(`❌ Error: ${error.message}`, 'danger');
+            } finally {
+                // Restaurar botón
+                btnGenerar.disabled = false;
+                btnGenerar.innerHTML = originalBtnHtml;
+            }
+        }
+
+        /**
+         * Poblar el datalist con usuarios para autocompletado
+         */
+        function poblarDatalistUsuarios() {
+            const datalist = document.getElementById('usuariosDatalist');
+            if (!datalist) return;
+
+            datalist.innerHTML = '';
+            
+            usuariosStore.forEach(user => {
+                const nombreCompleto = `${user.primerNombre || ''} ${user.primerApellido || ''}`.trim();
+                const option = document.createElement('option');
+                option.value = user.numeroId;
+                option.textContent = `${user.numeroId} - ${nombreCompleto}`;
+                datalist.appendChild(option);
+            });
         }
 
         // ═══════════════════════════════════════════════════════════════

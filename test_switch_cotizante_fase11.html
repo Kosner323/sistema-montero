@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Visual - Switch Tipo Cotizante Fase 11</title>
+    
+    <!-- Bootstrap 5.3.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .test-header h1 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .test-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .badge-test {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        /* Switch Grande */
+        .switch-cotizante {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .switch-cotizante:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+        
+        .switch-cotizante legend {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .btn-check:checked + label {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-outline-primary:hover,
+        .btn-outline-success:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Campos de formulario */
+        .campo-empresa,
+        .campo-actividad {
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        .campo-empresa.hidden,
+        .campo-actividad.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .campo-empresa.visible,
+        .campo-actividad.visible {
+            max-height: 200px;
+            opacity: 1;
+        }
+        
+        /* Log de eventos */
+        .event-log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 30px;
+        }
+        
+        .event-log .timestamp {
+            color: #888;
+            margin-right: 10px;
+        }
+        
+        .event-log .success {
+            color: #00ff00;
+        }
+        
+        .event-log .warning {
+            color: #ffaa00;
+        }
+        
+        .event-log .info {
+            color: #00aaff;
+        }
+        
+        /* Estado visual */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .status-indicator.independiente {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        
+        .status-icon {
+            font-size: 32px;
+        }
+        
+        .status-text h5 {
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .status-text p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <span class="badge-test">🧪 PRUEBA FASE 11.1</span>
+            <h1>Switch Tipo Cotizante</h1>
+            <p>Validación Visual del Toggle Dependiente/Independiente</p>
+        </div>
+        
+        <!-- Switch Grande -->
+        <fieldset class="switch-cotizante mb-4">
+            <legend class="mb-4">
+                <i data-feather="users" style="width: 28px; height: 28px; vertical-align: middle;"></i>
+                👥 ¿Tipo de Cotizante?
+            </legend>
+            
+            <div class="btn-group btn-group-lg w-100 mb-3" role="group">
+                <input type="radio" class="btn-check" name="tipoCotizante" id="tipoDependiente" value="Dependiente" checked>
+                <label class="btn btn-outline-primary d-flex flex-column align-items-center p-4" for="tipoDependiente">
+                    <i data-feather="briefcase" style="width: 40px; height: 40px;" class="mb-2"></i>
+                    <strong style="font-size: 1.2rem;">DEPENDIENTE</strong>
+                    <small class="text-muted mt-1">Empleado de empresa</small>
+                </label>
+                
+                <input type="radio" class="btn-check" name="tipoCotizante" id="tipoIndependiente" value="Independiente">
+                <label class="btn btn-outline-success d-flex flex-column align-items-center p-4" for="tipoIndependiente">
+                    <i data-feather="user" style="width: 40px; height: 40px;" class="mb-2"></i>
+                    <strong style="font-size: 1.2rem;">INDEPENDIENTE</strong>
+                    <small class="text-muted mt-1">Cuenta propia</small>
+                </label>
+            </div>
+            
+            <div class="alert alert-info mb-0">
+                <i data-feather="info" style="width: 18px; height: 18px;"></i>
+                <strong>Dependiente:</strong> IBC 100%, empresa asignada | 
+                <strong>Independiente:</strong> IBC 40%, sin empresa
+            </div>
+        </fieldset>
+        
+        <!-- Estado Visual -->
+        <div class="status-indicator" id="statusIndicator">
+            <div class="status-icon">💼</div>
+            <div class="status-text">
+                <h5 id="statusTitle">DEPENDIENTE SELECCIONADO</h5>
+                <p id="statusDescription">El usuario está vinculado a una empresa y cotiza IBC 100%</p>
+            </div>
+        </div>
+        
+        <!-- Campos de Formulario -->
+        <div class="mt-4">
+            <h5 class="mb-3">📋 Campos Dinámicos</h5>
+            
+            <div class="campo-empresa visible" id="campoEmpresa">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <label for="empresa" class="form-label fw-bold">🏢 Empresa Empleadora</label>
+                        <select class="form-select form-select-lg" id="empresa">
+                            <option value="">Seleccionar empresa...</option>
+                            <option value="1">MONTERO Y NEGOCIO SAS</option>
+                            <option value="2">COMERCIALIZADORA MONTERO LTDA</option>
+                            <option value="3">CORPORACIÓN MONTERO</option>
+                        </select>
+                        <small class="text-muted">Campo visible para cotizantes DEPENDIENTES</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="campo-actividad hidden mt-3" id="campoActividad">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <label for="actividad" class="form-label fw-bold">💼 Actividad Económica</label>
+                        <input type="text" class="form-control form-control-lg" id="actividad" 
+                               placeholder="Ej: Consultoría independiente, Diseño gráfico, Programación">
+                        <small class="text-muted">Campo visible para cotizantes INDEPENDIENTES</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Log de Eventos -->
+        <div class="event-log" id="eventLog">
+            <div><span class="timestamp">[00:00:00]</span> <span class="info">✅ Sistema iniciado</span></div>
+            <div><span class="timestamp">[00:00:01]</span> <span class="success">✅ Tipo Cotizante: DEPENDIENTE (por defecto)</span></div>
+            <div><span class="timestamp">[00:00:01]</span> <span class="success">✅ Campo Empresa: VISIBLE</span></div>
+            <div><span class="timestamp">[00:00:01]</span> <span class="warning">⚠️ Campo Actividad: OCULTO</span></div>
+        </div>
+        
+        <!-- Botones de prueba -->
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-secondary" onclick="resetForm()">
+                <i data-feather="refresh-cw"></i> Resetear
+            </button>
+            <button class="btn btn-primary" onclick="simularEnvio()">
+                <i data-feather="send"></i> Simular Envío
+            </button>
+            <button class="btn btn-danger" onclick="clearLog()">
+                <i data-feather="trash-2"></i> Limpiar Log
+            </button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <script>
+        // Inicializar Feather Icons
+        feather.replace();
+        
+        // Referencias
+        const radioDependiente = document.getElementById('tipoDependiente');
+        const radioIndependiente = document.getElementById('tipoIndependiente');
+        const campoEmpresa = document.getElementById('campoEmpresa');
+        const campoActividad = document.getElementById('campoActividad');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusDescription = document.getElementById('statusDescription');
+        const eventLog = document.getElementById('eventLog');
+        
+        // Función para agregar log
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('es-CO', {hour12: false});
+            const className = type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            const icon = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="${className}">${icon} ${message}</span>`;
+            eventLog.appendChild(logEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        // Función de toggle
+        function toggleCampos() {
+            const tipoCotizante = radioIndependiente.checked ? 'Independiente' : 'Dependiente';
+            
+            if (radioIndependiente.checked) {
+                // INDEPENDIENTE
+                campoEmpresa.classList.remove('visible');
+                campoEmpresa.classList.add('hidden');
+                campoActividad.classList.remove('hidden');
+                campoActividad.classList.add('visible');
+                
+                statusIndicator.classList.add('independiente');
+                statusTitle.textContent = 'INDEPENDIENTE SELECCIONADO';
+                statusDescription.textContent = 'El usuario trabaja por cuenta propia y cotiza IBC 40%';
+                document.querySelector('.status-icon').textContent = '👤';
+                
+                addLog('Cambio a INDEPENDIENTE', 'success');
+                addLog('Campo Empresa: OCULTO', 'warning');
+                addLog('Campo Actividad: VISIBLE', 'success');
+            } else {
+                // DEPENDIENTE
+                campoEmpresa.classList.remove('hidden');
+                campoEmpresa.classList.add('visible');
+                campoActividad.classList.remove('visible');
+                campoActividad.classList.add('hidden');
+                
+                statusIndicator.classList.remove('independiente');
+                statusTitle.textContent = 'DEPENDIENTE SELECCIONADO';
+                statusDescription.textContent = 'El usuario está vinculado a una empresa y cotiza IBC 100%';
+                document.querySelector('.status-icon').textContent = '💼';
+                
+                addLog('Cambio a DEPENDIENTE', 'success');
+                addLog('Campo Empresa: VISIBLE', 'success');
+                addLog('Campo Actividad: OCULTO', 'warning');
+            }
+            
+            addLog(`Tipo Cotizante actualizado: ${tipoCotizante}`, 'info');
+            console.log('🔄 Toggle ejecutado:', tipoCotizante);
+        }
+        
+        // Event Listeners
+        radioDependiente.addEventListener('change', toggleCampos);
+        radioIndependiente.addEventListener('change', toggleCampos);
+        
+        // Función resetear
+        function resetForm() {
+            radioDependiente.checked = true;
+            toggleCampos();
+            document.getElementById('empresa').value = '';
+            document.getElementById('actividad').value = '';
+            addLog('Formulario reseteado', 'info');
+        }
+        
+        // Función simular envío
+        function simularEnvio() {
+            const tipoCotizante = radioIndependiente.checked ? 'Independiente' : 'Dependiente';
+            const empresa = document.getElementById('empresa').value;
+            const actividad = document.getElementById('actividad').value;
+            
+            addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+            addLog('Simulando envío de formulario...', 'info');
+            addLog(`Tipo Cotizante: ${tipoCotizante}`, 'success');
+            
+            if (radioIndependiente.checked) {
+                addLog(`Actividad: ${actividad || '(vacío)'}`, actividad ? 'success' : 'warning');
+            } else {
+                addLog(`Empresa ID: ${empresa || '(no seleccionada)'}`, empresa ? 'success' : 'warning');
+            }
+            
+            addLog('Envío completado ✅', 'success');
+            addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+            
+            console.log('📤 Datos a enviar:', {
+                tipoCotizante,
+                empresa: radioIndependiente.checked ? null : empresa,
+                actividad: radioIndependiente.checked ? actividad : null
+            });
+        }
+        
+        // Función limpiar log
+        function clearLog() {
+            eventLog.innerHTML = '';
+            addLog('Log limpiado', 'info');
+        }
+        
+        // Ejecutar toggle inicial
+        toggleCampos();
+        
+        console.log('✅ Test de Switch Tipo Cotizante - Fase 11.1');
+        console.log('📊 Estado inicial: DEPENDIENTE');
+        console.log('🎯 Objetivo: Validar toggle visual de campos según tipo de cotizante');
+    </script>
+</body>
+</html>

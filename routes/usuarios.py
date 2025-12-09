@@ -261,10 +261,10 @@ def add_usuario():
 
             # Guardar en base de datos (modo simple)
             conn = get_db_connection()
-            
-            # Asegurar que empresa_nit tenga un valor válido (NOT NULL constraint)
-            empresa_nit_final = usuario_data.empresa_nit if usuario_data.empresa_nit else '999999999'
-            logger.info(f"📋 Empresa NIT asignado: {empresa_nit_final}")
+
+            # CAMBIO DE LÓGICA: empresa_nit ahora puede ser None (NULL en DB)
+            empresa_nit_final = usuario_data.empresa_nit
+            logger.info(f"📋 Empresa NIT asignado: {empresa_nit_final if empresa_nit_final else 'NULL (sin empresa)'}")
             
             try:
                 conn.execute(
@@ -418,6 +418,7 @@ def add_usuario():
             # ==================== GUARDAR EN BASE DE DATOS ====================
             conn = get_db_connection()
             try:
+                # CAMBIO DE LÓGICA: empresa_nit ahora puede ser None (NULL en DB)
                 empresa_nit = None
                 if data.get("administracion"):
                     empresa = conn.execute(
@@ -430,11 +431,8 @@ def add_usuario():
                         logger.warning(
                             f"Advertencia: Empresa '{data['administracion']}' no encontrada en la tabla 'empresas' para el usuario {numero_id}."
                         )
-                
-                # Asegurar que empresa_nit tenga un valor válido (NOT NULL constraint)
-                if not empresa_nit:
-                    empresa_nit = '999999999'  # NIT de MONTERO ADMINISTRADORA por defecto
-                    logger.info(f"📋 Empresa NIT asignado por defecto: {empresa_nit}")
+
+                logger.info(f"📋 Empresa NIT asignado: {empresa_nit if empresa_nit else 'NULL (sin empresa)'}")
 
                 afp_costo = float(data.get("afpCosto")) if data.get("afpCosto") else None
                 eps_costo = float(data.get("epsCosto")) if data.get("epsCosto") else None

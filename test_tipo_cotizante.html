@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Demo: Switch Tipo Cotizante</title>
+    
+    <!-- Bootstrap 5.3.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .demo-header h1 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .demo-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .estado-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        
+        .badge-dependiente {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .badge-independiente {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            color: white;
+        }
+        
+        .info-box {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        
+        .field-visible {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .field-hidden {
+            animation: slideOut 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+        
+        .btn-outline-primary:hover,
+        .btn-outline-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>👥 Demo: Switch Tipo Cotizante</h1>
+            <p class="text-muted mb-0">Prueba visual de la funcionalidad Dependiente vs Independiente</p>
+        </div>
+
+        <!-- Formulario de Prueba -->
+        <form id="formUsuario">
+            <div class="demo-section">
+                <h5 class="mb-3">📝 Información Básica</h5>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="nombreCompleto" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="nombreCompleto" 
+                               value="Carlos Andrés Pérez Gómez" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control" id="cedula" 
+                               value="1010123456" readonly>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="eps" class="form-label">EPS</label>
+                        <input type="text" class="form-control" id="eps" 
+                               value="NUEVA EPS" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="pension" class="form-label">Pensión</label>
+                        <input type="text" class="form-control" id="pension" 
+                               value="COLPENSIONES" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="arl" class="form-label">ARL</label>
+                        <input type="text" class="form-control" id="arl" 
+                               value="POSITIVA" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIPO DE COTIZANTE (Feature Principal) -->
+            <div class="demo-section" style="border: 3px solid #667eea;">
+                <h5 class="mb-3">
+                    <i data-feather="users" style="width: 24px; height: 24px; color: #667eea;"></i>
+                    <strong>Tipo de Cotizante</strong>
+                    <span class="badge bg-primary ms-2">Nueva Funcionalidad</span>
+                </h5>
+                
+                <div class="btn-group d-flex mb-3" role="group" aria-label="Tipo de cotizante">
+                    <input type="radio" class="btn-check" name="tipoCotizante" id="tipoDependiente" value="dependiente" checked>
+                    <label class="btn btn-outline-primary btn-lg" for="tipoDependiente">
+                        <i data-feather="briefcase" style="width: 20px; height: 20px;"></i>
+                        <strong>Dependiente</strong>
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="tipoCotizante" id="tipoIndependiente" value="independiente">
+                    <label class="btn btn-outline-success btn-lg" for="tipoIndependiente">
+                        <i data-feather="user" style="width: 20px; height: 20px;"></i>
+                        <strong>Independiente</strong>
+                    </label>
+                </div>
+                
+                <small class="text-muted d-block">
+                    <strong>💼 Dependiente:</strong> Empleado de una empresa con contrato laboral | 
+                    <strong>🏆 Independiente:</strong> Trabajador por cuenta propia (Freelancer, Comerciante, etc.)
+                </small>
+
+                <!-- Badge Estado Actual -->
+                <div class="text-center">
+                    <span id="estadoBadge" class="estado-badge badge-dependiente">
+                        ✅ Modo: DEPENDIENTE
+                    </span>
+                </div>
+            </div>
+
+            <!-- Campo Empresa (Condicional) -->
+            <div class="demo-section" id="campoEmpresa">
+                <h5 class="mb-3">🏢 Información Laboral</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="administracion" class="form-label">
+                            Administración/Empresa
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="administracion" 
+                               name="administracion" 
+                               list="listaEmpresasAdmin" 
+                               placeholder="Empresa a la que pertenece"
+                               value="TECH SOLUTIONS S.A.S">
+                        <datalist id="listaEmpresasAdmin">
+                            <option>TECH SOLUTIONS S.A.S</option>
+                            <option>INNOVACIÓN DIGITAL LTDA</option>
+                            <option>SERVICIOS EMPRESARIALES S.A</option>
+                            <option>ADMINISTRADORA DE PRUEBA S.A.S</option>
+                        </datalist>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="ibc" class="form-label">IBC</label>
+                        <input type="text" class="form-control" id="ibc" 
+                               placeholder="Ingreso Base de Cotización"
+                               value="2.500.000">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="claseRiesgo" class="form-label">Clase Riesgo</label>
+                        <select class="form-select" id="claseRiesgo">
+                            <option>I (Mínimo)</option>
+                            <option selected>II (Bajo)</option>
+                            <option>III (Medio)</option>
+                            <option>IV (Alto)</option>
+                            <option>V (Máximo)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Estado -->
+            <div class="info-box">
+                <h6><i data-feather="info" style="width: 18px; height: 18px;"></i> Instrucciones de Prueba</h6>
+                <ul class="mb-0">
+                    <li>Haz clic en <strong>"Independiente"</strong> para ocultar el campo Empresa</li>
+                    <li>Haz clic en <strong>"Dependiente"</strong> para mostrar el campo Empresa</li>
+                    <li>El campo se oculta/muestra automáticamente con animación</li>
+                    <li>La validación "required" se ajusta dinámicamente</li>
+                </ul>
+            </div>
+        </form>
+
+        <!-- Botones de Acción -->
+        <div class="mt-4 d-flex gap-3 justify-content-center">
+            <button type="button" class="btn btn-primary btn-lg" onclick="simularGuardar()">
+                <i data-feather="save" style="width: 20px; height: 20px;"></i>
+                Guardar Usuario
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg" onclick="resetForm()">
+                <i data-feather="rotate-ccw" style="width: 20px; height: 20px;"></i>
+                Resetear
+            </button>
+        </div>
+
+        <!-- Log de Eventos -->
+        <div class="demo-section mt-4">
+            <h6>📊 Log de Eventos</h6>
+            <div id="logEventos" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+                <div style="color: #28a745;">✅ Inicialización completa</div>
+                <div style="color: #6c757d;">⚙️ Tipo Cotizante: DEPENDIENTE (default)</div>
+                <div style="color: #6c757d;">👁️ Campo Empresa: VISIBLE</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Inicializar Feather Icons
+        feather.replace();
+
+        // Referencias a elementos
+        const radioDependiente = document.getElementById('tipoDependiente');
+        const radioIndependiente = document.getElementById('tipoIndependiente');
+        const campoEmpresa = document.getElementById('campoEmpresa');
+        const estadoBadge = document.getElementById('estadoBadge');
+        const logEventos = document.getElementById('logEventos');
+
+        // Función para agregar log
+        function addLog(mensaje, tipo = 'info') {
+            const colores = {
+                'info': '#6c757d',
+                'success': '#28a745',
+                'warning': '#ffc107',
+                'danger': '#dc3545'
+            };
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colores[tipo];
+            logEntry.textContent = `[${timestamp}] ${mensaje}`;
+            logEventos.appendChild(logEntry);
+            logEventos.scrollTop = logEventos.scrollHeight;
+        }
+
+        // Función toggle para mostrar/ocultar campo empresa
+        function toggleEmpresaField() {
+            const inputEmpresa = document.getElementById('administracion');
+            
+            if (radioIndependiente.checked) {
+                // INDEPENDIENTE: Ocultar empresa
+                campoEmpresa.classList.add('field-hidden');
+                setTimeout(() => {
+                    campoEmpresa.style.display = 'none';
+                }, 300);
+                
+                inputEmpresa.removeAttribute('required');
+                inputEmpresa.value = ''; // Limpiar valor
+                
+                // Actualizar badge
+                estadoBadge.textContent = '🏆 Modo: INDEPENDIENTE';
+                estadoBadge.className = 'estado-badge badge-independiente';
+                
+                // Log
+                addLog('🔄 Cambio a INDEPENDIENTE', 'warning');
+                addLog('👁️ Campo Empresa: OCULTO', 'info');
+                addLog('✂️ Atributo "required" removido', 'info');
+                
+            } else {
+                // DEPENDIENTE: Mostrar empresa
+                campoEmpresa.style.display = 'block';
+                campoEmpresa.classList.remove('field-hidden');
+                campoEmpresa.classList.add('field-visible');
+                
+                // Opcional: descomentar si quieres hacerlo obligatorio
+                // inputEmpresa.setAttribute('required', 'required');
+                inputEmpresa.value = 'TECH SOLUTIONS S.A.S'; // Valor por defecto
+                
+                // Actualizar badge
+                estadoBadge.textContent = '✅ Modo: DEPENDIENTE';
+                estadoBadge.className = 'estado-badge badge-dependiente';
+                
+                // Log
+                addLog('🔄 Cambio a DEPENDIENTE', 'success');
+                addLog('👁️ Campo Empresa: VISIBLE', 'info');
+                addLog('📝 Valor restaurado: TECH SOLUTIONS S.A.S', 'info');
+            }
+        }
+
+        // Event listeners
+        radioDependiente.addEventListener('change', toggleEmpresaField);
+        radioIndependiente.addEventListener('change', toggleEmpresaField);
+
+        // Ejecutar al cargar
+        toggleEmpresaField();
+
+        // Función simular guardar
+        function simularGuardar() {
+            const tipoCotizante = document.querySelector('input[name="tipoCotizante"]:checked').value;
+            const empresaValue = document.getElementById('administracion').value;
+            
+            addLog('💾 Guardando usuario...', 'info');
+            addLog(`📋 Tipo Cotizante: ${tipoCotizante.toUpperCase()}`, 'success');
+            
+            if (tipoCotizante === 'dependiente') {
+                if (!empresaValue) {
+                    addLog('❌ ERROR: Campo Empresa vacío (required)', 'danger');
+                    alert('⚠️ El campo Empresa es requerido para Dependientes');
+                    return;
+                } else {
+                    addLog(`🏢 Empresa: ${empresaValue}`, 'success');
+                }
+            } else {
+                addLog('🏆 Empresa: N/A (Independiente)', 'info');
+            }
+            
+            addLog('✅ Usuario guardado exitosamente', 'success');
+            addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+            
+            // Simular éxito
+            setTimeout(() => {
+                alert('✅ Usuario guardado correctamente\n\nTipo: ' + tipoCotizante.toUpperCase() + 
+                      (tipoCotizante === 'dependiente' ? '\nEmpresa: ' + empresaValue : ''));
+            }, 500);
+        }
+
+        // Función resetear
+        function resetForm() {
+            document.getElementById('tipoDependiente').checked = true;
+            toggleEmpresaField();
+            
+            // Limpiar log (mantener solo líneas iniciales)
+            logEventos.innerHTML = `
+                <div style="color: #28a745;">✅ Formulario reseteado</div>
+                <div style="color: #6c757d;">⚙️ Tipo Cotizante: DEPENDIENTE (default)</div>
+                <div style="color: #6c757d;">👁️ Campo Empresa: VISIBLE</div>
+            `;
+            
+            addLog('🔄 Reseteo completo', 'warning');
+        }
+    </script>
+</body>
+</html>

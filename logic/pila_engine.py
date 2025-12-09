@@ -1,34 +1,286 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Motor de Cálculo de Seguridad Social (PILA) - Colombia
-Sistema Montero - Lógica de Negocio Pura
+logic/pila_engine.py
+====================
+Motor de Liquidación PILA Real - Seguridad Social Colombiana
+Fase 11: Cálculos exactos según normativa vigente 2025
 
-VERSIÓN 1.1 - CORRECCIONES LEGALES
-===================================
-✓ CCF 4% se calcula SIEMPRE (sin umbral de 10 SMMLV)
-✓ Exoneración de Salud Empleador para salarios < 10 SMMLV
-✓ Tope IBC máximo de 25 SMMLV
-✓ Soporte para Salario Integral (IBC = 70% del salario)
-
-Este módulo implementa el cálculo exacto de aportes a Seguridad Social
-según la legislación laboral colombiana vigente.
-
-Autor: Sistema Montero
-Fecha: 2025-11-26
-Versión: 1.1.0
+Autor: Senior Backend Developer & Data Scientist
+Fecha: 2025-11-30
 """
 
-from typing import Dict, Optional
+from datetime import datetime, date
 from decimal import Decimal, ROUND_HALF_UP
+from typing import Dict, List, Optional
 from dataclasses import dataclass
-from datetime import datetime
+
+
+class ConfiguracionPILA:
+    """
+    Configuración de valores legales para liquidación PILA 2025
+    """
+    # Valores base 2025
+    SMMLV = Decimal('1300000')  # Salario Mínimo Mensual Legal Vigente
+    AUX_TRANSPORTE = Decimal('162000')  # Auxilio de Transporte 2025
+    UVT = Decimal('47065')  # Unidad de Valor Tributario 2025
+
+    # Tarifas de aportes (porcentajes)
+    SALUD_EMPLEADO = Decimal('4.0')  # 4%
+    SALUD_EMPLEADOR = Decimal('8.5')  # 8.5%
+    PENSION_EMPLEADO = Decimal('4.0')  # 4%
+    PENSION_EMPLEADOR = Decimal('12.0')  # 12%
+
+    # ARL - Riesgo I (mínimo)
+    ARL_CLASE_1 = Decimal('0.522')  # 0.522%
+    ARL_CLASE_2 = Decimal('1.044')
+    ARL_CLASE_3 = Decimal('2.436')
+    ARL_CLASE_4 = Decimal('4.350')
+    ARL_CLASE_5 = Decimal('6.960')  # Máximo
+
+    # CCF - Caja de Compensación Familiar
+    CCF_EMPLEADOR = Decimal('4.0')  # 4%
+
+    # SENA e ICBF (aplica para empresas con más de cierto límite)
+    SENA = Decimal('2.0')  # 2%
+    ICBF = Decimal('3.0')  # 3%
+
+    # Topes para IBC
+    IBC_MINIMO = SMMLV
+    IBC_MAXIMO = SMMLV * 25  # 25 SMMLV
+
+    # Días estándar por mes
+    DIAS_MES_ESTANDAR = 30
+
+
+class LiquidadorPILA:
+    """
+    Motor de Liquidación PILA con lógica real de seguridad social colombiana.
+
+    Maneja:
+    - Cálculo de IBC (Ingreso Base de Cotización)
+    - Ajuste por días trabajados
+    - Novedades (Ingreso, Retiro, Incapacidad, Licencia)
+    - Validaciones legales
+    - Cálculo de aportes exactos
+    """
+
+    def __init__(self, config: Optional[ConfiguracionPILA] = None):
+        """
+        Inicializa el liquidador con configuración PILA.
+
+        Args:
+            config: Configuración PILA (usa valores por defecto si no se provee)
+        """
+        self.config = config or ConfiguracionPILA()
+
+    def calcular_linea(
+        self,
+        usuario: Dict,
+        dias_trabajados: int = 30,
+        novedades: Optional[List[Dict]] = None
+    ) -> Dict:
+        """
+        Calcula una línea completa de planilla PILA para un usuario.
+
+        Args:
+            usuario: Diccionario con datos del usuario
+                {
+                    'numeroId': str,
+                    'primerNombre': str,
+                    'primerApellido': str,
+                    'ibc': float,  # Ingreso Base de Cotización
+                    'salario': float,  # Salario mensual
+                    'epsNombre': str,
+                    'afpNombre': str,
+                    'arlNombre': str,
+                    'arlClase': int (1-5),
+                    'tipoContrato': str  # 'Indefinido', 'Temporal', etc.
+                }
+            dias_trabajados: Días efectivos trabajados en el mes (1-30)
+            novedades: Lista de novedades que afectan la liquidación
+                [
+                    {'tipo': 'Ingreso', 'fecha': '2025-01-15'},
+                    {'tipo': 'Incapacidad', 'dias': 5, 'tipo_incapacidad': 'EG'},
+                    {'tipo': 'Licencia', 'dias': 3, 'remunerada': True}
+                ]
+
+        Returns:
+            Dict con la línea PILA completa
+        """
+        resultado = {
+            'usuario_id': usuario.get('numeroId'),
+            'nombre_completo': f"{usuario.get('primerNombre')} {usuario.get('primerApellido')}",
+            'novedades_procesadas': [],
+            'alertas': [],
+            'marca_novedad': '',
+            'validaciones': []
+        }
+
+        # PASO 1: PROCESAR NOVEDADES
+        novedades = novedades or []
+        dias_ajustados = dias_trabajados
+        tiene_incapacidad = False
+        tipo_incapacidad = None
+
+        for novedad in novedades:
+            tipo_nov = novedad.get('tipo', '').upper()
+
+            if tipo_nov == 'INGRESO':
+                fecha_ingreso = novedad.get('fecha')
+                if fecha_ingreso:
+                    dia_ingreso = int(fecha_ingreso.split('-')[-1])
+                    dias_ajustados = self.config.DIAS_MES_ESTANDAR - dia_ingreso + 1
+                    resultado['novedades_procesadas'].append(
+                        f"INGRESO: Día {dia_ingreso}, cotiza {dias_ajustados} días"
+                    )
+                    resultado['marca_novedad'] = 'IGE'
+
+            elif tipo_nov == 'RETIRO':
+                fecha_retiro = novedad.get('fecha')
+                if fecha_retiro:
+                    dia_retiro = int(fecha_retiro.split('-')[-1])
+                    dias_ajustados = dia_retiro
+                    resultado['novedades_procesadas'].append(
+                        f"RETIRO: Día {dia_retiro}, cotiza {dias_ajustados} días"
+                    )
+                    resultado['marca_novedad'] = 'RET'
+
+            elif tipo_nov in ['INCAPACIDAD', 'INC']:
+                tiene_incapacidad = True
+                dias_inc = novedad.get('dias', 0)
+                tipo_incapacidad = novedad.get('tipo_incapacidad', 'EG')
+
+                if tipo_incapacidad == 'EG':
+                    resultado['marca_novedad'] = 'LGE'
+                    resultado['novedades_procesadas'].append(
+                        f"INCAPACIDAD EG: {dias_inc} días (marca LGE)"
+                    )
+
+        # PASO 2: CALCULAR IBC
+        ibc_base = Decimal(str(usuario.get('ibc', usuario.get('salario', 0))))
+
+        if dias_ajustados < self.config.DIAS_MES_ESTANDAR:
+            ibc_calculado = (ibc_base / self.config.DIAS_MES_ESTANDAR) * Decimal(str(dias_ajustados))
+        else:
+            ibc_calculado = ibc_base
+
+        # VALIDACIÓN: IBC mínimo
+        if ibc_calculado < self.config.IBC_MINIMO and dias_ajustados >= self.config.DIAS_MES_ESTANDAR:
+            resultado['alertas'].append(
+                f"IBC ${ibc_calculado:,.0f} menor al SMMLV"
+            )
+            ibc_calculado = self.config.IBC_MINIMO
+
+        resultado['ibc_calculado'] = ibc_calculado
+        resultado['dias_cotizados'] = dias_ajustados
+
+        # PASO 3: CALCULAR APORTES
+        salud_empleado = (ibc_calculado * self.config.SALUD_EMPLEADO / 100).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP
+        )
+        salud_empleador = (ibc_calculado * self.config.SALUD_EMPLEADOR / 100).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP
+        )
+        pension_empleado = (ibc_calculado * self.config.PENSION_EMPLEADO / 100).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP
+        )
+        pension_empleador = (ibc_calculado * self.config.PENSION_EMPLEADOR / 100).quantize(
+            Decimal('0.01'), rounding=ROUND_HALF_UP
+        )
+
+        clase_arl = usuario.get('arlClase', 1)
+        tarifa_arl_map = {
+            1: self.config.ARL_CLASE_1,
+            2: self.config.ARL_CLASE_2,
+            3: self.config.ARL_CLASE_3,
+            4: self.config.ARL_CLASE_4,
+            5: self.config.ARL_CLASE_5
+        }
+        tarifa_arl = tarifa_arl_map.get(clase_arl, self.config.ARL_CLASE_1)
+        arl = (ibc_calculado * tarifa_arl / 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        ccf = (ibc_calculado * self.config.CCF_EMPLEADOR / 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        total_empleado = salud_empleado + pension_empleado
+        total_empleador = salud_empleador + pension_empleador + arl + ccf
+        total_aportes = total_empleado + total_empleador
+
+        resultado.update({
+            'salud_empleado': float(salud_empleado),
+            'salud_empleador': float(salud_empleador),
+            'pension_empleado': float(pension_empleado),
+            'pension_empleador': float(pension_empleador),
+            'arl': float(arl),
+            'arl_clase': clase_arl,
+            'arl_tarifa': float(tarifa_arl),
+            'ccf': float(ccf),
+            'total_empleado': float(total_empleado),
+            'total_empleador': float(total_empleador),
+            'total_aportes': float(total_aportes),
+            'ibc_calculado': float(ibc_calculado),
+            'ibc_base': float(ibc_base)
+        })
+
+        if not resultado['alertas']:
+            resultado['validaciones'].append("Liquidación correcta")
+
+        return resultado
+
+    def validar_planilla(self, lineas: List[Dict]) -> Dict:
+        """Valida planilla completa"""
+        errores = []
+        advertencias = []
+        total_aportes = Decimal('0')
+
+        for i, linea in enumerate(lineas, start=1):
+            ibc = Decimal(str(linea.get('ibc_calculado', 0)))
+            if ibc < self.config.IBC_MINIMO:
+                errores.append(f"Línea {i}: IBC menor al mínimo legal")
+
+            dias = linea.get('dias_cotizados', 0)
+            if dias < 1 or dias > 30:
+                errores.append(f"Línea {i}: Días inválidos ({dias})")
+
+            total_aportes += Decimal(str(linea.get('total_aportes', 0)))
+
+        return {
+            'valida': len(errores) == 0,
+            'errores': errores,
+            'advertencias': advertencias,
+            'total_aportes': float(total_aportes),
+            'total_empleados': len(lineas)
+        }
+
+
+if __name__ == "__main__":
+    print("=" * 80)
+    print("PRUEBA MOTOR PILA")
+    print("=" * 80)
+
+    liquidador = LiquidadorPILA()
+
+    usuario_prueba = {
+        'numeroId': '1234567890',
+        'primerNombre': 'Juan',
+        'primerApellido': 'Pérez',
+        'ibc': 1500000,
+        'salario': 1500000,
+        'arlClase': 1
+    }
+
+    resultado = liquidador.calcular_linea(usuario_prueba, dias_trabajados=30)
+
+    print(f"\nUsuario: {resultado['nombre_completo']}")
+    print(f"IBC: ${resultado['ibc_calculado']:,.0f}")
+    print(f"Días: {resultado['dias_cotizados']}")
+    print(f"Total aportes: ${resultado['total_aportes']:,.0f}")
+    print("=" * 80)
 
 
 # ============================================================================
-# CONSTANTES COLOMBIA - SEGURIDAD SOCIAL 2025
+# CONSTANTES ADICIONALES PARA CalculadoraPILA - Seguridad Social 2025
 # ============================================================================
-
-# Salario Mínimo Mensual Legal Vigente
-SMMLV_2025 = Decimal('1300000')  # $1.300.000 COP
 
 # SALUD (12.5% total)
 SALUD_TOTAL = Decimal('0.125')
@@ -41,7 +293,6 @@ PENSION_EMPLEADO = Decimal('0.04')    # 4% empleado
 PENSION_EMPLEADOR = Decimal('0.12')   # 12% empleador
 
 # ARL (Administradora de Riesgos Laborales) - Según nivel de riesgo
-# Fuente: Decreto 1772 de 1994 y actualizaciones
 TABLA_ARL = {
     1: Decimal('0.00522'),   # Riesgo I (Mínimo): 0.522%
     2: Decimal('0.01044'),   # Riesgo II (Bajo): 1.044%
@@ -51,27 +302,22 @@ TABLA_ARL = {
 }
 
 # PARAFISCALES
-# CORRECCIÓN V1.1: CCF 4% SIEMPRE (sin umbral)
 CCF_TASA = Decimal('0.04')
-
-# SENA e ICBF solo para salarios < 10 SMMLV
 SENA_TASA = Decimal('0.02')
 ICBF_TASA = Decimal('0.03')
-UMBRAL_SENA_ICBF = SMMLV_2025 * 10
 
 # TOPES IBC
 IBC_MAXIMO_SMMLV = 25  # Tope máximo de 25 SMMLV
-IBC_MAXIMO = SMMLV_2025 * IBC_MAXIMO_SMMLV
-
-# EXONERACIÓN DE SALUD
-UMBRAL_EXONERACION_SALUD = SMMLV_2025 * 10  # Empresas con salarios < 10 SMMLV
+IBC_MAXIMO = Decimal('1300000') * IBC_MAXIMO_SMMLV  # 32.5M
+UMBRAL_SENA_ICBF = Decimal('1300000') * 10  # 10 SMMLV
+UMBRAL_EXONERACION_SALUD = Decimal('1300000') * 10
 
 # SALARIO INTEGRAL
 PORCENTAJE_IBC_SALARIO_INTEGRAL = Decimal('0.70')  # 70% del salario base
 
 
 # ============================================================================
-# CLASES DE DATOS
+# DATACLASS para resultado de CalculadoraPILA
 # ============================================================================
 
 @dataclass
@@ -82,7 +328,7 @@ class LiquidacionPILA:
     """
     # Datos de entrada
     salario_base: Decimal
-    ibc: Decimal  # Ingreso Base de Cotización
+    ibc: Decimal
     nivel_riesgo_arl: int
     es_salario_integral: bool
     es_empresa_exonerada: bool
@@ -117,37 +363,19 @@ class LiquidacionPILA:
     # Metadata
     fecha_calculo: datetime
     salario_ajustado: bool
-    ibc_limitado: bool  # True si se aplicó tope de 25 SMMLV
+    ibc_limitado: bool
     advertencias: list
 
 
 # ============================================================================
-# MOTOR DE CÁLCULO
+# CLASE CalculadoraPILA - Usada por routes/cotizaciones.py
 # ============================================================================
 
 class CalculadoraPILA:
     """
     Calculadora de Seguridad Social para Colombia - Versión 1.1
     
-    MEJORAS EN VERSIÓN 1.1:
-    - CCF 4% se calcula SIEMPRE (sin umbral)
-    - Exoneración de Salud Empleador para salarios < 10 SMMLV
-    - Tope IBC máximo de 25 SMMLV
-    - Soporte para Salario Integral (IBC = 70%)
-    
-    Implementa la lógica pura de negocio sin dependencias de base de datos.
-    Todos los cálculos se realizan con precisión Decimal para evitar
-    errores de redondeo financiero.
-    
-    Ejemplo de uso:
-        >>> calc = CalculadoraPILA(
-        ...     salario_base=1300000,
-        ...     nivel_riesgo_arl=1,
-        ...     es_empresa_exonerada=True
-        ... )
-        >>> resultado = calc.calcular()
-        >>> print(f"Total empleado: ${resultado.total_empleado:,.0f}")
-        Total empleado: $104,000
+    Implementa la lógica pura de negocio para cálculo de aportes PILA.
     """
     
     def __init__(
@@ -157,18 +385,6 @@ class CalculadoraPILA:
         es_empresa_exonerada: bool = True,
         es_salario_integral: bool = False
     ):
-        """
-        Inicializa la calculadora
-        
-        Args:
-            salario_base: Salario mensual del empleado en COP
-            nivel_riesgo_arl: Nivel de riesgo ARL (1=Mínimo a 5=Máximo)
-            es_empresa_exonerada: Si aplica exoneración de Salud Empleador (default: True)
-            es_salario_integral: Si el salario es integral (IBC = 70%)
-        
-        Raises:
-            ValueError: Si los parámetros son inválidos
-        """
         self.salario_base = Decimal(str(salario_base))
         self.nivel_riesgo_arl = nivel_riesgo_arl
         self.es_empresa_exonerada = es_empresa_exonerada
@@ -177,106 +393,55 @@ class CalculadoraPILA:
         self.salario_ajustado = False
         self.ibc_limitado = False
         
-        # Validaciones
         self._validar_parametros()
-        
-        # Calcular IBC
         self.ibc = self._calcular_ibc()
         
     def _validar_parametros(self):
         """Valida los parámetros de entrada"""
-        
-        # Validar nivel de riesgo ARL
         if self.nivel_riesgo_arl not in TABLA_ARL:
             raise ValueError(
                 f"Nivel de riesgo ARL inválido: {self.nivel_riesgo_arl}. "
                 f"Debe estar entre 1 y 5."
             )
         
-        # Validar salario positivo
         if self.salario_base <= 0:
             raise ValueError(
                 f"El salario base debe ser mayor a cero. "
                 f"Recibido: ${self.salario_base:,.2f}"
             )
         
-        # Ajustar al mínimo si es menor
-        if self.salario_base < SMMLV_2025:
-            self.advertencias.append(
-                f"⚠️ Salario ${self.salario_base:,.0f} es menor al SMMLV "
-                f"(${SMMLV_2025:,.0f}). Se ajustará automáticamente al mínimo legal."
-            )
-            self.salario_base = SMMLV_2025
+        SMMLV = Decimal('1300000')
+        if self.salario_base < SMMLV:
+            self.salario_base = SMMLV
             self.salario_ajustado = True
     
     def _calcular_ibc(self) -> Decimal:
-        """
-        Calcula el IBC (Ingreso Base de Cotización)
-        
-        CORRECCIÓN V1.1: Implementa:
-        1. Salario Integral: IBC = 70% del salario
-        2. Tope Máximo: IBC no puede superar 25 SMMLV
-        3. Si no aplica ninguna excepción: IBC = salario base
-        
-        Returns:
-            Decimal: IBC calculado
-        """
-        # REGLA 1: Salario Integral (IBC = 70%)
+        """Calcula el IBC (Ingreso Base de Cotización)"""
         if self.es_salario_integral:
             ibc = self.salario_base * PORCENTAJE_IBC_SALARIO_INTEGRAL
-            self.advertencias.append(
-                f"ℹ️ Salario Integral detectado: IBC = 70% de ${self.salario_base:,.0f} = ${ibc:,.0f}"
-            )
-            
-            # Validar que el IBC integral no supere el tope de 25 SMMLV
             if ibc > IBC_MAXIMO:
-                self.advertencias.append(
-                    f"⚠️ IBC integral ${ibc:,.0f} supera el tope de 25 SMMLV. "
-                    f"Limitado a ${IBC_MAXIMO:,.0f}"
-                )
                 ibc = IBC_MAXIMO
                 self.ibc_limitado = True
-            
             return ibc
         
-        # REGLA 2: Tope Máximo de 25 SMMLV (para salarios ordinarios)
         if self.salario_base > IBC_MAXIMO:
-            self.advertencias.append(
-                f"ℹ️ Salario ${self.salario_base:,.0f} supera el tope de 25 SMMLV. "
-                f"IBC limitado a ${IBC_MAXIMO:,.0f}"
-            )
             self.ibc_limitado = True
             return IBC_MAXIMO
         
-        # REGLA 3: IBC = Salario Base (caso normal)
         return self.salario_base
     
     def _redondear(self, valor: Decimal) -> Decimal:
-        """
-        Redondea un valor decimal al peso más cercano
-        Usa redondeo bancario (ROUND_HALF_UP) según normas contables
-        """
+        """Redondea un valor decimal al peso más cercano"""
         return valor.quantize(Decimal('1'), rounding=ROUND_HALF_UP)
     
     def _calcular_salud(self) -> Dict[str, Decimal]:
-        """
-        Calcula aportes de salud
-        
-        CORRECCIÓN V1.1: Implementa exoneración de Salud Empleador
-        Si es_empresa_exonerada=True y salario < 10 SMMLV:
-            Salud Empleador = $0
-        """
+        """Calcula aportes de salud"""
         salud_empleado = self._redondear(self.ibc * SALUD_EMPLEADO)
         
-        # CORRECCIÓN V1.1: Exoneración de Salud Empleador
         salud_empleador_exonerado = False
         if self.es_empresa_exonerada and self.salario_base < UMBRAL_EXONERACION_SALUD:
             salud_empleador = Decimal('0')
             salud_empleador_exonerado = True
-            self.advertencias.append(
-                f"✓ Exoneración de Salud Empleador aplicada "
-                f"(salario ${self.salario_base:,.0f} < 10 SMMLV)"
-            )
         else:
             salud_empleador = self._redondear(self.ibc * SALUD_EMPLEADOR)
         
@@ -309,16 +474,9 @@ class CalculadoraPILA:
         }
     
     def _calcular_parafiscales(self) -> Dict[str, Decimal]:
-        """
-        Calcula aportes parafiscales
-        
-        CORRECCIÓN V1.1: CCF 4% SIEMPRE (sin umbral de 10 SMMLV)
-        SENA e ICBF solo para salarios < 10 SMMLV
-        """
-        # CORRECCIÓN V1.1: CCF se calcula SIEMPRE
+        """Calcula aportes parafiscales"""
         ccf = self._redondear(self.ibc * CCF_TASA)
         
-        # SENA e ICBF solo para salarios < 10 SMMLV
         aplica_sena_icbf = self.salario_base < UMBRAL_SENA_ICBF
         
         if aplica_sena_icbf:
@@ -327,9 +485,6 @@ class CalculadoraPILA:
         else:
             sena = Decimal('0')
             icbf = Decimal('0')
-            self.advertencias.append(
-                f"ℹ️ SENA e ICBF no aplicables (salario >= 10 SMMLV: ${UMBRAL_SENA_ICBF:,.0f})"
-            )
         
         return {
             'ccf': ccf,
@@ -340,274 +495,46 @@ class CalculadoraPILA:
         }
     
     def calcular(self) -> LiquidacionPILA:
-        """
-        Ejecuta el cálculo completo de Seguridad Social
-        
-        Returns:
-            LiquidacionPILA: Objeto con todos los valores calculados
-        """
-        
-        # Calcular componentes
+        """Ejecuta el cálculo completo de Seguridad Social"""
         salud = self._calcular_salud()
         pension = self._calcular_pension()
         arl = self._calcular_arl()
         parafiscales = self._calcular_parafiscales()
         
-        # Calcular totales
         total_empleado = salud['empleado'] + pension['empleado']
-        
         total_empleador = (
             salud['empleador'] +
             pension['empleador'] +
             arl['empleador'] +
             parafiscales['total']
         )
-        
         total_general = total_empleado + total_empleador
         
-        # Construir resultado
         return LiquidacionPILA(
-            # Entrada
             salario_base=self.salario_base,
             ibc=self.ibc,
             nivel_riesgo_arl=self.nivel_riesgo_arl,
             es_salario_integral=self.es_salario_integral,
             es_empresa_exonerada=self.es_empresa_exonerada,
-            
-            # Salud
             salud_empleado=salud['empleado'],
             salud_empleador=salud['empleador'],
             salud_total=salud['total'],
             salud_empleador_exonerado=salud['exonerado'],
-            
-            # Pensión
             pension_empleado=pension['empleado'],
             pension_empleador=pension['empleador'],
             pension_total=pension['total'],
-            
-            # ARL
             arl_empleador=arl['empleador'],
             tasa_arl=arl['tasa'],
-            
-            # Parafiscales
             ccf=parafiscales['ccf'],
             sena=parafiscales['sena'],
             icbf=parafiscales['icbf'],
             parafiscales_total=parafiscales['total'],
             aplica_sena_icbf=parafiscales['aplica_sena_icbf'],
-            
-            # Totales
             total_empleado=total_empleado,
             total_empleador=total_empleador,
             total_general=total_general,
-            
-            # Metadata
             fecha_calculo=datetime.now(),
             salario_ajustado=self.salario_ajustado,
             ibc_limitado=self.ibc_limitado,
             advertencias=self.advertencias.copy()
         )
-    
-    def generar_reporte(self) -> str:
-        """
-        Genera un reporte legible en texto de la liquidación
-        
-        Returns:
-            str: Reporte formateado para imprimir
-        """
-        resultado = self.calcular()
-        
-        linea = "=" * 70
-        
-        reporte = f"""
-{linea}
-        LIQUIDACIÓN DE SEGURIDAD SOCIAL - COLOMBIA
-                    Sistema Montero v1.1
-{linea}
-
-DATOS DEL EMPLEADO:
-  • Salario Base:        ${resultado.salario_base:>15,.0f} COP
-  • IBC (Base Cotiz.):   ${resultado.ibc:>15,.0f} COP
-  • Nivel Riesgo ARL:    {resultado.nivel_riesgo_arl} ({self._nombre_riesgo()})
-  • Tasa ARL:            {resultado.tasa_arl * 100:>15.3f}%
-  • Salario Integral:    {'SÍ' if resultado.es_salario_integral else 'NO'}
-  • Empresa Exonerada:   {'SÍ' if resultado.es_empresa_exonerada else 'NO'}
-  
-{linea}
-CONCEPTOS DE LIQUIDACIÓN:
-{linea}
-
-1. SALUD (12.5% total)
-   Empleado (4%):        ${resultado.salud_empleado:>15,.0f} COP
-   Empleador (8.5%):     ${resultado.salud_empleador:>15,.0f} COP {'(EXONERADO)' if resultado.salud_empleador_exonerado else ''}
-   ─────────────────────────────────────────
-   Subtotal Salud:       ${resultado.salud_total:>15,.0f} COP
-
-2. PENSIÓN (16% total)
-   Empleado (4%):        ${resultado.pension_empleado:>15,.0f} COP
-   Empleador (12%):      ${resultado.pension_empleador:>15,.0f} COP
-   ─────────────────────────────────────────
-   Subtotal Pensión:     ${resultado.pension_total:>15,.0f} COP
-
-3. ARL (100% empleador)
-   Empleador ({resultado.tasa_arl * 100:.3f}%):     ${resultado.arl_empleador:>15,.0f} COP
-
-4. PARAFISCALES
-   CCF (4%):             ${resultado.ccf:>15,.0f} COP [SIEMPRE]
-   SENA (2%):            ${resultado.sena:>15,.0f} COP {'[< 10 SMMLV]' if resultado.aplica_sena_icbf else '[NO APLICA]'}
-   ICBF (3%):            ${resultado.icbf:>15,.0f} COP {'[< 10 SMMLV]' if resultado.aplica_sena_icbf else '[NO APLICA]'}
-   ─────────────────────────────────────────
-   Subtotal Parafiscales:${resultado.parafiscales_total:>15,.0f} COP
-
-{linea}
-RESUMEN FINAL:
-{linea}
-
-  Total Empleado:        ${resultado.total_empleado:>15,.0f} COP
-  Total Empleador:       ${resultado.total_empleador:>15,.0f} COP
-  ═════════════════════════════════════════
-  TOTAL GENERAL:         ${resultado.total_general:>15,.0f} COP
-
-  Salario Neto (estimado): ${resultado.salario_base - resultado.total_empleado:>11,.0f} COP
-
-{linea}
-"""
-        
-        # Agregar advertencias si existen
-        if resultado.advertencias:
-            reporte += "\nADVERTENCIAS Y NOTAS:\n"
-            for adv in resultado.advertencias:
-                reporte += f"  {adv}\n"
-            reporte += f"\n{linea}\n"
-        
-        reporte += f"\nFecha de Cálculo: {resultado.fecha_calculo.strftime('%Y-%m-%d %H:%M:%S')}\n"
-        reporte += f"Versión Motor PILA: 1.1.0\n"
-        reporte += f"{linea}\n"
-        
-        return reporte
-    
-    def _nombre_riesgo(self) -> str:
-        """Retorna el nombre descriptivo del nivel de riesgo"""
-        nombres = {
-            1: "Mínimo",
-            2: "Bajo",
-            3: "Medio",
-            4: "Alto",
-            5: "Máximo"
-        }
-        return nombres.get(self.nivel_riesgo_arl, "Desconocido")
-
-
-# ============================================================================
-# FUNCIONES DE UTILIDAD
-# ============================================================================
-
-def calcular_pila_rapido(
-    salario: float,
-    riesgo_arl: int = 1,
-    exonerada: bool = True,
-    integral: bool = False
-) -> Dict:
-    """
-    Función de conveniencia para cálculo rápido
-    
-    Args:
-        salario: Salario mensual en COP
-        riesgo_arl: Nivel de riesgo (1-5), default=1
-        exonerada: Si aplica exoneración de salud, default=True
-        integral: Si es salario integral, default=False
-    
-    Returns:
-        dict: Diccionario con los valores calculados
-    """
-    calc = CalculadoraPILA(salario, riesgo_arl, exonerada, integral)
-    resultado = calc.calcular()
-    
-    return {
-        'salario_base': float(resultado.salario_base),
-        'ibc': float(resultado.ibc),
-        'total_empleado': float(resultado.total_empleado),
-        'total_empleador': float(resultado.total_empleador),
-        'total_general': float(resultado.total_general),
-        'salud_empleado': float(resultado.salud_empleado),
-        'pension_empleado': float(resultado.pension_empleado),
-        'salario_neto': float(resultado.salario_base - resultado.total_empleado),
-        'advertencias': resultado.advertencias
-    }
-
-
-def obtener_smmlv() -> float:
-    """Retorna el SMMLV vigente"""
-    return float(SMMLV_2025)
-
-
-def obtener_tabla_arl() -> Dict[int, float]:
-    """Retorna la tabla de tasas ARL"""
-    return {k: float(v * 100) for k, v in TABLA_ARL.items()}  # Retorna en %
-
-
-def obtener_tope_ibc() -> float:
-    """Retorna el tope máximo de IBC (25 SMMLV)"""
-    return float(IBC_MAXIMO)
-
-
-# ============================================================================
-# EJEMPLO DE USO
-# ============================================================================
-
-if __name__ == "__main__":
-    print("\n🧮 MOTOR DE CÁLCULO PILA v1.1 - SISTEMA MONTERO\n")
-    print("NUEVAS FUNCIONALIDADES:")
-    print("  ✓ CCF 4% SIEMPRE (sin umbral)")
-    print("  ✓ Exoneración de Salud Empleador < 10 SMMLV")
-    print("  ✓ Tope IBC máximo 25 SMMLV")
-    print("  ✓ Soporte Salario Integral (IBC = 70%)\n")
-    
-    # Ejemplo 1: Salario mínimo con exoneración
-    print("=" * 70)
-    print("EJEMPLO 1: Empleado con Salario Mínimo (CON Exoneración)")
-    print("=" * 70)
-    
-    calc1 = CalculadoraPILA(
-        salario_base=1300000,
-        nivel_riesgo_arl=1,
-        es_empresa_exonerada=True
-    )
-    print(calc1.generar_reporte())
-    
-    # Ejemplo 2: Salario alto sin exoneración
-    print("\n" + "=" * 70)
-    print("EJEMPLO 2: Empleado con Salario Alto (SIN Exoneración)")
-    print("=" * 70)
-    
-    calc2 = CalculadoraPILA(
-        salario_base=15000000,
-        nivel_riesgo_arl=3,
-        es_empresa_exonerada=False
-    )
-    print(calc2.generar_reporte())
-    
-    # Ejemplo 3: Salario integral
-    print("\n" + "=" * 70)
-    print("EJEMPLO 3: Salario Integral (IBC = 70%)")
-    print("=" * 70)
-    
-    calc3 = CalculadoraPILA(
-        salario_base=25000000,
-        nivel_riesgo_arl=2,
-        es_empresa_exonerada=False,
-        es_salario_integral=True
-    )
-    print(calc3.generar_reporte())
-    
-    # Ejemplo 4: Salario que supera el tope de 25 SMMLV
-    print("\n" + "=" * 70)
-    print("EJEMPLO 4: Salario > 25 SMMLV (Tope IBC)")
-    print("=" * 70)
-    
-    calc4 = CalculadoraPILA(
-        salario_base=35000000,
-        nivel_riesgo_arl=4,
-        es_empresa_exonerada=False
-    )
-    print(calc4.generar_reporte())

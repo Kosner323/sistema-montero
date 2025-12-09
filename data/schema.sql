@@ -57,7 +57,7 @@ CREATE INDEX IF NOT EXISTS idx_empresas_nombre
 CREATE TABLE IF NOT EXISTS usuarios (
     -- Identificación
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    empresa_nit TEXT NOT NULL,  -- ✅ AGREGADO NOT NULL
+    empresa_nit TEXT,  -- ✅ CAMBIADO: Ahora permite NULL (usuario independiente)
     tipoId TEXT NOT NULL,  -- ✅ AGREGADO NOT NULL
     numeroId TEXT NOT NULL,  -- ✅ AGREGADO NOT NULL
     

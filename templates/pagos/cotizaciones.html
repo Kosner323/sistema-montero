@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     <style>
         #feedbackMessage {
             margin-bottom: 1rem;
@@ -57,41 +59,41 @@
             <div id="feedbackMessage"></div>
 
             <div class="card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h5 style="margin: 0;">Crear Nueva Cotización</h5>
-                    <a href="{{ url_for('bp_cotizaciones.simulador_pila_page') }}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <div class="card-header card-header-corporate d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Crear Nueva Cotización</h5>
+                    <a href="{{ url_for('bp_cotizaciones.simulador_pila_page') }}" class="btn btn-corporate btn-sm d-inline-flex align-items-center gap-2">
                         <i data-feather="activity" style="width: 16px; height: 16px;"></i>
-                        🧮 Abrir Simulador PILA
+                        🧮 Simulador PILA
                     </a>
                 </div>
                 <div class="card-body">
-                    <p>Complete el formulario para generar una nueva cotización de servicio o producto.</p>
-                    <form id="formCotizacion" class="row g-3 mt-3">
-                        <div class="col-md-6">
-                            <label for="inputCliente" class="form-label">Cliente / Empresa</label>
-                            <input type="text" class="form-control" id="inputCliente" placeholder="Escriba para buscar empresa..." list="listaEmpresas" required>
+                    <p class="text-muted mb-3" style="font-size: 0.85rem;">Complete el formulario para generar una nueva cotización de servicio o producto.</p>
+                    <form id="formCotizacion" class="row g-2 mt-2">
+                        <div class="col-md-4">
+                            <label for="inputCliente" class="form-label form-label-sm">Cliente / Empresa</label>
+                            <input type="text" class="form-control form-control-sm" id="inputCliente" placeholder="Buscar empresa..." list="listaEmpresas" required>
                             <datalist id="listaEmpresas">
                                 </datalist>
                         </div>
-                        <div class="col-md-6">
-                            <label for="inputEmail" class="form-label">Correo Electrónico</label>
-                            <input type="email" class="form-control" id="inputEmail" placeholder="ejemplo@cliente.com">
-                        </div>
-                        <div class="col-12">
-                            <label for="inputServicio" class="form-label">Servicio/Producto Cotizado</label>
-                            <input type="text" class="form-control" id="inputServicio" placeholder="Ej: Afiliación y gestión de riesgos" required>
+                        <div class="col-md-4">
+                            <label for="inputEmail" class="form-label form-label-sm">Correo Electrónico</label>
+                            <input type="email" class="form-control form-control-sm" id="inputEmail" placeholder="ejemplo@cliente.com">
                         </div>
                         <div class="col-md-4">
-                            <label for="inputMonto" class="form-label">Monto Total (COP)</label>
-                            <input type="number" class="form-control" id="inputMonto" placeholder="0" min="0" required>
+                            <label for="inputMonto" class="form-label form-label-sm">Monto Total (COP)</label>
+                            <input type="number" class="form-control form-control-sm" id="inputMonto" placeholder="0" min="0" required>
                         </div>
-                         <div class="col-md-8">
-                            <label for="inputNotas" class="form-label">Notas Adicionales</label>
-                            <input type="text" class="form-control" id="inputNotas" placeholder="Detalles de la cotización, validez, etc.">
+                        <div class="col-md-6">
+                            <label for="inputServicio" class="form-label form-label-sm">Servicio/Producto</label>
+                            <input type="text" class="form-control form-control-sm" id="inputServicio" placeholder="Ej: Afiliación y gestión de riesgos" required>
                         </div>
-                        <div class="col-12 mt-4">
-                            <button type="submit" class="btn btn-primary me-2" id="btnGenerar">Generar Cotización</button>
-                            <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
+                         <div class="col-md-6">
+                            <label for="inputNotas" class="form-label form-label-sm">Notas Adicionales</label>
+                            <input type="text" class="form-control form-control-sm" id="inputNotas" placeholder="Detalles, validez, etc.">
+                        </div>
+                        <div class="col-12 mt-3 pt-2 border-top">
+                            <button type="submit" class="btn btn-corporate btn-sm me-2" id="btnGenerar">Generar Cotización</button>
+                            <button type="reset" class="btn btn-outline-secondary btn-sm">Limpiar</button>
                         </div>
                     </form>
                 </div>
@@ -100,30 +102,30 @@
 
           <div class="col-span-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Cotizaciones Recientes</h5>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <a href="{{ url_for('bp_cotizaciones.simulador_pila_page') }}" class="btn btn-sm btn-success" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                <div class="card-header card-header-corporate d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Cotizaciones Recientes</h5>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('bp_cotizaciones.simulador_pila_page') }}" class="btn btn-sm btn-excel d-inline-flex align-items-center gap-1">
                             <i data-feather="activity" style="width: 14px; height: 14px;"></i>
-                            🧮 Simulador PILA
+                            🧮 Simulador
                         </a>
                         <button class="btn btn-sm btn-outline-secondary" onclick="loadCotizaciones()">
                             <i data-feather="refresh-cw" class="me-1"></i> Recargar
                         </button>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-excel table-bordered table-sm">
                             <thead>
                                 <tr>
-                                    <th># Cotización</th>
-                                    <th>Cliente</th>
-                                    <th>Servicio</th>
-                                    <th>Monto</th>
-                                    <th>Fecha Creación</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th># COTIZACIÓN</th>
+                                    <th>CLIENTE</th>
+                                    <th>SERVICIO</th>
+                                    <th class="text-end">MONTO</th>
+                                    <th>FECHA</th>
+                                    <th class="text-center">ESTADO</th>
+                                    <th class="text-center">ACCIONES</th>
                                 </tr>
                             </thead>
                             <tbody id="tablaCotizacionesBody">
@@ -356,18 +358,27 @@
                 data.forEach(cot => {
                     const badgeClass = cot.estado === 'Aceptada' ? 'bg-success' : (cot.estado === 'Rechazada' ? 'bg-danger' : 'bg-warning');
                     const montoFormateado = (parseFloat(cot.monto) || 0).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                    const isPendiente = cot.estado === 'Pendiente';
+                    const cotId = cot.id_cotizacion || cot.id;
+                    
                     const row = `
                         <tr>
-                            <td>${cot.id_cotizacion || cot.id}</td>
+                            <td>${cotId}</td>
                             <td>${cot.cliente}</td>
                             <td>${cot.servicio}</td>
                             <td>${montoFormateado}</td>
                             <td>${cot.fecha_creacion}</td>
                             <td><span class="badge ${badgeClass}">${cot.estado}</span></td>
-                            <td><button class="btn btn-sm btn-info" onclick="alert('Funcionalidad de descarga de PDF no implementada. Se descargaría la cotización ${cot.id_cotizacion || cot.id}.')">Descargar PDF</button></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="alert('Funcionalidad de descarga de PDF no implementada. Se descargaría la cotización ${cotId}.')" title="Descargar PDF">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                                ${isPendiente ? `<button class="btn btn-sm btn-success ms-1" onclick="aceptarCotizacion(${cotId}, '${cot.cliente}')" title="Aceptar Oferta"><i data-feather="check-circle" class="w-4 h-4 mr-1"></i> Aceptar Oferta</button>` : ''}
+                            </td>
                         </tr>
                     `;
                     tablaTbody.insertAdjacentHTML('beforeend', row);
+                    feather.replace();
                 });
             }
 
@@ -419,6 +430,47 @@
                     btnGenerar.innerHTML = originalBtnHtml;
                 }
             });
+
+            /**
+             * Acepta una cotización pendiente
+             * @param {number} cotizacionId - ID de la cotización a aceptar
+             * @param {string} clienteNombre - Nombre del cliente
+             */
+            window.aceptarCotizacion = async function(cotizacionId, clienteNombre) {
+                // Confirmar acción
+                const confirmacion = confirm(`¿Estás seguro de aceptar la cotización para ${clienteNombre}?\n\nEsto cambiará el estado a "Aceptada".`);
+                if (!confirmacion) return;
+                
+                try {
+                    // Mostrar loader
+                    showMessage('⏳ Aceptando cotización...', 'info');
+                    
+                    // Enviar petición al backend
+                    const response = await fetch(`${API_URL}/cotizaciones/${cotizacionId}/aceptar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        // Mostrar mensaje de éxito
+                        showMessage(`✅ ${result.message || 'Cotización aceptada exitosamente.'}`, 'success');
+                        
+                        // Recargar tabla de cotizaciones
+                        await loadCotizaciones();
+                        
+                        console.log('✅ Cotización aceptada:', result);
+                    } else {
+                        throw new Error(result.error || 'Error al aceptar cotización');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error al aceptar cotización:', error);
+                    showMessage(`❌ Error: ${error.message}`, 'danger');
+                }
+            }
 
             // --- Logout Logic ---
             const logoutButtons = document.querySelectorAll('#btnLogout, #btnLogout2');

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Retiro de Empleados</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+</head>
+<body class="bg-light">
+    
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>🧪 Prueba de Modal de Retiro de Empleados</h4>
+            </div>
+            <div class="card-body">
+                <p>Haz clic en el botón para abrir el modal de retiro:</p>
+                
+                <button type="button" class="btn btn-danger" onclick="abrirModalRetiro('1234567890', 'Juan Carlos Pérez Gómez')">
+                    <i data-feather="user-x"></i> Retirar Empleado (Prueba)
+                </button>
+                
+                <div class="mt-4" id="feedbackMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL DE RETIRO DE EMPLEADO ========== -->
+    <div class="modal fade" id="modalRetiroEmpleado" tabindex="-1" aria-labelledby="modalRetiroLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="modalRetiroLabel">
+              <i data-feather="user-x" class="mr-2"></i> Retirar Empleado de la Empresa
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-warning mb-3">
+              <strong>⚠️ Atención:</strong> Esta acción registrará el retiro del empleado en el sistema.
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label fw-bold">Empleado:</label>
+              <p id="retiroEmpleadoNombre" class="text-muted">-</p>
+              <input type="hidden" id="retiroEmpleadoId">
+            </div>
+
+            <div class="mb-3">
+              <label for="retiroMotivo" class="form-label fw-bold">Motivo de Retiro <span class="text-danger">*</span></label>
+              <select class="form-select" id="retiroMotivo" required>
+                <option value="" selected disabled>Seleccionar motivo...</option>
+                <option value="renuncia">Renuncia Voluntaria</option>
+                <option value="despido">Despido</option>
+                <option value="mutuo_acuerdo">Mutuo Acuerdo</option>
+                <option value="terminacion_contrato">Terminación de Contrato</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="retiroSoporte" class="form-label fw-bold">Soporte de Retiro PILA <span class="text-danger">*</span></label>
+              <input type="file" class="form-control" id="retiroSoporte" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="form-text">
+                Formatos aceptados: PDF, JPG, PNG (máx. 5MB)
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="retiroObservaciones" class="form-label fw-bold">Observaciones</label>
+              <textarea class="form-control" id="retiroObservaciones" rows="3" placeholder="Ingrese observaciones adicionales (opcional)"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i data-feather="x" class="mr-1"></i> Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" onclick="confirmarRetiro()">
+              <i data-feather="check" class="mr-1"></i> Confirmar Retiro
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ========== FIN MODAL DE RETIRO ========== -->
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <script>
+        // Inicializar Feather Icons
+        feather.replace();
+
+        /**
+         * Muestra mensajes de feedback
+         */
+        function showMessage(message, type = 'info') {
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            if (feedbackDiv) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+                feedbackDiv.innerHTML = alertHtml;
+                if(type === 'success') {
+                     setTimeout(() => {
+                        const alert = feedbackDiv.querySelector('.alert-success');
+                        if(alert) new bootstrap.Alert(alert).close();
+                    }, 4000);
+                }
+            }
+        }
+
+        /**
+         * Abre el modal de retiro y carga los datos del empleado
+         */
+        function abrirModalRetiro(empleadoId, empleadoNombre) {
+            console.log('📋 Abriendo modal de retiro para:', empleadoId, empleadoNombre);
+            
+            // Cargar datos en el modal
+            document.getElementById('retiroEmpleadoId').value = empleadoId;
+            document.getElementById('retiroEmpleadoNombre').textContent = empleadoNombre;
+            
+            // Limpiar campos del formulario
+            document.getElementById('retiroMotivo').value = '';
+            document.getElementById('retiroSoporte').value = '';
+            document.getElementById('retiroObservaciones').value = '';
+            
+            // Abrir el modal usando Bootstrap 5
+            const modal = new bootstrap.Modal(document.getElementById('modalRetiroEmpleado'));
+            modal.show();
+            
+            // Recargar iconos de Feather
+            feather.replace();
+        }
+
+        /**
+         * Confirma el retiro del empleado (STUB - Solo validación frontend)
+         */
+        async function confirmarRetiro() {
+            const empleadoId = document.getElementById('retiroEmpleadoId').value;
+            const empleadoNombre = document.getElementById('retiroEmpleadoNombre').textContent;
+            const motivo = document.getElementById('retiroMotivo').value;
+            const soporteInput = document.getElementById('retiroSoporte');
+            const observaciones = document.getElementById('retiroObservaciones').value;
+            
+            // Validaciones
+            if (!motivo) {
+                alert('⚠️ Por favor, selecciona el motivo de retiro.');
+                return;
+            }
+            
+            if (!soporteInput.files || soporteInput.files.length === 0) {
+                alert('⚠️ Por favor, carga el soporte de retiro PILA.');
+                return;
+            }
+            
+            const soporte = soporteInput.files[0];
+            
+            // Validar tamaño del archivo (máx. 5MB)
+            if (soporte.size > 5 * 1024 * 1024) {
+                alert('⚠️ El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                return;
+            }
+            
+            // Validar tipo de archivo
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(soporte.type)) {
+                alert('⚠️ Formato de archivo no válido. Solo se permiten PDF, JPG y PNG.');
+                return;
+            }
+            
+            // Confirmar acción
+            const confirmacion = confirm(`¿Estás seguro de retirar al empleado ${empleadoNombre}?\n\nMotivo: ${motivo}\n\nEsta acción no se puede deshacer.`);
+            if (!confirmacion) return;
+            
+            // Simular envío exitoso (STUB)
+            console.log('📤 Datos a enviar:');
+            console.log('   - Empleado ID:', empleadoId);
+            console.log('   - Empleado Nombre:', empleadoNombre);
+            console.log('   - Motivo:', motivo);
+            console.log('   - Soporte:', soporte.name, `(${(soporte.size / 1024).toFixed(2)} KB)`);
+            console.log('   - Observaciones:', observaciones || 'N/A');
+            
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalRetiroEmpleado'));
+            modal.hide();
+            
+            // Mostrar mensaje de éxito
+            showMessage(`✅ STUB: Retiro de ${empleadoNombre} procesado exitosamente. (Endpoint /api/planillas/retirar pendiente de implementación)`, 'success');
+        }
+    </script>
+</body>
+</html>

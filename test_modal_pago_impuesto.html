@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Pago de Impuestos</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        
+        /* Badges de estado mejorados */
+        .badge-pendiente {
+            background-color: #ffc107;
+            color: #000;
+            padding: 0.5em 0.75em;
+        }
+        
+        .badge-vencido {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 0.5em 0.75em;
+            animation: pulse 2s infinite;
+        }
+        
+        .badge-pagado {
+            background-color: #28a745;
+            color: #fff;
+            padding: 0.5em 0.75em;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Estilo para filas vencidas */
+        .table-danger {
+            background-color: #f8d7da !important;
+        }
+        
+        #modalSubirPago .modal-dialog {
+            max-width: 500px !important;
+            margin: 1.75rem auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>🧪 Prueba de Modal de Pago de Impuestos</h4>
+            </div>
+            <div class="card-body">
+                <p>Este es un demo del nuevo sistema de gestión de pagos de impuestos con:</p>
+                <ul>
+                    <li>✅ Filtro de Año</li>
+                    <li>✅ Columna de Comprobante</li>
+                    <li>✅ Botón "Subir Pago" para estados pendientes</li>
+                    <li>✅ Modal con validaciones completas</li>
+                    <li>✅ Estilos de estado mejorados (Pendiente, Vencido, Pagado)</li>
+                </ul>
+                
+                <h5 class="mt-4 mb-3">Simulación de Tabla de Impuestos:</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>NIT</th>
+                                <th>Empresa</th>
+                                <th>Tipo de Impuesto</th>
+                                <th>Periodo</th>
+                                <th>Vencimiento</th>
+                                <th>Estado</th>
+                                <th>Comprobante</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Impuesto PENDIENTE -->
+                            <tr>
+                                <td>900123456</td>
+                                <td>Empresa ABC S.A.S.</td>
+                                <td>IVA</td>
+                                <td>Bimestre 6, Año 2025</td>
+                                <td>2025-12-15</td>
+                                <td><span class="badge badge-pendiente">Pendiente de Pago</span></td>
+                                <td><span class="text-muted">-</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" title="Ver Formulario">
+                                        <i data-feather="eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="abrirModalPago(1, 'Empresa ABC S.A.S.', 'IVA', 'Bimestre 6, Año 2025')" title="Subir Pago">
+                                        <i data-feather="upload"></i> Subir Pago
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Impuesto VENCIDO -->
+                            <tr class="table-danger">
+                                <td>900654321</td>
+                                <td>Comercial XYZ Ltda.</td>
+                                <td>Retefuente</td>
+                                <td>Mes Octubre 2025</td>
+                                <td>2025-11-15</td>
+                                <td><span class="badge badge-vencido">¡VENCIDO!</span></td>
+                                <td><span class="text-muted">-</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" title="Ver Formulario">
+                                        <i data-feather="eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-success" onclick="abrirModalPago(2, 'Comercial XYZ Ltda.', 'Retefuente', 'Mes Octubre 2025')" title="Subir Pago">
+                                        <i data-feather="upload"></i> Subir Pago
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Impuesto PAGADO -->
+                            <tr>
+                                <td>900987654</td>
+                                <td>Industrias DEF S.A.</td>
+                                <td>ICA</td>
+                                <td>Año 2025</td>
+                                <td>2025-01-31</td>
+                                <td><span class="badge badge-pagado">Pagado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" title="Ver Comprobante">
+                                        <i data-feather="file-text"></i> Ver
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info" title="Ver Formulario">
+                                        <i data-feather="eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Log de Acciones -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">📋 Log de Acciones</h5>
+            </div>
+            <div class="card-body">
+                <div id="actionLog" class="bg-light p-3 rounded" style="font-family: monospace; font-size: 0.875rem; max-height: 300px; overflow-y: auto;">
+                    <p class="text-muted">Las acciones se mostrarán aquí...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL SUBIR PAGO ========== -->
+    <div class="modal fade" id="modalSubirPago" tabindex="-1" aria-labelledby="modalSubirPagoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalSubirPagoLabel">
+                        <i data-feather="upload" class="mr-2"></i> Registrar Pago de Impuesto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>ℹ️ Información:</strong>
+                        <p id="infoPagoEmpresa" class="mb-0 mt-2">-</p>
+                    </div>
+
+                    <form id="formSubirPago" enctype="multipart/form-data">
+                        <input type="hidden" id="pagoImpuestoId" name="impuesto_id">
+
+                        <div class="mb-3">
+                            <label for="pagoFecha" class="form-label fw-bold">Fecha de Pago <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="pagoFecha" name="fecha_pago" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoValor" class="form-label fw-bold">Valor Pagado (COP) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="pagoValor" name="valor_pagado" 
+                                       placeholder="Ej: 1500000" step="0.01" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoComprobante" class="form-label fw-bold">Archivo Comprobante <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" id="pagoComprobante" name="comprobante" 
+                                   accept=".pdf,.jpg,.jpeg,.png" required>
+                            <div class="form-text">
+                                Formatos aceptados: PDF, JPG, PNG (máx. 10MB)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pagoObservaciones" class="form-label fw-bold">Observaciones</label>
+                            <textarea class="form-control" id="pagoObservaciones" name="observaciones" rows="2" 
+                                      placeholder="Notas adicionales (opcional)"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i data-feather="x" class="mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnConfirmarPago">
+                        <i data-feather="check-circle" class="mr-1"></i> Confirmar Pago
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========== FIN MODAL SUBIR PAGO ========== -->
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <script>
+        // Inicializar Feather Icons
+        feather.replace();
+        
+        const modalPagoInstance = new bootstrap.Modal(document.getElementById('modalSubirPago'));
+        const formSubirPago = document.getElementById('formSubirPago');
+        const btnConfirmarPago = document.getElementById('btnConfirmarPago');
+        
+        // Abrir modal de subir pago
+        function abrirModalPago(id, empresaNombre, tipoImpuesto, periodo) {
+            addLog(`📤 Abriendo modal de pago para impuesto ID: ${id}`, 'info');
+            
+            // Cargar datos en el modal
+            document.getElementById('pagoImpuestoId').value = id;
+            document.getElementById('infoPagoEmpresa').innerHTML = `
+                <strong>Empresa:</strong> ${empresaNombre}<br>
+                <strong>Impuesto:</strong> ${tipoImpuesto}<br>
+                <strong>Periodo:</strong> ${periodo}
+            `;
+            
+            // Limpiar formulario
+            formSubirPago.reset();
+            document.getElementById('pagoImpuestoId').value = id;
+            
+            // Establecer fecha actual por defecto
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pagoFecha').value = today;
+            
+            // Abrir modal
+            modalPagoInstance.show();
+            
+            // Recargar iconos
+            setTimeout(() => feather.replace(), 100);
+        }
+        
+        // Confirmar pago (STUB)
+        btnConfirmarPago.addEventListener('click', function() {
+            if (!formSubirPago.checkValidity()) {
+                formSubirPago.reportValidity();
+                return;
+            }
+            
+            const impuestoId = document.getElementById('pagoImpuestoId').value;
+            const fecha = document.getElementById('pagoFecha').value;
+            const valor = document.getElementById('pagoValor').value;
+            const comprobante = document.getElementById('pagoComprobante').files[0];
+            const observaciones = document.getElementById('pagoObservaciones').value;
+            
+            // Validar archivo
+            if (!comprobante) {
+                alert('⚠️ Debe cargar el archivo comprobante de pago.');
+                return;
+            }
+            
+            // Validar tamaño
+            if (comprobante.size > 10 * 1024 * 1024) {
+                alert('⚠️ El archivo es demasiado grande. El tamaño máximo es 10MB.');
+                return;
+            }
+            
+            // Log de datos
+            addLog('✅ Validaciones completadas', 'success');
+            addLog(`📋 Datos del pago:`, 'info');
+            addLog(`   - Impuesto ID: ${impuestoId}`, 'info');
+            addLog(`   - Fecha de Pago: ${fecha}`, 'info');
+            addLog(`   - Valor: $${parseFloat(valor).toLocaleString('es-CO')}`, 'info');
+            addLog(`   - Comprobante: ${comprobante.name} (${(comprobante.size / 1024).toFixed(2)} KB)`, 'info');
+            if (observaciones) {
+                addLog(`   - Observaciones: ${observaciones}`, 'info');
+            }
+            
+            addLog('🔗 STUB: En producción se enviaría a POST /api/impuestos/${impuestoId}/pagar', 'primary');
+            
+            // Cerrar modal
+            modalPagoInstance.hide();
+            
+            // Mensaje de éxito
+            setTimeout(() => {
+                alert('✅ STUB: Pago registrado exitosamente (simulación)');
+            }, 500);
+        });
+        
+        // Función auxiliar para agregar logs
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('actionLog');
+            const timestamp = new Date().toLocaleTimeString('es-CO');
+            
+            // Limpiar mensaje inicial
+            if (logDiv.querySelector('.text-muted')) {
+                logDiv.innerHTML = '';
+            }
+            
+            const colorMap = {
+                success: '#28a745',
+                danger: '#dc3545',
+                warning: '#ffc107',
+                info: '#17a2b8',
+                primary: '#007bff',
+                secondary: '#6c757d'
+            };
+            
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colorMap[type] || '#000';
+            logEntry.style.marginBottom = '0.25rem';
+            logEntry.innerHTML = `<span style="color: #999;">[${timestamp}]</span> ${message}`;
+            
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // Log inicial
+        addLog('🚀 Sistema de prueba iniciado', 'success');
+        addLog('👆 Haz clic en "Subir Pago" en las filas pendientes o vencidas', 'info');
+    </script>
+</body>
+</html>

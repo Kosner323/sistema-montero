@@ -10,7 +10,7 @@ Fecha: 2025-11-26
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, Index
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, Index, Numeric, DateTime
 from sqlalchemy.orm import relationship
 
 # Importar db desde extensions para evitar instancias duplicadas
@@ -86,6 +86,13 @@ class Empresa(db.Model):
             'created_at': self.created_at
         }
 
+    # ✅ Índices para optimización de búsquedas (10k+ usuarios)
+    __table_args__ = (
+        Index('idx_empresas_nombre', 'nombre_empresa'),  # Búsqueda por nombre
+        Index('idx_empresas_ciudad', 'ciudad_empresa'),  # Filtrar por ciudad
+        Index('idx_empresas_created', 'created_at'),     # Ordenar por fecha
+    )
+
 
 class Usuario(db.Model):
     """
@@ -147,6 +154,9 @@ class Usuario(db.Model):
     # Índices (se definen al final con __table_args__)
     __table_args__ = (
         Index('sqlite_autoindex_usuarios_1', 'tipoId', 'numeroId', unique=True),
+        Index('idx_usuarios_empresa_nit', 'empresa_nit'),  # Búsqueda por empresa
+        Index('idx_usuarios_nombre', 'primerNombre', 'primerApellido'),  # Búsqueda por nombre
+        Index('idx_usuarios_created', 'created_at'),  # Ordenar por fecha
     )
 
     def __repr__(self):
@@ -241,6 +251,13 @@ class Incapacidad(db.Model):
     estado = Column(Text, nullable=True, default='En Proceso')
     archivos_info = Column(Text, nullable=True)  # JSON
     created_at = Column(Text, nullable=True, default=datetime.utcnow)
+    
+    # Campos para flujo de pago a cliente
+    monto_pagado_cliente = Column(Numeric(15, 2), nullable=True)
+    fecha_pago_cliente = Column(Text, nullable=True)
+    observaciones_pago = Column(Text, nullable=True)
+    comprobante_pago = Column(Text, nullable=True)
+    fecha_cierre = Column(Text, nullable=True)
 
     # Relaciones
     empresa = relationship('Empresa', back_populates='incapacidades')
@@ -258,7 +275,12 @@ class Incapacidad(db.Model):
             'fecha_fin': self.fecha_fin,
             'estado': self.estado,
             'archivos_info': self.archivos_info,
-            'created_at': self.created_at
+            'created_at': self.created_at,
+            'monto_pagado_cliente': float(self.monto_pagado_cliente) if self.monto_pagado_cliente else None,
+            'fecha_pago_cliente': self.fecha_pago_cliente,
+            'observaciones_pago': self.observaciones_pago,
+            'comprobante_pago': self.comprobante_pago,
+            'fecha_cierre': self.fecha_cierre
         }
 
 
@@ -417,6 +439,7 @@ class Cotizacion(db.Model):
     notas = Column(Text, nullable=True)
     fecha_creacion = Column(Text, nullable=False)
     estado = Column(Text, nullable=True, default='Enviada')
+    periodo = Column(Text, nullable=False, default=lambda: datetime.now().strftime('%Y-%m'))  # ✅ AGREGADO
 
     # Índices
     __table_args__ = (
@@ -437,7 +460,8 @@ class Cotizacion(db.Model):
             'monto': self.monto,
             'notas': self.notas,
             'fecha_creacion': self.fecha_creacion,
-            'estado': self.estado
+            'estado': self.estado,
+            'periodo': self.periodo  # ✅ AGREGADO
         }
 
 
@@ -606,6 +630,15 @@ class Novedad(db.Model):
             'history': self.history,
         }
 
+    # ✅ Índices para optimización de búsquedas (10k+ novedades)
+    __table_args__ = (
+        Index('idx_novedades_client', 'client'),           # Búsqueda por cliente
+        Index('idx_novedades_status', 'status'),           # Filtrar por estado
+        Index('idx_novedades_priority', 'priority'),       # Ordenar por prioridad
+        Index('idx_novedades_creation', 'creationDate'),   # Ordenar por fecha
+        Index('idx_novedades_assigned', 'assignedTo'),     # Filtrar por asignado
+    )
+
 
 
 # =============================================================================
@@ -732,6 +765,367 @@ class DepuracionPendiente(db.Model):
 
 # =============================================================================
 # FUNCIONES DE UTILIDAD
+# =============================================================================
+
+
+# =============================================================================
+# MÓDULO: CARTERA DE CLIENTES
+# =============================================================================
+
+class DeudaCartera(db.Model):
+    """
+    Modelo ORM para la tabla 'deudas_cartera'
+    Registro de deudas manuales de cartera de clientes
+    """
+    __tablename__ = 'deudas_cartera'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    usuario_id = Column(Text, nullable=False)
+    nombre_usuario = Column(Text, nullable=True)
+    empresa_nit = Column(Text, ForeignKey('empresas.nit'), nullable=False)
+    nombre_empresa = Column(Text, nullable=True)
+    entidad = Column(Text, nullable=False)  # EPS, ARL, AFP, CCF, ICBF, SENA
+    monto = Column(Numeric(15, 2), nullable=False)
+    dias_mora = Column(Integer, default=0)
+    estado = Column(Text, default='Pendiente')  # Pendiente, Pagado, Vencido
+    tipo = Column(Text, default='Manual')
+    fecha_creacion = Column(Text, default=datetime.utcnow)
+    fecha_vencimiento = Column(Text, nullable=True)
+    usuario_registro = Column(Text, nullable=True)
+    fecha_recordatorio_cobro = Column(Text, nullable=True)  # AGENDA DE COBROS PERSONALIZADA
+
+    # Relaciones
+    empresa = relationship('Empresa', backref='deudas_cartera')
+
+    def __repr__(self):
+        return f"<DeudaCartera {self.entidad} - Usuario {self.usuario_id} - ${self.monto}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'usuario_id': self.usuario_id,
+            'nombre_usuario': self.nombre_usuario,
+            'empresa_nit': self.empresa_nit,
+            'nombre_empresa': self.nombre_empresa,
+            'entidad': self.entidad,
+            'monto': float(self.monto) if self.monto else 0.0,
+            'dias_mora': self.dias_mora,
+            'estado': self.estado,
+            'tipo': self.tipo,
+            'fecha_creacion': self.fecha_creacion,
+            'fecha_vencimiento': self.fecha_vencimiento,
+            'usuario_registro': self.usuario_registro,
+            'fecha_recordatorio_cobro': self.fecha_recordatorio_cobro
+        }
+
+
+# =============================================================================
+# MÓDULO: EGRESOS (CAJA MENOR)
+# =============================================================================
+
+class Egreso(db.Model):
+    """
+    Modelo ORM para la tabla 'egresos'
+    Registra gastos rápidos de caja menor sin soporte obligatorio
+    """
+    __tablename__ = 'egresos'
+
+    # Identificación
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    usuario_id = Column(Text, ForeignKey('usuarios.numeroId'), nullable=False)
+    
+    # Información financiera
+    monto = Column(Numeric(precision=15, scale=2), nullable=False)  # Monto del gasto
+    concepto = Column(Text, nullable=False)  # Descripción del gasto (ej: "Taxi a reunión")
+    categoria = Column(Text, nullable=True)  # Ej: Transporte, Alimentación, Oficina, Otros
+    
+    # Metadata
+    fecha = Column(DateTime, nullable=False, default=datetime.now)  # Fecha del gasto
+    soporte_opcional = Column(Text, nullable=True)  # Ruta al archivo de soporte (opcional)
+    
+    # Relaciones
+    usuario = relationship('Usuario', foreign_keys=[usuario_id], backref='egresos')
+    
+    # Índices para optimizar consultas
+    __table_args__ = (
+        Index('idx_egresos_usuario', 'usuario_id'),
+        Index('idx_egresos_fecha', 'fecha'),
+        Index('idx_egresos_categoria', 'categoria'),
+    )
+
+    def to_dict(self):
+        """Convierte el objeto a diccionario para JSON"""
+        return {
+            'id': self.id,
+            'usuario_id': self.usuario_id,
+            'monto': float(self.monto) if self.monto else 0.0,
+            'concepto': self.concepto,
+            'categoria': self.categoria,
+            'fecha': self.fecha.isoformat() if self.fecha else None,
+            'soporte_opcional': self.soporte_opcional
+        }
+
+    def __repr__(self):
+        return f"<Egreso(id={self.id}, usuario_id={self.usuario_id}, monto={self.monto}, concepto={self.concepto}, categoria={self.categoria})>"
+
+
+# =============================================================================
+# MÓDULO: SISTEMA DE TAREAS PERSONAL (FASE 11.2)
+# =============================================================================
+
+class TareaUsuario(db.Model):
+    """
+    Modelo ORM para la tabla 'tareas_usuario'
+    Sistema de To-Do List personal por usuario logueado
+    """
+    __tablename__ = 'tareas_usuario'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
+    descripcion = Column(Text, nullable=False)
+    completada = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index('idx_tareas_user_id', 'user_id'),
+        Index('idx_tareas_user_completada', 'user_id', 'completada'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'descripcion': self.descripcion,
+            'completada': bool(self.completada),
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None
+        }
+
+    def __repr__(self):
+        estado = "✅" if self.completada else "⏳"
+        return f"<TareaUsuario {self.id}: {estado} '{self.descripcion[:30]}...'>"
+
+
+# =============================================================================
+# MÓDULO: MARKETING (CRM)
+# =============================================================================
+
+class Prospecto(db.Model):
+    """
+    Modelo ORM para la tabla 'marketing_prospectos'
+    CRM de leads y prospectos de clientes potenciales
+    """
+    __tablename__ = 'marketing_prospectos'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre_empresa = Column(Text, nullable=True)
+    nombre_contacto = Column(Text, nullable=True)
+    telefono_contacto = Column(Text, nullable=True)
+    correo_contacto = Column(Text, nullable=True)
+    origen = Column(Text, nullable=True)  # Web, Referido, Publicidad, etc.
+    interes_servicio = Column(Text, nullable=True)
+    estado = Column(Text, nullable=True, default='Nuevo')  # Nuevo, Contactado, En Negociación, Cerrado, Perdido
+    notas = Column(Text, nullable=True)
+    fecha_registro = Column(Text, nullable=True, default=datetime.utcnow)
+    fecha_contacto = Column(Text, nullable=True)
+    valor_estimado = Column(Float, nullable=True)
+
+    __table_args__ = (
+        Index('idx_prospectos_estado', 'estado'),
+        Index('idx_prospectos_origen', 'origen'),
+    )
+
+    def __repr__(self):
+        return f"<Prospecto {self.nombre_empresa} - {self.estado}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre_empresa': self.nombre_empresa,
+            'nombre_contacto': self.nombre_contacto,
+            'telefono_contacto': self.telefono_contacto,
+            'correo_contacto': self.correo_contacto,
+            'origen': self.origen,
+            'interes_servicio': self.interes_servicio,
+            'estado': self.estado,
+            'notas': self.notas,
+            'fecha_registro': self.fecha_registro,
+            'fecha_contacto': self.fecha_contacto,
+            'valor_estimado': self.valor_estimado
+        }
+
+
+class RedSocial(db.Model):
+    """
+    Modelo ORM para la tabla 'marketing_redes'
+    Gestión de redes sociales de la empresa
+    """
+    __tablename__ = 'marketing_redes'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    plataforma = Column(Text, nullable=False)  # Facebook, Instagram, LinkedIn, etc.
+    url = Column(Text, nullable=True)
+    seguidores = Column(Integer, nullable=True, default=0)
+    estado = Column(Text, nullable=True, default='Activo')
+    descripcion = Column(Text, nullable=True)
+    created_at = Column(Text, nullable=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<RedSocial {self.plataforma} - {self.seguidores} seguidores>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'plataforma': self.plataforma,
+            'url': self.url,
+            'seguidores': self.seguidores,
+            'estado': self.estado,
+            'descripcion': self.descripcion,
+            'created_at': self.created_at
+        }
+
+
+class CampanaMarketing(db.Model):
+    """
+    Modelo ORM para la tabla 'marketing_campanas'
+    Gestión de campañas publicitarias
+    """
+    __tablename__ = 'marketing_campanas'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nombre_campana = Column(Text, nullable=False)
+    descripcion = Column(Text, nullable=True)
+    fecha_inicio = Column(Text, nullable=True)
+    fecha_fin = Column(Text, nullable=True)
+    presupuesto = Column(Float, nullable=True, default=0.0)
+    estado = Column(Text, nullable=True, default='Activa')  # Activa, Pausada, Finalizada
+    objetivo = Column(Text, nullable=True)
+    canal = Column(Text, nullable=True)  # Facebook Ads, Google Ads, Email, etc.
+    created_at = Column(Text, nullable=True, default=datetime.utcnow)
+    updated_at = Column(Text, nullable=True)
+
+    __table_args__ = (
+        Index('idx_campanas_estado', 'estado'),
+        Index('idx_campanas_fecha', 'fecha_inicio', 'fecha_fin'),
+    )
+
+    def __repr__(self):
+        return f"<CampanaMarketing {self.nombre_campana} - {self.estado}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre_campana': self.nombre_campana,
+            'descripcion': self.descripcion,
+            'fecha_inicio': self.fecha_inicio,
+            'fecha_fin': self.fecha_fin,
+            'presupuesto': self.presupuesto,
+            'estado': self.estado,
+            'objetivo': self.objetivo,
+            'canal': self.canal,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+
+
+# =============================================================================
+# MÓDULO: CARTERA FINANCIERA (Cuentas por Cobrar/Pagar)
+# =============================================================================
+
+class CarteraCobrar(db.Model):
+    """
+    Modelo ORM para la tabla 'cartera_cobrar'
+    Cuentas por cobrar a clientes
+    """
+    __tablename__ = 'cartera_cobrar'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    empresa_nit = Column(Text, ForeignKey('empresas.nit'), nullable=False)
+    nombre_empresa = Column(Text, nullable=True)
+    concepto = Column(Text, nullable=False)
+    monto = Column(Numeric(15, 2), nullable=False)
+    monto_pagado = Column(Numeric(15, 2), nullable=True, default=0)
+    fecha_emision = Column(Text, nullable=True)
+    fecha_vencimiento = Column(Text, nullable=True)
+    estado = Column(Text, nullable=True, default='Pendiente')  # Pendiente, Pagado, Vencido
+    created_at = Column(Text, nullable=True, default=datetime.utcnow)
+
+    # Relaciones
+    empresa = relationship('Empresa', backref='cuentas_cobrar')
+
+    __table_args__ = (
+        Index('idx_cartera_cobrar_estado', 'estado'),
+        Index('idx_cartera_cobrar_vencimiento', 'fecha_vencimiento'),
+    )
+
+    def __repr__(self):
+        return f"<CarteraCobrar {self.concepto} - ${self.monto} - {self.estado}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'empresa_nit': self.empresa_nit,
+            'nombre_empresa': self.nombre_empresa,
+            'concepto': self.concepto,
+            'monto': float(self.monto) if self.monto else 0.0,
+            'monto_pagado': float(self.monto_pagado) if self.monto_pagado else 0.0,
+            'fecha_emision': self.fecha_emision,
+            'fecha_vencimiento': self.fecha_vencimiento,
+            'estado': self.estado,
+            'created_at': self.created_at
+        }
+
+
+class CarteraPagarSS(db.Model):
+    """
+    Modelo ORM para la tabla 'cartera_pagar_ss'
+    Cuentas por pagar de Seguridad Social (EPS, ARL, Pensión, CCF)
+    """
+    __tablename__ = 'cartera_pagar_ss'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    empresa_nit = Column(Text, ForeignKey('empresas.nit'), nullable=False)
+    nombre_empresa = Column(Text, nullable=True)
+    tipo_entidad = Column(Text, nullable=False)  # EPS, ARL, Pensión, CCF, ICBF, SENA
+    nombre_entidad = Column(Text, nullable=True)
+    periodo = Column(Text, nullable=True)  # Ej: 2025-12
+    monto = Column(Numeric(15, 2), nullable=False)
+    fecha_limite = Column(Text, nullable=True)
+    estado = Column(Text, nullable=True, default='Pendiente')  # Pendiente, Pagado
+    numero_planilla = Column(Text, nullable=True)
+    fecha_pago = Column(Text, nullable=True)
+    created_at = Column(Text, nullable=True, default=datetime.utcnow)
+
+    # Relaciones
+    empresa = relationship('Empresa', backref='cuentas_pagar_ss')
+
+    __table_args__ = (
+        Index('idx_cartera_pagar_estado', 'estado'),
+        Index('idx_cartera_pagar_tipo', 'tipo_entidad'),
+        Index('idx_cartera_pagar_periodo', 'periodo'),
+    )
+
+    def __repr__(self):
+        return f"<CarteraPagarSS {self.tipo_entidad} - ${self.monto} - {self.estado}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'empresa_nit': self.empresa_nit,
+            'nombre_empresa': self.nombre_empresa,
+            'tipo_entidad': self.tipo_entidad,
+            'nombre_entidad': self.nombre_entidad,
+            'periodo': self.periodo,
+            'monto': float(self.monto) if self.monto else 0.0,
+            'fecha_limite': self.fecha_limite,
+            'estado': self.estado,
+            'numero_planilla': self.numero_planilla,
+            'fecha_pago': self.fecha_pago,
+            'created_at': self.created_at
+        }
+
+
+# =============================================================================
+# INICIALIZACIÓN DE BASE DE DATOS
 # =============================================================================
 
 def init_db(app):

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Página de Configuración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    <style>
+        body { 
+            padding: 2rem; 
+            background: #f8f9fa; 
+        }
+        .config-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        .config-section-header {
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .config-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .danger-zone {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .danger-zone-header {
+            border-bottom: 2px solid #dc2626;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .btn-download-backup {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border: none;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
+        }
+        .btn-download-backup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+            color: white;
+        }
+        .btn-download-backup:active {
+            transform: translateY(0);
+        }
+        .form-label-required::after {
+            content: ' *';
+            color: #dc2626;
+        }
+        .input-group-text {
+            background-color: #f3f4f6;
+            font-weight: 500;
+        }
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+        #actionLog {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .log-time {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🧪 Test - Configuración del Sistema</h1>
+        
+        <!-- Sección 1: Parámetros Salariales -->
+        <div class="config-section">
+            <div class="config-section-header">
+                <h3 class="config-section-title">
+                    <i data-feather="dollar-sign" style="width: 20px; height: 20px;"></i>
+                    Parámetros Salariales
+                </h3>
+                <p class="text-muted mb-0 small">Configuración de valores base para cálculos de nómina y seguridad social</p>
+            </div>
+
+            <form id="formSalarios">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="salarioMinimo" class="form-label form-label-required">Salario Mínimo Legal Vigente (SMLV)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="salarioMinimo" value="1300000" min="0" step="1000" required>
+                            <span class="input-group-text">COP</span>
+                        </div>
+                        <div class="form-text">Valor actualizado anualmente por el Gobierno</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="auxilioTransporte" class="form-label form-label-required">Auxilio de Transporte</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="auxilioTransporte" value="162000" min="0" step="1000" required>
+                            <span class="input-group-text">COP</span>
+                        </div>
+                        <div class="form-text">Aplica para salarios hasta 2 SMLV</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sección 2: Porcentajes -->
+        <div class="config-section">
+            <div class="config-section-header">
+                <h3 class="config-section-title">
+                    <i data-feather="percent" style="width: 20px; height: 20px;"></i>
+                    Porcentajes de Seguridad Social
+                </h3>
+                <p class="text-muted mb-0 small">Tasas de cotización según normativa colombiana vigente</p>
+            </div>
+
+            <form id="formPorcentajes">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="porcentajeSalud" class="form-label form-label-required">% Salud (EPS)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="porcentajeSalud" value="12.5" min="0" max="100" step="0.1" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-text small">
+                            <span class="badge bg-info">Empleador: 8.5%</span>
+                            <span class="badge bg-secondary ms-1">Empleado: 4%</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="porcentajePension" class="form-label form-label-required">% Pensión (AFP)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="porcentajePension" value="16" min="0" max="100" step="0.1" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-text small">
+                            <span class="badge bg-info">Empleador: 12%</span>
+                            <span class="badge bg-secondary ms-1">Empleado: 4%</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="porcentajeARL" class="form-label form-label-required">% ARL (Riesgos Laborales)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="porcentajeARL" value="0.522" min="0" max="100" step="0.001" required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-text small">
+                            <span class="badge bg-warning">Variable según clase de riesgo (I a V)</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="d-flex justify-content-end gap-3 mb-4">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="testRecargar()">
+                <i data-feather="refresh-cw" class="me-2" style="width: 18px; height: 18px;"></i>
+                Recargar Valores
+            </button>
+            <button type="button" class="btn btn-primary btn-lg" onclick="testGuardar()">
+                <i data-feather="save" class="me-2" style="width: 18px; height: 18px;"></i>
+                Guardar Configuración
+            </button>
+        </div>
+
+        <!-- ZONA DE PELIGRO -->
+        <div class="danger-zone">
+            <div class="danger-zone-header">
+                <h3 class="config-section-title text-danger">
+                    <i data-feather="alert-triangle" style="width: 24px; height: 24px;"></i>
+                    Zona de Peligro
+                </h3>
+                <p class="text-danger mb-0 fw-medium">Acciones críticas de mantenimiento del sistema</p>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="mb-2 fw-bold">
+                        <i data-feather="database" class="me-2" style="width: 20px; height: 20px;"></i>
+                        Copia de Seguridad Completa
+                    </h5>
+                    <p class="mb-2">
+                        Descargue una copia de seguridad completa del sistema incluyendo:
+                    </p>
+                    <ul class="mb-0 small">
+                        <li>Base de datos completa (usuarios, empresas, planillas, afiliaciones)</li>
+                        <li>Archivos adjuntos (comprobantes, documentos, soportes)</li>
+                        <li>Configuración del sistema</li>
+                        <li>Logs de auditoría</li>
+                    </ul>
+                    <div class="mt-3">
+                        <span class="stat-badge">
+                            <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
+                            Último backup: <strong>28/11/2025 14:30</strong>
+                        </span>
+                        <span class="stat-badge ms-2">
+                            <i data-feather="hard-drive" style="width: 14px; height: 14px;"></i>
+                            Tamaño estimado: <strong>~47 MB</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <button type="button" class="btn btn-download-backup w-100" onclick="testDescargarBackup()">
+                        <i data-feather="download" class="me-2" style="width: 24px; height: 24px;"></i>
+                        📥 DESCARGAR COPIA DE SEGURIDAD
+                    </button>
+                    <small class="text-muted d-block mt-2">Formato: ZIP comprimido</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOG DE ACCIONES -->
+        <div id="actionLog"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script>
+        feather.replace();
+
+        function logAction(action, details) {
+            const log = document.getElementById('actionLog');
+            const timestamp = new Date().toLocaleTimeString('es-CO');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${timestamp}]</span> <strong>${action}</strong> - ${details}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function testRecargar() {
+            logAction('🔄 RECARGAR CONFIGURACIÓN', 'GET /api/configuracion');
+            alert('✅ SIMULACIÓN: Valores recargados desde la base de datos');
+        }
+
+        function testGuardar() {
+            const config = {
+                salario_minimo: document.getElementById('salarioMinimo').value,
+                auxilio_transporte: document.getElementById('auxilioTransporte').value,
+                porcentaje_salud: document.getElementById('porcentajeSalud').value,
+                porcentaje_pension: document.getElementById('porcentajePension').value,
+                porcentaje_arl: document.getElementById('porcentajeARL').value
+            };
+
+            logAction('💾 GUARDAR CONFIGURACIÓN', `PUT /api/configuracion - Salario: $${config.salario_minimo}, Salud: ${config.porcentaje_salud}%`);
+            console.log('Configuración a guardar:', config);
+            alert('✅ SIMULACIÓN: Configuración guardada exitosamente en la base de datos');
+        }
+
+        function testDescargarBackup() {
+            const confirmacion = confirm('¿Está seguro de descargar una copia de seguridad completa del sistema?\n\nEsto puede tardar varios minutos.');
+            
+            if (confirmacion) {
+                logAction('📥 DESCARGAR BACKUP', 'GET /api/sistema/backup-download');
+                
+                // Simular descarga con delay
+                alert('⏳ Generando backup... (esto es una simulación)\n\nEn producción, se descargaría un archivo ZIP con:\n- Base de datos completa\n- Archivos adjuntos\n- Configuración\n- Logs');
+                
+                setTimeout(() => {
+                    alert('✅ SIMULACIÓN: Backup descargado como backup-sistema-2025-11-29.zip');
+                    logAction('✅ BACKUP COMPLETADO', 'Archivo: backup-sistema-2025-11-29.zip (47 MB)');
+                }, 1000);
+            } else {
+                logAction('⚠️ ACCIÓN CANCELADA', 'Descarga de backup cancelada por el usuario');
+            }
+        }
+
+        // Log inicial
+        logAction('Sistema', 'Test de configuración iniciado correctamente');
+        logAction('Info', 'Valores de ejemplo cargados');
+    </script>
+</body>
+</html>

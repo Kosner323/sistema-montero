@@ -97,6 +97,7 @@ def add_cotizacion():
         # Generar ID único de cotización
         fecha_actual = datetime.now()
         fecha_str = fecha_actual.strftime("%Y-%m-%d")
+        periodo = fecha_actual.strftime('%Y-%m')  # ✅ AGREGADO: Capturar periodo YYYY-MM
         id_cotizacion = f"COT-{fecha_actual.strftime('%Y%m%d%H%M%S')}"
 
         # ✅ Crear nueva cotización usando ORM
@@ -108,7 +109,8 @@ def add_cotizacion():
             monto=monto,
             notas=data.get("notas"),
             fecha_creacion=fecha_str,
-            estado=data.get("estado", "Enviada")
+            estado=data.get("estado", "Enviada"),
+            periodo=periodo  # ✅ AGREGADO: Asignar periodo
         )
 
         # ✅ Guardar en la base de datos
@@ -355,16 +357,17 @@ def guardar_simulacion():
         # Generar ID único de cotización
         fecha_actual = datetime.now()
         fecha_str = fecha_actual.strftime("%Y-%m-%d")
+        periodo = fecha_actual.strftime('%Y-%m')  # ✅ AGREGADO: Capturar periodo YYYY-MM
         id_cotizacion = f"PILA-{fecha_actual.strftime('%Y%m%d%H%M%S')}"
-        
+
         # Construir descripción del servicio
         servicio = f"Aportes PILA - Salario Base: ${salario_base:,.0f} | Riesgo ARL: Nivel {nivel_riesgo}"
-        
+
         # Construir notas detalladas
         notas_base = data.get("notas", "")
         total_empleado = float(data.get("total_empleado", 0))
         total_empleador = float(data.get("total_empleador", 0))
-        
+
         notas_completas = f"""SIMULACIÓN PILA GUARDADA
 Salario Base: ${salario_base:,.0f}
 Nivel de Riesgo ARL: {nivel_riesgo}
@@ -375,7 +378,7 @@ Total General: ${total_general:,.0f}
 {notas_base}
 
 Generado por Simulador PILA v1.1.0"""
-        
+
         # Crear nueva cotización usando ORM
         nueva_cotizacion = Cotizacion(
             id_cotizacion=id_cotizacion,
@@ -385,7 +388,8 @@ Generado por Simulador PILA v1.1.0"""
             monto=total_general,
             notas=notas_completas,
             fecha_creacion=fecha_str,
-            estado="Simulación PILA"
+            estado="Simulación PILA",
+            periodo=periodo  # ✅ AGREGADO: Asignar periodo
         )
         
         # Guardar en la base de datos

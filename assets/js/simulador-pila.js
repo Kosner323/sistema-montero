@@ -551,6 +551,75 @@ async function procesarFormulario(event) {
 document.addEventListener('DOMContentLoaded', function() {
   console.log('✅ Simulador PILA v1.0.0 inicializado');
   
+  // ========== INICIALIZAR BUSCADOR UNIVERSAL DE USUARIOS ==========
+  let buscadorUniversal = null;
+
+  if (typeof initUniversalSearch !== 'undefined') {
+    try {
+      buscadorUniversal = initUniversalSearch({
+        tipoIdField: 'tipoDocBusqueda',
+        numeroIdField: 'numeroDocBusqueda',
+        fieldMapping: {
+          // Mapeo específico para Simulador PILA
+          ibc: 'salarioBase', // El IBC se mapea al campo salario base
+          claseRiesgoARL: 'nivelRiesgo' // Nivel de riesgo ARL
+        },
+        autoLock: false, // NO bloquear campos (permitir edición)
+        onSuccess: function(usuario) {
+          console.log('✅ Usuario encontrado, aplicando lógica específica del simulador');
+
+          // Lógica especial para switches basada en tipo de contrato
+          if (usuario.tipo_contrato) {
+            const tipoContrato = usuario.tipo_contrato.toUpperCase();
+
+            // Switch de Salario Integral
+            const switchIntegral = document.getElementById('salarioIntegral');
+            if (switchIntegral) {
+              const esIntegral = (tipoContrato === 'INTEGRAL' || tipoContrato === 'SALARIO INTEGRAL' || tipoContrato.includes('INTEGRAL'));
+              switchIntegral.checked = esIntegral;
+              console.log(`🔄 Tipo de contrato: ${tipoContrato} -> Salario Integral: ${esIntegral}`);
+            }
+
+            // Switch de Empresa Exonerada (por defecto true, pero se puede ajustar según datos)
+            // Si el usuario tiene datos de exoneración específicos, aplicarlos aquí
+          }
+
+          // Si el usuario tiene nivel de riesgo específico en formato numérico o texto
+          if (usuario.claseRiesgoARL) {
+            const nivelRiesgoField = document.getElementById('nivelRiesgo');
+            if (nivelRiesgoField) {
+              // Intentar parsear el nivel de riesgo (puede ser "1", "Nivel 1", "I", etc.)
+              let riesgo = parseInt(usuario.claseRiesgoARL);
+
+              if (isNaN(riesgo)) {
+                // Si no es numérico, intentar extraer el número
+                const match = usuario.claseRiesgoARL.match(/\d+/);
+                if (match) {
+                  riesgo = parseInt(match[0]);
+                }
+              }
+
+              if (riesgo >= 1 && riesgo <= 5) {
+                nivelRiesgoField.value = riesgo.toString();
+                console.log(`🛡️ Nivel de riesgo ARL asignado: ${riesgo}`);
+              }
+            }
+          }
+        },
+        onNotFound: function() {
+          console.log('ℹ️ Usuario no encontrado, campos listos para ingreso manual');
+        }
+      });
+
+      console.log('🔍 Buscador Universal inicializado en Simulador PILA');
+    } catch (error) {
+      console.error('❌ Error al inicializar Buscador Universal:', error);
+    }
+  } else {
+    console.warn('⚠️ universal-search.js no está cargado. Asegúrate de incluir el script antes de simulador-pila.js');
+  }
+  // ========== FIN INICIALIZACIÓN BUSCADOR ==========
+  
   // Vincular evento submit del formulario
   const form = document.getElementById('formSimulador');
   if (form) {

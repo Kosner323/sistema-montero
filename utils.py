@@ -122,8 +122,8 @@ def login_required(f):
                 return jsonify({"error": "Acceso no autorizado. Se requiere inicio de sesión."}), 401
             else:
                 # Es una página web, redirige al login
-                # Asume que la función en app.py se llama 'login_page'
-                return redirect(url_for("login_page"))
+                # ✅ CORREGIDO: Usar el nombre correcto del blueprint main.login
+                return redirect(url_for("main.login"))
 
         return f(*args, **kwargs)
 

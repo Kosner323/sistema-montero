@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="es" data-pc-preset="preset-1" data-pc-sidebar-caption="true" data-pc-direction="ltr" dir="ltr" data-pc-theme="light">
+  <head>
+    <title>Configuración del Sistema | Montero y Negocio</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Configuración general del sistema" />
+    <meta name="author" content="Montero y Negocio" />
+
+    <link rel="icon" href="/assets/images/favicon.svg" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/fonts/phosphor/duotone/style.css" />
+    <link rel="stylesheet" href="/assets/fonts/tabler-icons.min.css" />
+    <link rel="stylesheet" href="/assets/fonts/feather.css" />
+    <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="/assets/fonts/material.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
+
+    <style>
+        .config-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+        .config-section-header {
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .config-section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .danger-zone {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .danger-zone-header {
+            border-bottom: 2px solid #dc2626;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .btn-download-backup {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border: none;
+            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
+        }
+        .btn-download-backup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.4);
+            background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+        }
+        .btn-download-backup:active {
+            transform: translateY(0);
+        }
+        .form-label-required::after {
+            content: ' *';
+            color: #dc2626;
+        }
+        .input-group-text {
+            background-color: #f3f4f6;
+            font-weight: 500;
+        }
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+    </style>
+
+    <script>
+      (async function checkAuthentication() {
+        const loader = document.querySelector('.loader-bg');
+        if (loader) loader.style.display = 'flex';
+
+        try {
+          const response = await fetch('/api/check_auth', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            window.location.href = '/login';
+            return;
+          }
+
+          const data = await response.json();
+
+          if (!data.authenticated) {
+            window.location.href = '/login';
+          } else {
+            if (loader) loader.style.display = 'none';
+            sessionStorage.setItem('userName', data.user_name);
+          }
+        } catch (error) {
+          console.error('Error de autenticación:', error);
+          window.location.href = '/login';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="loader-bg fixed inset-0 bg-white dark:bg-themedark-cardbg z-[1034]">
+      <div class="loader-track h-[5px] w-full inline-block absolute overflow-hidden top-0">
+        <div class="loader-fill w-[300px] h-[5px] bg-primary-500 absolute top-0 left-0 animate-[hitZak_0.6s_ease-in-out_infinite_alternate]"></div>
+      </div>
+    </div>
+
+    {% include '_sidebar.html' %}
+    {% include '_header.html' %}
+
+    <div class="pc-container">
+      <div class="pc-content">
+        
+        <!-- Encabezado de Página -->
+        <div class="page-header">
+          <div class="page-block">
+            <div class="row align-items-center">
+              <div class="col-md-12">
+                <ul class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="/dashboard">Inicio</a></li>
+                  <li class="breadcrumb-item" aria-current="page">Configuración</li>
+                </ul>
+              </div>
+              <div class="col-md-12">
+                <div class="page-header-title">
+                  <h2 class="mb-0">
+                    <i data-feather="settings" class="me-2"></i>
+                    Configuración del Sistema
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="feedbackMessage"></div>
+
+        <!-- Sección 1: Parámetros Salariales -->
+        <div class="config-section">
+          <div class="config-section-header">
+            <h3 class="config-section-title">
+              <i data-feather="dollar-sign" style="width: 20px; height: 20px;"></i>
+              Parámetros Salariales
+            </h3>
+            <p class="text-muted mb-0 small">Configuración de valores base para cálculos de nómina y seguridad social</p>
+          </div>
+
+          <form id="formSalarios">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="salarioMinimo" class="form-label form-label-required">Salario Mínimo Legal Vigente (SMLV)</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" id="salarioMinimo" name="salario_minimo" 
+                         placeholder="1300000" min="0" step="1000" required>
+                  <span class="input-group-text">COP</span>
+                </div>
+                <div class="form-text">Valor actualizado anualmente por el Gobierno</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="auxilioTransporte" class="form-label form-label-required">Auxilio de Transporte</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" id="auxilioTransporte" name="auxilio_transporte" 
+                         placeholder="162000" min="0" step="1000" required>
+                  <span class="input-group-text">COP</span>
+                </div>
+                <div class="form-text">Aplica para salarios hasta 2 SMLV</div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sección 2: Porcentajes de Seguridad Social -->
+        <div class="config-section">
+          <div class="config-section-header">
+            <h3 class="config-section-title">
+              <i data-feather="percent" style="width: 20px; height: 20px;"></i>
+              Porcentajes de Seguridad Social
+            </h3>
+            <p class="text-muted mb-0 small">Tasas de cotización según normativa colombiana vigente</p>
+          </div>
+
+          <form id="formPorcentajes">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="porcentajeSalud" class="form-label form-label-required">% Salud (EPS)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajeSalud" name="porcentaje_salud" 
+                         placeholder="12.5" min="0" max="100" step="0.1" required>
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">
+                  <span class="badge bg-info">Empleador: 8.5%</span>
+                  <span class="badge bg-secondary ms-1">Empleado: 4%</span>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="porcentajePension" class="form-label form-label-required">% Pensión (AFP)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajePension" name="porcentaje_pension" 
+                         placeholder="16" min="0" max="100" step="0.1" required>
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">
+                  <span class="badge bg-info">Empleador: 12%</span>
+                  <span class="badge bg-secondary ms-1">Empleado: 4%</span>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="porcentajeARL" class="form-label form-label-required">% ARL (Riesgos Laborales)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajeARL" name="porcentaje_arl" 
+                         placeholder="0.522" min="0" max="100" step="0.001" required>
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">
+                  <span class="badge bg-warning">Variable según clase de riesgo (I a V)</span>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="porcentajeCajaComp" class="form-label form-label-required">% Caja de Compensación</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajeCajaComp" name="porcentaje_caja_comp" 
+                         placeholder="4" min="0" max="100" step="0.1" required>
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">
+                  <span class="badge bg-success">100% a cargo del empleador</span>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="porcentajeICBF" class="form-label">% ICBF</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajeICBF" name="porcentaje_icbf" 
+                         placeholder="3" min="0" max="100" step="0.1">
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">Aplicable según tipo de empresa</div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="porcentajeSENA" class="form-label">% SENA</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="porcentajeSENA" name="porcentaje_sena" 
+                         placeholder="2" min="0" max="100" step="0.1">
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text small">Aplicable según tipo de empresa</div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Sección 3: Parámetros de Operación -->
+        <div class="config-section">
+          <div class="config-section-header">
+            <h3 class="config-section-title">
+              <i data-feather="sliders" style="width: 20px; height: 20px;"></i>
+              Parámetros de Operación
+            </h3>
+            <p class="text-muted mb-0 small">Configuración de límites y tiempos del sistema</p>
+          </div>
+
+          <form id="formOperacion">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="diasVencimientoPila" class="form-label">Días antes de vencimiento PILA (alerta)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="diasVencimientoPila" name="dias_alerta_pila" 
+                         placeholder="5" min="1" max="30" step="1">
+                  <span class="input-group-text">días</span>
+                </div>
+                <div class="form-text">Sistema enviará alertas antes del vencimiento</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="limiteArchivoPDF" class="form-label">Tamaño máximo de archivos PDF</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="limiteArchivoPDF" name="limite_pdf_mb" 
+                         placeholder="10" min="1" max="50" step="1">
+                  <span class="input-group-text">MB</span>
+                </div>
+                <div class="form-text">Límite para carga de documentos y comprobantes</div>
+              </div>
+
+              <div class="col-md-12">
+                <label for="emailNotificaciones" class="form-label">Correo para notificaciones del sistema</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i data-feather="mail" style="width: 16px; height: 16px;"></i></span>
+                  <input type="email" class="form-control" id="emailNotificaciones" name="email_notificaciones" 
+                         placeholder="admin@montero.com">
+                </div>
+                <div class="form-text">Correo donde se recibirán alertas críticas del sistema</div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Botón de Guardar Configuración -->
+        <div class="d-flex justify-content-end gap-3 mb-4">
+          <button type="button" class="btn btn-outline-secondary btn-lg" onclick="cargarConfiguracion()">
+            <i data-feather="refresh-cw" class="me-2" style="width: 18px; height: 18px;"></i>
+            Recargar Valores
+          </button>
+          <button type="button" class="btn btn-primary btn-lg" onclick="guardarConfiguracion()">
+            <i data-feather="save" class="me-2" style="width: 18px; height: 18px;"></i>
+            Guardar Configuración
+          </button>
+        </div>
+
+        <!-- FIRMA DIGITAL -->
+        <div class="config-section">
+          <div class="config-section-header">
+            <h3 class="config-section-title">
+              <i data-feather="edit" style="width: 20px; height: 20px;"></i>
+              Firma Digital
+            </h3>
+            <p class="text-muted mb-0 small">Cargue su firma digital para documentos oficiales (PNG/JPG con fondo transparente)</p>
+          </div>
+
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <label for="firmaDigitalInput" class="form-label fw-bold">
+                <i data-feather="upload" class="me-2" style="width: 16px; height: 16px;"></i>
+                Seleccionar Firma
+              </label>
+              <input 
+                type="file" 
+                class="form-control" 
+                id="firmaDigitalInput" 
+                accept="image/png,image/jpeg,image/jpg"
+                onchange="previewFirma(event)"
+              >
+              <div class="form-text small">
+                <i data-feather="info" style="width: 14px; height: 14px;"></i>
+                Formatos: PNG, JPG | Recomendado: fondo transparente | Tamaño máx: 2MB
+              </div>
+              <button type="button" class="btn btn-primary mt-3" onclick="guardarFirma()">
+                <i data-feather="save" class="me-2" style="width: 18px; height: 18px;"></i>
+                Guardar Firma
+              </button>
+            </div>
+
+            <div class="col-md-6">
+              <div class="text-center">
+                <label class="form-label fw-bold d-block">Vista Previa</label>
+                <div 
+                  id="firmaPreview" 
+                  style="
+                    min-height: 150px; 
+                    border: 2px dashed #cbd5e0; 
+                    border-radius: 8px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    background: #f8f9fa;
+                    padding: 20px;
+                  "
+                >
+                  <img 
+                    id="firmaImg" 
+                    src="" 
+                    alt="Firma digital" 
+                    style="max-width: 100%; max-height: 150px; display: none;"
+                  >
+                  <div id="firmaPlaceholder" class="text-muted">
+                    <i data-feather="image" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+                    <p class="mb-0 mt-2">Sin firma cargada</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONA DE PELIGRO: Backup del Sistema -->
+        <div class="danger-zone">
+          <div class="danger-zone-header">
+            <h3 class="config-section-title text-danger">
+              <i data-feather="alert-triangle" style="width: 24px; height: 24px;"></i>
+              Zona de Peligro
+            </h3>
+            <p class="text-danger mb-0 fw-medium">Acciones críticas de mantenimiento del sistema</p>
+          </div>
+
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="mb-2 fw-bold">
+                <i data-feather="database" class="me-2" style="width: 20px; height: 20px;"></i>
+                Copia de Seguridad Completa
+              </h5>
+              <p class="mb-2">
+                Descargue una copia de seguridad completa del sistema incluyendo:
+              </p>
+              <ul class="mb-0 small">
+                <li>Base de datos completa (usuarios, empresas, planillas, afiliaciones)</li>
+                <li>Archivos adjuntos (comprobantes, documentos, soportes)</li>
+                <li>Configuración del sistema</li>
+                <li>Logs de auditoría</li>
+              </ul>
+              <div class="mt-3">
+                <span class="stat-badge">
+                  <i data-feather="calendar" style="width: 14px; height: 14px;"></i>
+                  Último backup: <strong id="ultimoBackup">Nunca</strong>
+                </span>
+                <span class="stat-badge ms-2">
+                  <i data-feather="hard-drive" style="width: 14px; height: 14px;"></i>
+                  Tamaño estimado: <strong id="tamañoEstimado">~50 MB</strong>
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              <button type="button" class="btn btn-download-backup w-100" onclick="descargarBackup()">
+                <i data-feather="download" class="me-2" style="width: 24px; height: 24px;"></i>
+                📥 DESCARGAR COPIA DE SEGURIDAD
+              </button>
+              <small class="text-muted d-block mt-2">Formato: ZIP comprimido</small>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    <script src="/assets/js/plugins/simplebar.min.js"></script>
+    <script src="/assets/js/plugins/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/icon/custom-icon.js"></script>
+    <script src="/assets/js/plugins/feather.min.js"></script>
+    <script src="/assets/js/component.js"></script>
+    <script src="/assets/js/theme.js"></script>
+    <script>
+        // --- POLYFILLS PARA TEMA ---
+        window.layout_change = window.layout_change || function() {};
+        window.layout_theme_sidebar_change = window.layout_theme_sidebar_change || function() {};
+        window.change_box_container = window.change_box_container || function() {};
+        window.layout_caption_change = window.layout_caption_change || function() {};
+        window.layout_rtl_change = window.layout_rtl_change || function() {};
+        window.preset_change = window.preset_change || function() {};
+        window.main_layout_change = window.main_layout_change || function() {};
+    </script>
+    <script src="/assets/js/script.js"></script>
+
+    <script>
+        const API_URL = '/api';
+
+        // Función de feedback
+        function showMessage(message, type = 'info') {
+            const feedbackDiv = document.getElementById('feedbackMessage');
+            if (feedbackDiv) {
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+                feedbackDiv.innerHTML = alertHtml;
+                if(type === 'success') {
+                     setTimeout(() => {
+                        const alert = feedbackDiv.querySelector('.alert-success');
+                        if(alert) new bootstrap.Alert(alert).close();
+                    }, 4000);
+                }
+            } else {
+                alert(message);
+            }
+        }
+
+        /**
+         * Cargar configuración actual del sistema
+         */
+        async function cargarConfiguracion() {
+            try {
+                showMessage('⏳ Cargando configuración...', 'info');
+                
+                const response = await fetch(`${API_URL}/configuracion`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar configuración');
+                }
+
+                const config = await response.json();
+                
+                // Llenar formulario con valores
+                document.getElementById('salarioMinimo').value = config.salario_minimo || '';
+                document.getElementById('auxilioTransporte').value = config.auxilio_transporte || '';
+                document.getElementById('porcentajeSalud').value = config.porcentaje_salud || '';
+                document.getElementById('porcentajePension').value = config.porcentaje_pension || '';
+                document.getElementById('porcentajeARL').value = config.porcentaje_arl || '';
+                document.getElementById('porcentajeCajaComp').value = config.porcentaje_caja_comp || '';
+                document.getElementById('porcentajeICBF').value = config.porcentaje_icbf || '';
+                document.getElementById('porcentajeSENA').value = config.porcentaje_sena || '';
+                document.getElementById('diasVencimientoPila').value = config.dias_alerta_pila || '';
+                document.getElementById('limiteArchivoPDF').value = config.limite_pdf_mb || '';
+                document.getElementById('emailNotificaciones').value = config.email_notificaciones || '';
+
+                // Actualizar stats de backup
+                if (config.ultimo_backup) {
+                    document.getElementById('ultimoBackup').textContent = new Date(config.ultimo_backup).toLocaleString('es-CO');
+                }
+                if (config.tamaño_backup) {
+                    document.getElementById('tamañoEstimado').textContent = `~${config.tamaño_backup} MB`;
+                }
+
+                showMessage('✅ Configuración cargada exitosamente', 'success');
+                
+            } catch (error) {
+                console.error('Error cargando configuración:', error);
+                showMessage(`❌ Error: ${error.message}`, 'danger');
+            }
+        }
+
+        /**
+         * Guardar configuración del sistema
+         */
+        async function guardarConfiguracion() {
+            try {
+                // Recopilar datos de los formularios
+                const configData = {
+                    salario_minimo: parseFloat(document.getElementById('salarioMinimo').value) || null,
+                    auxilio_transporte: parseFloat(document.getElementById('auxilioTransporte').value) || null,
+                    porcentaje_salud: parseFloat(document.getElementById('porcentajeSalud').value) || null,
+                    porcentaje_pension: parseFloat(document.getElementById('porcentajePension').value) || null,
+                    porcentaje_arl: parseFloat(document.getElementById('porcentajeARL').value) || null,
+                    porcentaje_caja_comp: parseFloat(document.getElementById('porcentajeCajaComp').value) || null,
+                    porcentaje_icbf: parseFloat(document.getElementById('porcentajeICBF').value) || null,
+                    porcentaje_sena: parseFloat(document.getElementById('porcentajeSENA').value) || null,
+                    dias_alerta_pila: parseInt(document.getElementById('diasVencimientoPila').value) || null,
+                    limite_pdf_mb: parseInt(document.getElementById('limiteArchivoPDF').value) || null,
+                    email_notificaciones: document.getElementById('emailNotificaciones').value || null
+                };
+
+                // Validar campos requeridos
+                if (!configData.salario_minimo || !configData.auxilio_transporte) {
+                    showMessage('⚠️ Por favor complete los campos obligatorios (Salario Mínimo y Auxilio de Transporte)', 'warning');
+                    return;
+                }
+
+                showMessage('⏳ Guardando configuración...', 'info');
+
+                const response = await fetch(`${API_URL}/configuracion`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(configData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al guardar configuración');
+                }
+
+                const result = await response.json();
+                showMessage(`✅ ${result.message || 'Configuración guardada exitosamente'}`, 'success');
+                
+                console.log('✅ Configuración guardada:', result);
+
+            } catch (error) {
+                console.error('❌ Error guardando configuración:', error);
+                showMessage(`❌ Error: ${error.message}`, 'danger');
+            }
+        }
+
+        /**
+         * Descargar copia de seguridad del sistema
+         */
+        /**
+         * Vista previa de la firma digital
+         */
+        function previewFirma(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validar tamaño (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showMessage('⚠️ El archivo es muy grande. Tamaño máximo: 2MB', 'warning');
+                event.target.value = '';
+                return;
+            }
+
+            // Validar formato
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('⚠️ Formato no válido. Use PNG o JPG', 'warning');
+                event.target.value = '';
+                return;
+            }
+
+            // Mostrar vista previa
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('firmaImg');
+                const placeholder = document.getElementById('firmaPlaceholder');
+                
+                img.src = e.target.result;
+                img.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * Guardar firma digital
+         */
+        async function guardarFirma() {
+            const input = document.getElementById('firmaDigitalInput');
+            const file = input.files[0];
+
+            if (!file) {
+                showMessage('⚠️ Por favor seleccione un archivo de firma', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('firma', file);
+
+            try {
+                showMessage('⏳ Guardando firma digital...', 'info');
+
+                const response = await fetch(`${API_URL}/configuracion/firma`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al guardar firma');
+                }
+
+                const result = await response.json();
+                showMessage(`✅ ${result.message || 'Firma guardada exitosamente'}`, 'success');
+
+            } catch (error) {
+                console.error('Error guardando firma:', error);
+                showMessage(`❌ Error: ${error.message}`, 'danger');
+            }
+        }
+
+        /**
+         * Descargar backup del sistema
+         */
+        async function descargarBackup() {
+            const confirmacion = confirm('¿Está seguro de descargar una copia de seguridad completa del sistema?\n\nEsto puede tardar varios minutos dependiendo del tamaño de la base de datos.');
+            
+            if (!confirmacion) return;
+
+            try {
+                showMessage('⏳ Generando copia de seguridad... Por favor espere.', 'info');
+
+                const response = await fetch(`${API_URL}/sistema/backup-download`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al generar backup');
+                }
+
+                // Descargar archivo ZIP
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-sistema-${new Date().toISOString().split('T')[0]}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                showMessage('✅ Copia de seguridad descargada exitosamente', 'success');
+                
+                // Actualizar fecha del último backup
+                document.getElementById('ultimoBackup').textContent = new Date().toLocaleString('es-CO');
+
+                console.log('✅ Backup descargado');
+
+            } catch (error) {
+                console.error('❌ Error descargando backup:', error);
+                showMessage(`❌ Error: ${error.message}`, 'danger');
+            }
+        }
+
+        // Cargar configuración al iniciar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarConfiguracion();
+
+            // Configuración del tema
+            feather.replace();
+            layout_change('false');
+            layout_theme_sidebar_change('dark');
+            change_box_container('false');
+            layout_caption_change('true');
+            layout_rtl_change('false');
+            preset_change('preset-1');
+            main_layout_change('vertical');
+        });
+    </script>
+
+  </body>
+</html>

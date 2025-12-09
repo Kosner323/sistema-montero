@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST VISUAL: Gastos Rápidos - Caja Menor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-header p {
+            margin: 8px 0 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+        }
+
+        /* TARJETA DE FORMULARIO */
+        .expense-entry-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .expense-entry-card h3 {
+            margin: 0 0 24px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .amount-input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .amount-input-wrapper .currency-symbol {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            pointer-events: none;
+        }
+
+        .amount-input {
+            width: 100%;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px 24px 28px 80px;
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a202c;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .amount-input:focus {
+            border-color: #667eea;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .concept-input {
+            width: 100%;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 16px;
+            color: #2d3748;
+            outline: none;
+            transition: all 0.2s ease;
+            background: #f8f9fa;
+            margin-bottom: 24px;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .concept-input:focus {
+            border-color: #667eea;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .category-selector label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .category-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn .icon {
+            font-size: 36px;
+        }
+
+        .category-btn .label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .category-btn:hover {
+            border-color: #cbd5e0;
+            background: #edf2f7;
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .category-btn.active .label {
+            color: #ffffff;
+        }
+
+        .register-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 20px 32px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* COLUMNA DERECHA */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .daily-summary-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .daily-summary-card h3 {
+            margin: 0 0 24px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .total-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .expenses-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .expenses-table thead tr {
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .expenses-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .expenses-table tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s ease;
+        }
+
+        .expenses-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .expenses-table td {
+            padding: 16px;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        .expense-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f7fafc;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .expense-amount {
+            font-weight: 700;
+            font-size: 16px;
+            color: #f5576c;
+        }
+
+        .expense-time {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        /* BALANCE DEL DÍA */
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            color: #ffffff;
+        }
+
+        .balance-card h3 {
+            margin: 0 0 24px 0;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .balance-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .balance-item .label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .balance-item .amount {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .balance-item.ingresos .amount {
+            color: #10b981;
+        }
+
+        .balance-item.egresos .amount {
+            color: #f5576c;
+        }
+
+        .balance-item.neto .amount {
+            font-size: 32px;
+        }
+
+        .balance-bar {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            height: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .balance-bar-fill {
+            background: linear-gradient(90deg, #10b981 0%, #f5576c 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .success-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            font-weight: 600;
+        }
+
+        .success-toast.active {
+            display: flex;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>
+                <span style="font-size: 32px;">💸</span>
+                Gastos Rápidos - Caja Menor
+            </h1>
+            <p>Registro de gastos diarios sin soporte obligatorio | Diseño "Speed Entry"</p>
+        </div>
+
+        <div class="row">
+            <!-- FORMULARIO DE ENTRADA -->
+            <div>
+                <div class="expense-entry-card">
+                    <h3>
+                        <span>✍️</span>
+                        Registrar Nuevo Gasto
+                    </h3>
+
+                    <form id="expenseForm">
+                        <!-- Monto gigante -->
+                        <div class="amount-input-wrapper">
+                            <span class="currency-symbol">$</span>
+                            <input 
+                                type="text" 
+                                class="amount-input" 
+                                id="amount" 
+                                placeholder="0" 
+                                value="15,000"
+                            />
+                        </div>
+
+                        <!-- Concepto -->
+                        <input 
+                            type="text" 
+                            class="concept-input" 
+                            id="concept" 
+                            placeholder="¿En qué gastaste? (Ej: Taxi a reunión)" 
+                            value="Taxi a reunión con cliente ABC"
+                        />
+
+                        <!-- Categoría - Botones grandes -->
+                        <div class="category-selector">
+                            <label>Categoría</label>
+                            <div class="category-buttons">
+                                <div class="category-btn active" data-category="Transporte">
+                                    <span class="icon">🚕</span>
+                                    <span class="label">Transporte</span>
+                                </div>
+                                <div class="category-btn" data-category="Comida">
+                                    <span class="icon">🍔</span>
+                                    <span class="label">Comida</span>
+                                </div>
+                                <div class="category-btn" data-category="Oficina">
+                                    <span class="icon">📎</span>
+                                    <span class="label">Papelería</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón grande -->
+                        <button type="submit" class="register-btn">
+                            <i class="ti ti-check" style="font-size: 24px;"></i>
+                            Registrar Gasto
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RESUMEN Y BALANCE -->
+            <div class="right-column">
+                <!-- Gastos de Hoy -->
+                <div class="daily-summary-card">
+                    <h3>
+                        <span>📊 Gastos de Hoy</span>
+                        <span class="total-badge" id="totalBadge">$48,500</span>
+                    </h3>
+
+                    <table class="expenses-table">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Concepto</th>
+                                <th>Categoría</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="expense-time">15:30</td>
+                                <td>Taxi a reunión con cliente ABC</td>
+                                <td>
+                                    <span class="expense-category">
+                                        <span>🚕</span>
+                                        <span>Transporte</span>
+                                    </span>
+                                </td>
+                                <td class="expense-amount">$15,000</td>
+                            </tr>
+                            <tr>
+                                <td class="expense-time">13:15</td>
+                                <td>Almuerzo de negocios</td>
+                                <td>
+                                    <span class="expense-category">
+                                        <span>🍔</span>
+                                        <span>Comida</span>
+                                    </span>
+                                </td>
+                                <td class="expense-amount">$25,000</td>
+                            </tr>
+                            <tr>
+                                <td class="expense-time">10:00</td>
+                                <td>Papelería y útiles de oficina</td>
+                                <td>
+                                    <span class="expense-category">
+                                        <span>📎</span>
+                                        <span>Papelería</span>
+                                    </span>
+                                </td>
+                                <td class="expense-amount">$8,500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Balance del Día -->
+                <div class="balance-card">
+                    <h3>
+                        <span>💰</span>
+                        Balance del Día
+                    </h3>
+
+                    <div class="balance-grid">
+                        <div class="balance-item ingresos">
+                            <div class="label">Ingresos</div>
+                            <div class="amount">$120,000</div>
+                        </div>
+                        <div class="balance-item egresos">
+                            <div class="label">Egresos</div>
+                            <div class="amount">$48,500</div>
+                        </div>
+                        <div class="balance-item neto">
+                            <div class="label">Neto</div>
+                            <div class="amount" style="color: #10b981;">$71,500</div>
+                        </div>
+                    </div>
+
+                    <div class="balance-bar">
+                        <div class="balance-bar-fill" style="width: 28.8%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-toast" id="successToast">
+        <i class="ti ti-check" style="font-size: 24px;"></i>
+        <span>✅ Gasto de $15,000 registrado exitosamente</span>
+    </div>
+
+    <script>
+        // Selección de categorías
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Formateo de monto
+        const amountInput = document.getElementById('amount');
+        amountInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value) {
+                const number = parseInt(value);
+                e.target.value = number.toLocaleString('es-CO');
+            }
+        });
+
+        // Envío del formulario
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const toast = document.getElementById('successToast');
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        });
+
+        console.log('💸 Test Visual de Gastos Rápidos cargado');
+        console.log('✅ Diseño "Speed Entry" implementado');
+        console.log('✅ Balance del Día visible');
+    </script>
+</body>
+</html>

@@ -16,11 +16,11 @@ from logger import logger
 try:
     from ..utils import login_required, COMPANY_DATA_FOLDER, sanitize_and_save_file, log_file_upload
     from ..extensions import db
-    from ..models.orm_models import PagoImpuesto, Empresa
+    from ..models.orm_models import PagoImpuesto, Empresa, Novedad
 except (ImportError, ValueError):
     from utils import login_required, COMPANY_DATA_FOLDER, sanitize_and_save_file, log_file_upload
     from extensions import db
-    from models.orm_models import PagoImpuesto, Empresa
+    from models.orm_models import PagoImpuesto, Empresa, Novedad
 # -------------------------------
 
 def save_text_content(content, upload_path, filename):
@@ -192,11 +192,40 @@ def add_impuesto():
             estado="Pendiente de Pago",
             ruta_archivo=ruta_guardada
         )
-        
+
         db.session.add(nuevo_impuesto)
         db.session.commit()
 
         logger.info(f"Impuesto registrado con ID: {nuevo_impuesto.id} para NIT: {nit}")
+
+        # ==================== AUTOMATIZACIÓN: NOTIFICAR A TESORERÍA ====================
+        # REGLA DE NEGOCIO: Cuando se crea un impuesto, notificar automáticamente a Tesorería
+        try:
+            # Crear novedad automática para gestión de pago
+            nueva_novedad = Novedad(
+                subject=f"📋 IMPUESTO PENDIENTE: {tipo_impuesto}",
+                description=f"Vence el {fecha_limite}. Empresa: {nombre_empresa} (NIT: {nit}). Período: {periodo}. Por favor gestionar pago.",
+                status="Pendiente",
+                priorityText="Alta",
+                priority=3,  # Alta prioridad
+                client=nombre_empresa,
+                creationDate=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                assignedTo="Tesorería"
+            )
+
+            db.session.add(nueva_novedad)
+            db.session.commit()
+
+            logger.info(f"✅ Notificación automática creada (Novedad ID: {nueva_novedad.id}) para impuesto ID: {nuevo_impuesto.id}")
+
+        except Exception as notif_error:
+            # CRÍTICO: Si falla la notificación, NO fallar el registro del impuesto
+            # El impuesto es prioridad, la notificación es secundaria
+            db.session.rollback()  # Rollback solo de la novedad, el impuesto ya está committed
+            logger.error(f"⚠️ ERROR al crear notificación automática para impuesto ID {nuevo_impuesto.id}: {notif_error}", exc_info=True)
+            logger.warning(f"⚠️ El impuesto fue registrado exitosamente pero la notificación falló. Revisar manualmente.")
+
+        # =================================================================================
 
         return jsonify(nuevo_impuesto.to_dict()), 201
 
@@ -206,23 +235,248 @@ def add_impuesto():
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
 
 
-@bp_impuestos.route("/<int:impuesto_id>/pagar", methods=["PUT"])
+@bp_impuestos.route("/<int:impuesto_id>/pagar", methods=["POST", "PUT"])
 @login_required
 def marcar_como_pagado(impuesto_id):
-    """Actualiza el estado de un impuesto a 'Pagado'."""
+    """
+    Actualiza el estado de un impuesto a 'Pagado' con comprobante de pago.
+
+    Request (multipart/form-data):
+        - comprobante: Archivo PDF/Imagen del comprobante (opcional)
+        - fecha_pago: Fecha en que se realizó el pago (opcional)
+
+    Returns:
+        JSON con el registro actualizado
+    """
     try:
+        # Obtener el registro del impuesto
         registro = PagoImpuesto.query.get(impuesto_id)
         if not registro:
-            return jsonify({"error": "Registro no encontrado."}), 404
+            logger.warning(f"Intento de marcar como pagado impuesto inexistente ID: {impuesto_id}")
+            return jsonify({"error": "Registro de impuesto no encontrado."}), 404
 
+        # Obtener datos de la empresa
+        empresa = Empresa.query.filter_by(nit=registro.empresa_nit).first()
+        if not empresa:
+            logger.error(f"Empresa con NIT {registro.empresa_nit} no encontrada para impuesto ID {impuesto_id}")
+            return jsonify({"error": "Empresa asociada no encontrada."}), 404
+
+        nombre_empresa = empresa.nombre_empresa
+        comprobante_guardado = False
+        ruta_comprobante = None
+
+        # Si se envió un archivo de comprobante, guardarlo
+        if "comprobante" in request.files:
+            file = request.files["comprobante"]
+
+            if file and file.filename != "":
+                try:
+                    # Crear estructura de carpetas: EMPRESAS/{nombre}/IMPUESTOS/{tipo}/PAGOS/
+                    sanitized_empresa = secure_filename(nombre_empresa.replace(" ", "_"))
+                    sanitized_tipo = secure_filename(registro.tipo_impuesto.replace(" ", "_"))
+
+                    pagos_folder = os.path.join(
+                        COMPANY_DATA_FOLDER,
+                        sanitized_empresa,
+                        "PAGO DE IMPUESTOS",
+                        sanitized_tipo,
+                        "PAGOS"
+                    )
+                    os.makedirs(pagos_folder, exist_ok=True)
+
+                    # Nombre del archivo: ComprobantePago_{NIT}_{Tipo}_{Periodo}_{Fecha}
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    ext = os.path.splitext(file.filename)[1]
+                    custom_filename = f"ComprobantePago_{registro.empresa_nit}_{sanitized_tipo}_{registro.periodo}_{timestamp}{ext}"
+
+                    # Guardar el archivo
+                    filepath = sanitize_and_save_file(file, pagos_folder, custom_filename)
+
+                    # Guardar ruta relativa
+                    ruta_comprobante = os.path.relpath(filepath, COMPANY_DATA_FOLDER)
+                    comprobante_guardado = True
+
+                    logger.info(f"Comprobante de pago guardado: {ruta_comprobante}")
+
+                    # Log de carga exitosa
+                    user_session_id = session.get("user_id", "unknown")
+                    log_file_upload(file.filename, user_session_id, success=True)
+
+                except (ValueError, IOError) as file_error:
+                    logger.error(f"Error al guardar comprobante para impuesto ID {impuesto_id}: {file_error}", exc_info=True)
+                    user_session_id = session.get("user_id", "unknown")
+                    log_file_upload(file.filename, user_session_id, success=False, error=str(file_error))
+                    return jsonify({"error": f"Error al guardar el comprobante: {str(file_error)}"}), 500
+
+        # Actualizar el registro del impuesto
         registro.estado = 'Pagado'
+
+        # Si se guardó el comprobante, actualizar la ruta (si el modelo tiene el campo)
+        if comprobante_guardado and ruta_comprobante:
+            # Verificar si el modelo tiene el atributo ruta_soporte_pago
+            if hasattr(registro, 'ruta_soporte_pago'):
+                registro.ruta_soporte_pago = ruta_comprobante
+            else:
+                logger.warning(f"El modelo PagoImpuesto no tiene campo 'ruta_soporte_pago'. Comprobante guardado en: {ruta_comprobante}")
+
+        # Fecha de pago (si se proporciona)
+        fecha_pago = request.form.get("fecha_pago")
+        if fecha_pago and hasattr(registro, 'fecha_pago'):
+            registro.fecha_pago = fecha_pago
+
         db.session.commit()
 
-        logger.info(f"Impuesto ID {impuesto_id} marcado como 'Pagado'")
+        logger.info(f"Impuesto ID {impuesto_id} marcado como 'Pagado' {' con comprobante' if comprobante_guardado else ''}")
 
-        return jsonify(registro.to_dict()), 200
+        # ==================== OPCIONAL: ACTUALIZAR NOVEDAD ASOCIADA ====================
+        # Buscar la novedad relacionada con este impuesto y marcarla como Resuelta
+        try:
+            # Buscar novedad que mencione este tipo de impuesto y empresa
+            novedad_relacionada = Novedad.query.filter(
+                Novedad.subject.like(f"%{registro.tipo_impuesto}%"),
+                Novedad.client == nombre_empresa,
+                Novedad.status == "Pendiente"
+            ).first()
+
+            if novedad_relacionada:
+                novedad_relacionada.status = "Resuelta"
+                novedad_relacionada.solutionDescription = f"Impuesto pagado el {fecha_pago or datetime.now().strftime('%Y-%m-%d')}. Comprobante archivado."
+                db.session.commit()
+                logger.info(f"✅ Novedad ID {novedad_relacionada.id} marcada como Resuelta para impuesto ID {impuesto_id}")
+            else:
+                logger.debug(f"No se encontró novedad pendiente asociada para impuesto ID {impuesto_id}")
+
+        except Exception as novedad_error:
+            logger.warning(f"⚠️ Error al actualizar novedad asociada para impuesto ID {impuesto_id}: {novedad_error}")
+            # No fallar el pago por error en actualización de novedad
+        # ===============================================================================
+
+        # Preparar respuesta
+        response_data = registro.to_dict()
+        if comprobante_guardado:
+            response_data['comprobante_guardado'] = True
+            response_data['ruta_comprobante'] = ruta_comprobante
+
+        return jsonify(response_data), 200
 
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error actualizando estado de impuesto {impuesto_id}: {e}", exc_info=True)
+        return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500
+
+
+@bp_impuestos.route("/balance", methods=["GET"])
+@login_required
+def get_balance_impuestos():
+    """
+    Genera un reporte de balance de impuestos filtrado por empresa y año.
+
+    Query Parameters:
+        - empresa_nit: NIT de la empresa (requerido)
+        - anio: Año fiscal (ej: 2025) (requerido)
+
+    Returns:
+        JSON con balance detallado de impuestos del año
+    """
+    try:
+        # Obtener parámetros
+        empresa_nit = request.args.get("empresa_nit")
+        anio = request.args.get("anio")
+
+        # Validación de parámetros
+        if not empresa_nit or not anio:
+            logger.warning("Intento de consultar balance sin empresa_nit o anio")
+            return jsonify({"error": "Parámetros requeridos: empresa_nit y anio"}), 400
+
+        # Validar que el año sea numérico
+        try:
+            anio_int = int(anio)
+        except ValueError:
+            return jsonify({"error": "El parámetro 'anio' debe ser un número"}), 400
+
+        # Verificar que la empresa existe
+        empresa = Empresa.query.filter_by(nit=empresa_nit).first()
+        if not empresa:
+            logger.warning(f"Intento de consultar balance para NIT no encontrado: {empresa_nit}")
+            return jsonify({"error": f"Empresa con NIT {empresa_nit} no encontrada"}), 404
+
+        # Consultar impuestos del año especificado
+        # Filtrar por año en el campo fecha_limite (formato YYYY-MM-DD)
+        impuestos = PagoImpuesto.query.filter(
+            PagoImpuesto.empresa_nit == empresa_nit,
+            PagoImpuesto.fecha_limite.like(f"{anio}%")
+        ).order_by(PagoImpuesto.fecha_limite.asc()).all()
+
+        logger.debug(f"Balance consultado para {empresa_nit} año {anio}: {len(impuestos)} registros")
+
+        # Construir estadísticas
+        total_impuestos = len(impuestos)
+        impuestos_pagados = len([i for i in impuestos if i.estado == 'Pagado'])
+        impuestos_pendientes = len([i for i in impuestos if i.estado == 'Pendiente de Pago'])
+        impuestos_vencidos = len([i for i in impuestos if i.estado == 'Vencido'])
+
+        # Calcular totales (si existe campo valor en el modelo, si no, usar 0)
+        total_pagado = 0.0
+        total_pendiente = 0.0
+
+        # Preparar lista detallada de impuestos
+        impuestos_detalle = []
+        for impuesto in impuestos:
+            impuesto_dict = impuesto.to_dict()
+
+            # Agregar enlace al comprobante si existe
+            if hasattr(impuesto, 'ruta_soporte_pago') and impuesto.ruta_soporte_pago:
+                impuesto_dict['tiene_comprobante'] = True
+                impuesto_dict['url_comprobante'] = f"/static/empresas/{impuesto.ruta_soporte_pago}"
+            else:
+                impuesto_dict['tiene_comprobante'] = False
+
+            # Calcular días hasta vencimiento o desde vencimiento
+            try:
+                fecha_limite_dt = datetime.strptime(impuesto.fecha_limite, "%Y-%m-%d")
+                dias_diferencia = (fecha_limite_dt - datetime.now()).days
+
+                if impuesto.estado == 'Pendiente de Pago':
+                    if dias_diferencia > 0:
+                        impuesto_dict['dias_hasta_vencimiento'] = dias_diferencia
+                        impuesto_dict['estado_alerta'] = 'Normal' if dias_diferencia > 15 else 'Próximo a Vencer'
+                    else:
+                        impuesto_dict['dias_desde_vencimiento'] = abs(dias_diferencia)
+                        impuesto_dict['estado_alerta'] = 'Vencido'
+            except ValueError:
+                impuesto_dict['dias_hasta_vencimiento'] = None
+
+            impuestos_detalle.append(impuesto_dict)
+
+        # Preparar respuesta
+        response = {
+            "empresa": {
+                "nit": empresa_nit,
+                "nombre": empresa.nombre_empresa
+            },
+            "periodo": {
+                "anio": anio_int,
+                "fecha_consulta": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            },
+            "resumen": {
+                "total_impuestos": total_impuestos,
+                "pagados": impuestos_pagados,
+                "pendientes": impuestos_pendientes,
+                "vencidos": impuestos_vencidos,
+                "porcentaje_cumplimiento": round((impuestos_pagados / total_impuestos * 100), 2) if total_impuestos > 0 else 0
+            },
+            "totales_financieros": {
+                "total_pagado": total_pagado,
+                "total_pendiente": total_pendiente,
+                "nota": "Los valores financieros dependen de la estructura del modelo PagoImpuesto"
+            },
+            "impuestos": impuestos_detalle
+        }
+
+        logger.info(f"Balance generado para {empresa.nombre_empresa} año {anio}: {total_impuestos} impuestos, {impuestos_pagados} pagados")
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        logger.error(f"Error generando balance de impuestos: {e}", exc_info=True)
         return jsonify({"error": f"Error interno del servidor: {str(e)}"}), 500

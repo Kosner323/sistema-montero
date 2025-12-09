@@ -1,0 +1,150 @@
+================================================================================
+🤖 ARCHIVO DE COMUNICACIÓN ENTRE IAs - PROYECTO SISTEMA MONTERO
+================================================================================
+
+📅 ÚLTIMA ACTUALIZACIÓN: 9 de Diciembre de 2025 - 02:00 AM
+📍 UBICACIÓN DEL PROYECTO: D:\Mi-App-React
+
+================================================================================
+📋 HISTORIAL DE CAMBIOS
+================================================================================
+
+[2025-12-09 02:00] - AGENTE ARQUITECTO FRONTEND (Claude) - HEADER + JORDY
+--------------------------------------------------------------------------------
+TAREA: Refactorización del Header Corporativo + Integración JORDY IA
+
+✅ ARCHIVO CREADO/MODIFICADO:
+
+1. templates/_header.html (REESCRITO COMPLETAMENTE)
+   - Header superior estilo BARRA AZUL SÓLIDA (#0056b3)
+   - Altura compacta: 60px
+   - Sin sombras, sin gradientes (estilo plano corporativo)
+   - Incluye:
+     * Toggle sidebar (desktop/mobile)
+     * Búsqueda global dropdown
+     * ✨ BOTÓN JORDY IA (centro, estilo píldora verde brillante)
+     * Selector de tema (claro/oscuro)
+     * Notificaciones con badge
+     * Menú configuración rápida
+     * Dropdown perfil usuario con logout
+   - Incluye LOCKSCREEN OVERLAY (bloqueo de pantalla)
+   - Incluye JORDY MODAL (chat IA placeholder)
+   - CSS inline para el header y Jordy
+   - JavaScript para todas las funciones
+
+⚠️ NOTA IMPORTANTE:
+   El archivo anterior _header.html contenía el SIDEBAR (error de nomenclatura).
+   Se hizo backup en: _sidebar_menu.html.bak
+   Ahora _header.html = Barra superior azul
+   Y _sidebar.html = Menú lateral (ya existía correcto)
+
+🎨 ESPECIFICACIONES JORDY IA:
+   - Clase: .btn-jordy-trigger
+   - Color: Gradiente verde (#00c853 → #00e676)
+   - Ubicación: Centro del header
+   - Efecto hover: Brillo + elevación sutil
+   - Animación: Pulso en el icono 🤖 + punto verde "en línea"
+   - Modal de chat: Esquina inferior derecha (380px ancho)
+
+--------------------------------------------------------------------------------
+
+[2025-12-09] - AGENTE ARQUITECTO FRONTEND (Claude) - ESTILOS EXCEL
+--------------------------------------------------------------------------------
+TAREA: Implementación del Manual de Estilo Excel/Fintech Corporativo
+
+✅ ARCHIVOS MODIFICADOS:
+
+1. assets/css/corporate-redesign.css
+   - Añadidos estilos "Modo Excel" para tablas con rejilla completa
+   - Clase .table-excel con bordes visibles en cada celda
+   - Inputs sin bordes dentro de tablas (estilo spreadsheet)
+   - Clases .form-section-corporate para formularios en grid
+   - Clases .card-flat y .card-header-corporate (sin sombras, border-radius 4px)
+   - Clases .stat-card-compact para métricas
+   - Sidebar profesional oscuro (#1a2035)
+   - Override global para eliminar border-radius >4px
+
+2. templates/empresas/ingresar.html
+   - Tabla de empresas → Estilo Excel (.table-excel .table-bordered .table-sm)
+   - Encabezados → Mayúsculas, fondo Azul #0056b3
+   - Card → Estilo flat con header azul corporativo
+   - Formulario → Reorganizado en GRID 3-4 columnas
+   - Secciones → Usando .form-section-corporate con títulos azules
+   - Labels → Mayúsculas y compactos
+   - Documentación → Grid de 4 columnas (antes era 2)
+   - Botones → Estilo corporativo plano
+
+3. templates/novedades/index.html
+   - Stats cards → Estilo compacto (.stat-card-compact)
+   - Tabla novedades → Estilo Excel con rejilla completa
+   - Header → Mayúsculas y estilo corporativo
+   - Eliminadas sombras y border-radius grandes
+
+⚠️ INTOCADO (BACKEND):
+   - Todos los id="" y name="" de inputs preservados
+   - Todos los bloques Jinja2 {% %} y {{ }} intactos
+   - Todos los scripts JavaScript sin modificar
+
+================================================================================
+📌 PENDIENTE PARA PRÓXIMO AGENTE
+================================================================================
+
+1. ⏳ templates/empresas/editar_empresa.html - Aplicar estilo Excel
+2. ⏳ templates/novedades/crear.html - Formulario en grid corporativo
+3. ⏳ templates/auth/login.html - Estilo corporativo en login
+4. ⏳ templates/main/index.html (Dashboard) - Stats cards compactas
+5. ⏳ templates/cartera.html - Tablas Excel mode
+6. ⏳ templates/simulador_pila.html - Interfaz Excel
+7. ⏳ Revisar templates/formularios/* - Aplicar grid 3-4 columnas
+8. ⏳ Revisar templates/pagos/* - Tablas con rejilla
+9. ⏳ Conectar JORDY IA con backend real (API /api/jordy/chat)
+
+================================================================================
+🎨 PALETA CORPORATIVA OFICIAL
+================================================================================
+
+- Azul Rey: #0056b3 (Headers, botones primarios, sidebar activo)
+- Azul Oscuro: #004494 (Bordes, hover states)
+- Gris Hielo: #f4f6f9 (Fondo general)
+- Blanco: #ffffff (Cards, tablas)
+- Bordes: #dee2e6
+- Verde Jordy: #00c853 → #00e676 (Botón IA)
+- Sidebar: #1a2035 (Fondo oscuro profesional)
+
+================================================================================
+📊 CLASES CSS DISPONIBLES
+================================================================================
+
+TABLAS:
+.table-excel          → Tabla con rejilla completa estilo hoja de cálculo
+.table-bordered       → Bordes en todas las celdas
+.table-sm             → Tabla compacta
+
+CARDS:
+.card-flat            → Card sin sombras, border-radius 4px
+.card-header-corporate → Header azul #0056b3 con texto blanco
+
+FORMULARIOS:
+.form-section-corporate → Sección de formulario con borde y título
+.section-title         → Título azul de sección
+.form-corporate       → Formulario con inputs compactos
+
+ESTADÍSTICAS:
+.stat-card-compact    → Tarjeta de estadística minimalista
+
+BOTONES:
+.btn-excel            → Botón verde Excel
+.btn-export           → Botón de exportación secundario
+.btn-jordy-trigger    → Botón del asistente Jordy IA
+
+================================================================================
+🔧 NOTAS TÉCNICAS
+================================================================================
+
+- Servidor Flask: http://localhost:5000
+- Base de datos SQLite: D:\Mi-App-React\data\mi_sistema.db
+- CSS corporativo: /assets/css/corporate-redesign.css
+- Sentry SDK: Deshabilitado (opcional, no instalado)
+- Python: 3.14 (experimental) - greenlet no compatible
+
+================================================================================

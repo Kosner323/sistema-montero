@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Visual - Árbol de Carpetas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    
+    <style>
+        :root {
+            --navy-primary: #0d47a1;
+            --navy-dark: #01579b;
+            --navy-light: #1976d2;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--navy-dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .test-container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-light));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .user-info {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--navy-primary);
+        }
+
+        .user-info strong {
+            color: var(--gray-800);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-info span {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        .tree-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .tree-header i {
+            color: var(--navy-primary);
+            font-size: 1.5rem;
+        }
+
+        .tree-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 1.1rem;
+        }
+
+        .folder-tree {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .folder-item {
+            margin-bottom: 0.75rem;
+        }
+
+        .folder-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .folder-toggle:hover {
+            background: var(--gray-100);
+            border-color: var(--navy-primary);
+            transform: translateX(6px);
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.15);
+        }
+
+        .folder-toggle.active {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-light));
+            color: white;
+            border-color: var(--navy-primary);
+            box-shadow: 0 4px 16px rgba(13, 71, 161, 0.25);
+            transform: translateX(6px) scale(1.02);
+        }
+
+        .folder-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .folder-toggle.active .folder-icon {
+            transform: rotate(15deg);
+        }
+
+        .folder-label {
+            flex: 1;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .folder-count {
+            background: var(--gray-300);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .folder-toggle.active .folder-count {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .subfolder-list {
+            list-style: none;
+            padding: 0;
+            margin: 0.75rem 0 0 0;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s ease;
+        }
+
+        .subfolder-list.expanded {
+            max-height: 600px;
+        }
+
+        .subfolder-item {
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            margin-top: 0.5rem;
+            background: white;
+            border-left: 4px solid var(--navy-light);
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .subfolder-item:hover {
+            background: var(--gray-50);
+            border-left-width: 6px;
+            padding-left: 2.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .subfolder-item.selected {
+            background: var(--gray-100);
+            border-left-color: var(--navy-primary);
+            border-left-width: 6px;
+            padding-left: 2.75rem;
+            font-weight: 600;
+        }
+
+        .subfolder-icon {
+            color: var(--gray-500);
+            width: 18px;
+            height: 18px;
+        }
+
+        .subfolder-item:hover .subfolder-icon,
+        .subfolder-item.selected .subfolder-icon {
+            color: var(--navy-primary);
+        }
+
+        .badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #e53935;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .footer-note {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--gray-100);
+            text-align: center;
+            color: var(--gray-500);
+            font-size: 0.85rem;
+        }
+
+        .footer-note strong {
+            color: var(--navy-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="card">
+            <div class="card-header">
+                <h2>🗂️ Árbol de Archivos</h2>
+                <p>Prueba Visual del Gestor Documental</p>
+            </div>
+            <div class="card-body">
+                <div class="user-info">
+                    <strong>👤 Usuario:</strong>
+                    <span>Juan Carlos Pérez González</span>
+                    <br>
+                    <strong>📝 Cédula:</strong>
+                    <span>1234567890</span>
+                </div>
+
+                <div class="tree-header">
+                    <i data-feather="folder"></i>
+                    <h3>Archivos por Año</h3>
+                </div>
+
+                <ul class="folder-tree" id="folderTree">
+                    <li class="folder-item">
+                        <div class="folder-toggle" onclick="toggleFolder(0)">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-label">2025</span>
+                            <span class="folder-count">5</span>
+                        </div>
+                        <ul class="subfolder-list" id="subfolder-0">
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Certificado Laboral
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Contrato de Trabajo
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Planilla PILA Enero
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Planilla PILA Febrero
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Estado de Cuenta
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="folder-item">
+                        <div class="folder-toggle" onclick="toggleFolder(1)">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-label">2024</span>
+                            <span class="folder-count">8</span>
+                        </div>
+                        <ul class="subfolder-list" id="subfolder-1">
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Planilla PILA Diciembre
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Planilla PILA Noviembre
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Certificado EPS
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Certificado Pensión
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Incapacidad Médica
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Paz y Salvo
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Renovación Contrato
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Examen Médico Ocupacional
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="folder-item">
+                        <div class="folder-toggle" onclick="toggleFolder(2)">
+                            <span class="folder-icon">📂</span>
+                            <span class="folder-label">2023</span>
+                            <span class="folder-count">4</span>
+                        </div>
+                        <ul class="subfolder-list" id="subfolder-2">
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Contrato Inicial
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Afiliación Seguridad Social
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Cédula Escaneada
+                            </li>
+                            <li class="subfolder-item" onclick="selectFile(this)">
+                                <i data-feather="file-text" class="subfolder-icon"></i>
+                                Hoja de Vida
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="footer-note">
+                    💡 Haz clic en los años para expandir/contraer<br>
+                    <strong>Estilo Ejecutivo:</strong> Navy #0d47a1, Grises, Blancos
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        function toggleFolder(index) {
+            const subfolder = document.getElementById(`subfolder-${index}`);
+            const toggle = subfolder.previousElementSibling;
+
+            if (subfolder.classList.contains('expanded')) {
+                subfolder.classList.remove('expanded');
+                toggle.classList.remove('active');
+            } else {
+                // Cerrar todas las demás carpetas
+                document.querySelectorAll('.subfolder-list').forEach(sf => sf.classList.remove('expanded'));
+                document.querySelectorAll('.folder-toggle').forEach(ft => ft.classList.remove('active'));
+
+                // Abrir la seleccionada
+                subfolder.classList.add('expanded');
+                toggle.classList.add('active');
+            }
+        }
+
+        function selectFile(element) {
+            // Quitar selección previa
+            document.querySelectorAll('.subfolder-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Marcar como seleccionado
+            element.classList.add('selected');
+
+            // Simular carga de vista previa
+            console.log('📄 Archivo seleccionado:', element.textContent.trim());
+        }
+
+        // Auto-abrir primer año al cargar
+        setTimeout(() => {
+            toggleFolder(0);
+        }, 500);
+    </script>
+</body>
+</html>

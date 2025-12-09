@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
     <style>
         #feedbackMessage {
             margin-bottom: 1rem;
@@ -226,7 +228,8 @@
                         <td><span class="badge ${statusBadge} estado-badge">${envio.estado}</span></td>
                         <td class="fecha-envio">${fechaEnvioFormatted}</td>
                         <td class="acciones-cell">
-                            ${!isSent ? `<button class="btn btn-sm btn-success btn-enviar" title="Enviar"><i data-feather="send" class="w-4 h-4 mr-1"></i> Enviar</button>` : ''}
+                            ${!isSent ? `<button class="btn btn-sm btn-success btn-enviar" title="Marcar como Enviado"><i data-feather="send" class="w-4 h-4 mr-1"></i> Enviar</button>` : ''}
+                            ${envio.telefono ? `<button class="btn btn-sm btn-success ms-1 btn-whatsapp" data-telefono="${envio.telefono}" title="Enviar por WhatsApp"><i data-feather="message-circle" class="w-4 h-4 mr-1"></i> WhatsApp</button>` : ''}
                         </td>
                     </tr>
                 `;
@@ -322,7 +325,39 @@
                 if (target) {
                     enviarPlanilla(target);
                 }
+                
+                // Event listener para el botón "WhatsApp"
+                const whatsappBtn = e.target.closest('.btn-whatsapp');
+                if (whatsappBtn) {
+                    enviarPorWhatsApp(whatsappBtn);
+                }
             });
+            
+            /**
+             * Abre WhatsApp Web con el número del cliente y un mensaje predefinido
+             * @param {HTMLElement} button - Botón de WhatsApp que contiene el número
+             */
+            function enviarPorWhatsApp(button) {
+                const telefono = button.dataset.telefono;
+                if (!telefono) {
+                    alert('⚠️ No hay número de teléfono registrado para este cliente.');
+                    return;
+                }
+                
+                // Limpiar el número (quitar espacios, guiones, etc.)
+                const telefonoLimpio = telefono.replace(/\D/g, '');
+                
+                // Mensaje predefinido (puedes personalizarlo)
+                const mensaje = 'Hola, adjunto su planilla/comprobante de pago de seguridad social.';
+                
+                // Generar URL de WhatsApp (con código de país 57 para Colombia)
+                const whatsappURL = `https://wa.me/57${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+                
+                // Abrir en nueva pestaña
+                window.open(whatsappURL, '_blank');
+                
+                console.log('📱 Abriendo WhatsApp Web para:', telefono);
+            }
             
             // --- Logout Logic ---
             const logoutButtons = document.querySelectorAll('#btnLogout, #btnLogout2');

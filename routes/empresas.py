@@ -487,31 +487,61 @@ def add_empresa():
 @login_required
 def get_empresas():
     """
-    Obtiene lista de empresas (SIMPLIFICADA para verificar conectividad).
+    Obtiene lista de empresas con paginación opcional.
+    Query params:
+      - page: número de página (default: 1)
+      - per_page: items por página (default: 50, max: 200)
+      - search: búsqueda por nombre o NIT
     """
     conn = None
     try:
         conn = get_db_connection()
+        
+        # Parámetros de paginación
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 50, type=int), 200)  # Max 200
+        search = request.args.get('search', '', type=str).strip()
+        
+        offset = (page - 1) * per_page
+        
+        # Construir query con búsqueda opcional
+        if search:
+            count_query = "SELECT COUNT(*) FROM empresas WHERE nombre_empresa LIKE ? OR nit LIKE ?"
+            search_param = f"%{search}%"
+            total = conn.execute(count_query, (search_param, search_param)).fetchone()[0]
+            
+            empresas = conn.execute(
+                """SELECT nit, nombre_empresa, ciudad_empresa, created_at 
+                   FROM empresas 
+                   WHERE nombre_empresa LIKE ? OR nit LIKE ?
+                   ORDER BY nombre_empresa 
+                   LIMIT ? OFFSET ?""",
+                (search_param, search_param, per_page, offset)
+            ).fetchall()
+        else:
+            total = conn.execute("SELECT COUNT(*) FROM empresas").fetchone()[0]
+            empresas = conn.execute(
+                """SELECT nit, nombre_empresa, ciudad_empresa, created_at 
+                   FROM empresas 
+                   ORDER BY nombre_empresa 
+                   LIMIT ? OFFSET ?""",
+                (per_page, offset)
+            ).fetchall()
 
-        # CONSULTA SIMPLE (sin filtros ni paginación) - SOLO PARA DEBUGGING
-        empresas = conn.execute(
-            "SELECT nit, nombre_empresa FROM empresas ORDER BY nombre_empresa"
-        ).fetchall()
+        logger.debug(f"✅ Se consultaron {len(empresas)} empresas (página {page})")
 
-        logger.debug(f"✅ Se consultaron {len(empresas)} empresas exitosamente")
-
-        return jsonify(
-            {
-                "items": [dict(row) for row in empresas],
-                "total_items": len(empresas)
-            }
-        ), 200
+        return jsonify({
+            "items": [dict(row) for row in empresas],
+            "total_items": total,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total + per_page - 1) // per_page
+        }), 200
 
     except Exception as e:
-        # Agrega un mensaje de error detallado en la respuesta para debugging frontend
         logger.error(f"❌ Error al obtener lista de empresas: {e}", exc_info=True)
         return jsonify({
-            "error": "Error interno del servidor al consultar empresas. Verifique la conexión a la BD.",
+            "error": "Error interno del servidor al consultar empresas.",
             "detail": str(e)
         }), 500
     finally:
@@ -805,8 +835,8 @@ def update_empresa(nit):
 @login_required
 def delete_empresa(nit):
     """
-    Elimina una empresa por su NIT.
-    TODO: Añadir lógica para verificar dependencias (usuarios asociados, etc.)
+    FASE 10.4: SOFT DELETE - Inactiva una empresa en lugar de eliminarla físicamente.
+    Cambia el estado de 'Activa' a 'Inactiva' para preservar el histórico.
     """
     from flask import g
 
@@ -814,33 +844,47 @@ def delete_empresa(nit):
     try:
         conn = get_db_connection()
 
-        # Verificar si la empresa tiene usuarios asociados
-        usuarios_asociados = conn.execute("SELECT COUNT(id) FROM usuarios WHERE empresa_nit = ?", (nit,)).fetchone()[0]
+        # Verificar si la empresa tiene usuarios asociados activos
+        usuarios_activos = conn.execute(
+            "SELECT COUNT(id) FROM usuarios WHERE empresa_nit = ? AND estado = 'Activo'",
+            (nit,)
+        ).fetchone()[0]
 
-        if usuarios_asociados > 0:
-            # (CORREGIDO: usa 'logger')
-            logger.warning(f"Intento de eliminar empresa {nit} que tiene {usuarios_asociados} usuarios asociados.")
+        if usuarios_activos > 0:
+            logger.warning(f"Intento de inactivar empresa {nit} que tiene {usuarios_activos} usuarios activos.")
             return (
                 jsonify(
                     {
-                        "error": f"No se puede eliminar la empresa. Primero reasigne o elimine a los {usuarios_asociados} usuarios asociados."
+                        "error": f"No se puede inactivar la empresa. Primero inactive o reasigne a los {usuarios_activos} usuarios activos asociados."
                     }
                 ),
                 409,
             )  # Conflicto
 
-        # Eliminar la empresa
-        cursor = conn.execute("DELETE FROM empresas WHERE nit = ?", (nit,))
+        # SOFT DELETE: Cambiar estado a 'Inactiva' en lugar de eliminar
+        cursor = conn.execute(
+            "UPDATE empresas SET estado = 'Inactiva' WHERE nit = ? AND estado = 'Activa'",
+            (nit,)
+        )
 
         if cursor.rowcount == 0:
-            # (CORREGIDO: usa 'logger')
-            logger.warning(f"Intento de eliminar empresa no existente. NIT: {nit}")
-            return jsonify({"error": "Empresa no encontrada"}), 404
+            # Verificar si la empresa existe pero ya está inactiva
+            existe = conn.execute("SELECT estado FROM empresas WHERE nit = ?", (nit,)).fetchone()
+
+            if existe:
+                if existe[0] == 'Inactiva':
+                    return jsonify({"error": "La empresa ya está inactiva"}), 400
+            else:
+                logger.warning(f"Intento de inactivar empresa no existente. NIT: {nit}")
+                return jsonify({"error": "Empresa no encontrada"}), 404
 
         conn.commit()
-        # (CORREGIDO: usa 'logger')
-        logger.info(f"Empresa eliminada (NIT: {nit}) por usuario {session.get('user_id')}")
-        return jsonify({"message": "Empresa eliminada exitosamente."})
+        logger.info(f"✅ Empresa inactivada (SOFT DELETE) - NIT: {nit}, Usuario: {session.get('user_id')}")
+        return jsonify({
+            "message": "Empresa inactivada exitosamente (soft delete).",
+            "nit": nit,
+            "nuevo_estado": "Inactiva"
+        })
 
     except sqlite3.IntegrityError as e:
         # (CORREGIDO: usa 'logger')

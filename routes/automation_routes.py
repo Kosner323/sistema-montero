@@ -2,9 +2,12 @@
 """
 Blueprint para rutas de Automatización (Copiloto)
 Gestión de ARL y otras automatizaciones RPA.
+
+REFACTORIZADO: Usa SQLAlchemy ORM en lugar de SQL manual
+Autor: Senior Backend Developer
+Fecha: 2025-12-09
 """
 import os
-import sqlite3
 import traceback
 import threading
 from datetime import datetime
@@ -14,19 +17,24 @@ from flask import Blueprint, render_template, redirect, session, request, jsonif
 from logger import logger
 
 # --- IMPORTACIÓN CENTRALIZADA ---
-# Intentamos importar desde nivel superior o local, SIN crear fallbacks locales
 try:
     from ..extensions import db
     from ..utils import login_required
 except (ImportError, ValueError):
     from extensions import db
     from utils import login_required
+
+# Modelos ORM
+try:
+    from ..models.orm_models import Empresa, Usuario
+except (ImportError, ValueError):
+    from models.orm_models import Empresa, Usuario
 # -------------------------------
 
 
 # --- IMPORTAR BOT RPA ---
 try:
-    from src.dashboard.rpa.arl_bot import ARLBot
+    from rpa.arl_bot import ARLBot
 except ImportError:
     class ARLBot:
         def __init__(self, headless=True): pass
@@ -43,24 +51,18 @@ automation_bp = Blueprint('automation', __name__, url_prefix='/copiloto')
 @automation_bp.route('/arl')
 @login_required
 def arl():
-    """Vista Principal"""
-    conn = None
+    """Vista Principal - Usando SQLAlchemy ORM"""
     empresas_lista = []
-    diag_msg = ""
 
     try:
-        conn = get_db_connection()
-        if conn:
-            # Test rápido al cargar la página
-            cursor = conn.execute("SELECT nit, nombre_empresa FROM empresas ORDER BY nombre_empresa ASC")
-            empresas_lista = [dict(row) for row in cursor.fetchall()]
+        # Consulta ORM en lugar de SQL manual
+        empresas = Empresa.query.order_by(Empresa.nombre_empresa.asc()).all()
+        empresas_lista = [{'nit': e.nit, 'nombre_empresa': e.nombre_empresa} for e in empresas]
 
-            # LOG VISIBLE EN CONSOLA
-            print(f"\n🤖 [COPILOTO START] Empresas cargadas: {len(empresas_lista)}")
-            if len(empresas_lista) == 0:
-                print("⚠️ ALERTA: La lista de empresas está vacía. Verifica la BD.")
-        else:
-            print("❌ [COPILOTO] Error fatal: Sin conexión a BD.")
+        # LOG VISIBLE EN CONSOLA
+        print(f"\n🤖 [COPILOTO START] Empresas cargadas: {len(empresas_lista)}")
+        if len(empresas_lista) == 0:
+            print("⚠️ ALERTA: La lista de empresas está vacía. Verifica la BD.")
 
         return render_template(
             'copiloto/arl.html',
@@ -70,11 +72,9 @@ def arl():
     except Exception as e:
         logger.error(f"Error vista ARL: {e}")
         return render_template('copiloto/arl.html', user=session.get('user'), empresas=[])
-    finally:
-        if conn: conn.close()
 
 
-# ==================== NUEVO: ENDPOINT DE DIAGNÓSTICO ====================
+# ==================== ENDPOINT DE DIAGNÓSTICO - SQLAlchemy ====================
 @automation_bp.route('/api/test-conexion', methods=['GET'])
 @login_required
 def test_conexion():
@@ -84,70 +84,61 @@ def test_conexion():
     """
     resultado = {
         "estado": "iniciando",
-        "ruta_bd": "usando get_db_connection()",
+        "ruta_bd": "SQLAlchemy ORM",
         "empresas_encontradas": 0,
         "usuarios_encontrados": 0,
         "mensaje": ""
     }
 
-    conn = None
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Verificar Empresas
+        # Verificar Empresas con ORM
         try:
-            count_emp = cur.execute("SELECT COUNT(*) FROM empresas").fetchone()[0]
+            count_emp = Empresa.query.count()
             resultado['empresas_encontradas'] = count_emp
         except Exception as e:
             resultado['errores_tabla_empresas'] = str(e)
 
-        # Verificar Usuarios
+        # Verificar Usuarios con ORM
         try:
-            count_usr = cur.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0]
+            count_usr = Usuario.query.count()
             resultado['usuarios_encontrados'] = count_usr
         except Exception as e:
             resultado['errores_tabla_usuarios'] = str(e)
 
         resultado['estado'] = "OK"
-        resultado['mensaje'] = "Conexión exitosa y tablas verificadas."
+        resultado['mensaje'] = "Conexión exitosa y tablas verificadas (SQLAlchemy ORM)."
 
     except Exception as e:
         resultado['estado'] = "ERROR"
         resultado['mensaje'] = str(e)
         logger.error(f"❌ Error en test_conexion: {e}")
-    finally:
-        if conn:
-            conn.close()
 
     return jsonify(resultado)
 
 
-# ==================== RUTAS DE API RPA ====================
+# ==================== RUTAS DE API RPA - SQLAlchemy ====================
 
 @automation_bp.route('/api/empleado/buscar/<string:cedula>', methods=['GET'])
 @login_required
 def buscar_empleado_por_cedula(cedula):
-    conn = None
+    """Buscar empleado por cédula usando SQLAlchemy ORM"""
     try:
-        conn = get_db_connection()
-        if not conn: return jsonify({"error": "Sin BD"}), 500
-
-        query = """
-            SELECT u.primerNombre, u.primerApellido, u.numeroId, u.empresa_nit, e.nombre_empresa
-            FROM usuarios u
-            LEFT JOIN empresas e ON u.empresa_nit = e.nit
-            WHERE u.numeroId = ?
-        """
-        empleado = conn.execute(query, (cedula,)).fetchone()
+        # Query ORM con join
+        empleado = Usuario.query.filter_by(numeroId=cedula).first()
 
         if empleado:
-            nombre = f"{empleado['primerNombre']} {empleado['primerApellido']}"
+            nombre = f"{empleado.primerNombre or ''} {empleado.primerApellido or ''}".strip()
+            empresa_nombre = 'Sin Empresa'
+            
+            # Obtener nombre de empresa si existe relación
+            if empleado.empresa:
+                empresa_nombre = empleado.empresa.nombre_empresa or 'Sin Empresa'
+            
             print(f"✅ [COPILOTO] Encontrado: {nombre}")
             return jsonify({
                 "nombre": nombre,
-                "empresa_nit": empleado['empresa_nit'],
-                "empresa_nombre": empleado['nombre_empresa'] or 'Sin Empresa'
+                "empresa_nit": empleado.empresa_nit,
+                "empresa_nombre": empresa_nombre
             }), 200
         else:
             print(f"⚠️ [COPILOTO] No encontrado: {cedula}")
@@ -156,13 +147,12 @@ def buscar_empleado_por_cedula(cedula):
     except Exception as e:
         logger.error(f"Error API buscar: {e}")
         return jsonify({"error": "Error interno."}), 500
-    finally:
-        if conn: conn.close()
 
 
 @automation_bp.route('/api/ejecutar', methods=['POST'])
 @login_required
 def ejecutar_automatizacion():
+    """Ejecutar automatización RPA"""
     try:
         data = request.get_json()
         job_id = f"JOB-{datetime.now().strftime('%H%M%S')}"

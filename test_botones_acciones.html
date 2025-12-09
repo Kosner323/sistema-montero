@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Botones de Acciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.css">
+    <style>
+        body { 
+            padding: 2rem; 
+            background: #f5f5f5; 
+        }
+        .test-section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        #actionLog {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        .log-time {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">🧪 Test de Botones de Acciones</h1>
+        
+        <!-- TEST 1: Botón Retirar (Planillas) -->
+        <div class="test-section">
+            <div class="test-header">
+                <h3>1️⃣ Botón "Retirar" - Planillas</h3>
+                <p class="text-muted mb-0">Acción: Cambiar estado de empleado a "Inactivo" (PUT /api/usuarios/{id}/estado)</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1234567890</td>
+                            <td>Juan Carlos</td>
+                            <td>Pérez García</td>
+                            <td><span class="badge bg-success">Activo</span></td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="testRetirarEmpleado('1234567890', 'Juan Carlos Pérez García')" title="Retirar Empleado">
+                                    <i data-feather="user-x" class="w-4 h-4"></i> Retirar
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>9876543210</td>
+                            <td>María Fernanda</td>
+                            <td>López Rodríguez</td>
+                            <td><span class="badge bg-success">Activo</span></td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="testRetirarEmpleado('9876543210', 'María Fernanda López Rodríguez')" title="Retirar Empleado">
+                                    <i data-feather="user-x" class="w-4 h-4"></i> Retirar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEST 2: Botón WhatsApp (Enviar Planillas) -->
+        <div class="test-section">
+            <div class="test-header">
+                <h3>2️⃣ Botón "WhatsApp" - Enviar Planillas</h3>
+                <p class="text-muted mb-0">Acción: Abrir WhatsApp Web con mensaje predefinido</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Contacto</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Empresa ABC S.A.S.</td>
+                            <td>Carlos Martínez</td>
+                            <td>3001234567</td>
+                            <td><span class="badge bg-warning">Pendiente</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success btn-enviar" title="Marcar como Enviado">
+                                    <i data-feather="send" class="w-4 h-4 mr-1"></i> Enviar
+                                </button>
+                                <button class="btn btn-sm btn-success ms-1" onclick="testEnviarPorWhatsApp('3001234567')" title="Enviar por WhatsApp">
+                                    <i data-feather="message-circle" class="w-4 h-4 mr-1"></i> WhatsApp
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Comercializadora XYZ Ltda.</td>
+                            <td>Ana Gómez</td>
+                            <td>3109876543</td>
+                            <td><span class="badge bg-success">Enviado</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="testEnviarPorWhatsApp('3109876543')" title="Enviar por WhatsApp">
+                                    <i data-feather="message-circle" class="w-4 h-4 mr-1"></i> WhatsApp
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Servicios TEC S.A.</td>
+                            <td>Sin contacto</td>
+                            <td>-</td>
+                            <td><span class="badge bg-warning">Pendiente</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success btn-enviar" title="Marcar como Enviado">
+                                    <i data-feather="send" class="w-4 h-4 mr-1"></i> Enviar
+                                </button>
+                                <span class="text-muted small">(Sin teléfono)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEST 3: Botón Aceptar Oferta (Cotizaciones) -->
+        <div class="test-section">
+            <div class="test-header">
+                <h3>3️⃣ Botón "Aceptar Oferta" - Cotizaciones</h3>
+                <p class="text-muted mb-0">Acción: Aceptar cotización (POST /api/cotizaciones/{id}/aceptar)</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th># Cotización</th>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>COT-001</td>
+                            <td>Empresa ABC S.A.S.</td>
+                            <td>Afiliación PILA (10 empleados)</td>
+                            <td>$850,000</td>
+                            <td><span class="badge bg-warning">Pendiente</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="logAction('Descargar PDF', 'COT-001')" title="Descargar PDF">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                                <button class="btn btn-sm btn-success ms-1" onclick="testAceptarCotizacion(1, 'Empresa ABC S.A.S.')" title="Aceptar Oferta">
+                                    <i data-feather="check-circle" class="w-4 h-4 mr-1"></i> Aceptar Oferta
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>COT-002</td>
+                            <td>Comercializadora XYZ Ltda.</td>
+                            <td>Gestión de Riesgos Laborales</td>
+                            <td>$1,200,000</td>
+                            <td><span class="badge bg-warning">Pendiente</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="logAction('Descargar PDF', 'COT-002')" title="Descargar PDF">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                                <button class="btn btn-sm btn-success ms-1" onclick="testAceptarCotizacion(2, 'Comercializadora XYZ Ltda.')" title="Aceptar Oferta">
+                                    <i data-feather="check-circle" class="w-4 h-4 mr-1"></i> Aceptar Oferta
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>COT-003</td>
+                            <td>Servicios TEC S.A.</td>
+                            <td>Outsourcing Contable</td>
+                            <td>$2,500,000</td>
+                            <td><span class="badge bg-success">Aceptada</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="logAction('Descargar PDF', 'COT-003')" title="Descargar PDF">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>COT-004</td>
+                            <td>Construcciones DEF S.A.S.</td>
+                            <td>Asesoría Tributaria</td>
+                            <td>$950,000</td>
+                            <td><span class="badge bg-danger">Rechazada</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="logAction('Descargar PDF', 'COT-004')" title="Descargar PDF">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- LOG DE ACCIONES -->
+        <div class="test-section">
+            <div class="test-header">
+                <h3>📋 Log de Acciones</h3>
+                <button class="btn btn-sm btn-outline-secondary" onclick="clearLog()">Limpiar Log</button>
+            </div>
+            <div id="actionLog"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script>
+        // Inicializar iconos Feather
+        feather.replace();
+
+        // Función para registrar acciones
+        function logAction(action, details) {
+            const log = document.getElementById('actionLog');
+            const timestamp = new Date().toLocaleTimeString('es-CO');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${timestamp}]</span> <strong>${action}</strong> - ${details}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('actionLog').innerHTML = '';
+            logAction('Sistema', 'Log limpiado');
+        }
+
+        // TEST 1: Retirar Empleado
+        function testRetirarEmpleado(empleadoId, empleadoNombre) {
+            const confirmacion = confirm(`¿Estás seguro de retirar al empleado ${empleadoNombre}?\n\nEsto cambiará su estado a Inactivo.\n\nEsta acción no se puede deshacer.`);
+            
+            if (confirmacion) {
+                logAction('🔴 RETIRAR EMPLEADO', `ID: ${empleadoId}, Nombre: ${empleadoNombre}`);
+                logAction('API CALL', `PUT /api/usuarios/${empleadoId}/estado { estado: "Inactivo" }`);
+                alert(`✅ SIMULACIÓN: Empleado ${empleadoNombre} marcado como Inactivo`);
+            } else {
+                logAction('⚠️ ACCIÓN CANCELADA', `Retiro de ${empleadoNombre}`);
+            }
+        }
+
+        // TEST 2: Enviar por WhatsApp
+        function testEnviarPorWhatsApp(telefono) {
+            if (!telefono || telefono === '-') {
+                alert('⚠️ No hay número de teléfono registrado para este cliente.');
+                logAction('⚠️ ERROR', 'No hay número de teléfono');
+                return;
+            }
+
+            const telefonoLimpio = telefono.replace(/\D/g, '');
+            const mensaje = 'Hola, adjunto su planilla/comprobante de pago de seguridad social.';
+            const whatsappURL = `https://wa.me/57${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+            
+            logAction('📱 ENVIAR WHATSAPP', `Teléfono: +57${telefonoLimpio}`);
+            logAction('URL GENERADA', whatsappURL);
+            
+            // Abrir en nueva pestaña
+            window.open(whatsappURL, '_blank');
+            
+            alert(`✅ ABRIENDO WHATSAPP WEB\n\nNúmero: +57${telefonoLimpio}\nMensaje: ${mensaje}`);
+        }
+
+        // TEST 3: Aceptar Cotización
+        function testAceptarCotizacion(cotizacionId, clienteNombre) {
+            const confirmacion = confirm(`¿Estás seguro de aceptar la cotización para ${clienteNombre}?\n\nEsto cambiará el estado a "Aceptada".`);
+            
+            if (confirmacion) {
+                logAction('✅ ACEPTAR COTIZACIÓN', `ID: ${cotizacionId}, Cliente: ${clienteNombre}`);
+                logAction('API CALL', `POST /api/cotizaciones/${cotizacionId}/aceptar`);
+                alert(`✅ SIMULACIÓN: Cotización ${cotizacionId} para ${clienteNombre} aceptada`);
+            } else {
+                logAction('⚠️ ACCIÓN CANCELADA', `Aceptación de cotización ${cotizacionId}`);
+            }
+        }
+
+        // Inicializar log
+        logAction('Sistema', 'Test de botones iniciado correctamente');
+        logAction('Info', 'Click en los botones para probar las acciones');
+    </script>
+</body>
+</html>

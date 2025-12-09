@@ -8,12 +8,20 @@ instancias de app limpias, especialmente para testing.
 import os
 import sqlite3
 import traceback
-import sentry_sdk
-sentry_sdk.init(
-    dsn="https://aa52fecc13c85932c959a382887ee5b2@o4510441465970688.ingest.us.sentry.io/4510441469313024",
-    send_default_pii=True,
-    traces_sample_rate=1.0,
-)
+
+# Sentry SDK (opcional - para monitoreo de errores en producción)
+try:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn="https://aa52fecc13c85932c959a382887ee5b2@o4510441465970688.ingest.us.sentry.io/4510441469313024",
+        send_default_pii=True,
+        traces_sample_rate=1.0,
+    )
+    SENTRY_ENABLED = True
+except ImportError:
+    SENTRY_ENABLED = False
+    print("⚠️  Sentry SDK no instalado - Monitoreo de errores deshabilitado")
+
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -41,6 +49,7 @@ from routes.index import bp_main
 from routes.empresas import empresas_bp as bp_empresa
 from routes.usuarios import usuarios_bp as bp_empleado
 from routes.pagos import bp_pagos as bp_pago
+from routes.cartera import bp_cartera
 from routes.notificaciones_routes import bp_notificaciones
 from routes.analytics import analytics_bp as bp_api
 from routes.tutelas import bp_tutelas as bp_tutela
@@ -61,6 +70,8 @@ from routes.automation_routes import automation_bp
 from routes.finance_routes import finance_bp
 from routes.admin_routes import admin_bp
 from routes.user_settings import user_settings_bp
+from routes.tareas import tareas_bp  # Sistema de Tareas Personal (Fase 11.2)
+from routes.asistente_ai import asistente_bp  # Jordy IA - Asistente con Gemini
 
 
 # =============================================================================
@@ -131,6 +142,15 @@ def create_app(test_config=None):
         SQLALCHEMY_DATABASE_URI=DATABASE_URI,
         SQLALCHEMY_TRACK_MODIFICATIONS=False,  # Desactivar tracking para mejor performance
         SQLALCHEMY_ECHO=False,  # Cambiar a True para debugging SQL
+        
+        # ✅ OPTIMIZACIÓN PARA ESCALABILIDAD (10k+ usuarios)
+        SQLALCHEMY_ENGINE_OPTIONS={
+            'pool_size': 10,           # Conexiones base en el pool
+            'max_overflow': 20,        # Conexiones adicionales permitidas
+            'pool_timeout': 30,        # Timeout para obtener conexión
+            'pool_recycle': 1800,      # Reciclar conexiones cada 30 min
+            'pool_pre_ping': True,     # Verificar conexión antes de usar
+        },
 
         SESSION_COOKIE_SECURE=False,
         SESSION_COOKIE_HTTPONLY=True,
@@ -229,6 +249,7 @@ def create_app(test_config=None):
         app.register_blueprint(bp_empresa)
         app.register_blueprint(bp_empleado)
         app.register_blueprint(bp_pago)
+        app.register_blueprint(bp_cartera)
         app.register_blueprint(bp_notificaciones)
         app.register_blueprint(bp_api)
         app.register_blueprint(bp_tutela)
@@ -242,7 +263,8 @@ def create_app(test_config=None):
         app.register_blueprint(bp_envio_planillas)
         app.register_blueprint(credenciales_bp)
         app.register_blueprint(bp_novedades)
-        app.register_blueprint(pages_bp)
+        # ❌ REMOVIDO: pages_bp causa conflicto con bp_main (rutas duplicadas)
+        # app.register_blueprint(pages_bp)
 
         # Nuevos blueprints para Marketing, Automation, Finance y Admin
         app.register_blueprint(bp_marketing)
@@ -250,9 +272,11 @@ def create_app(test_config=None):
         app.register_blueprint(finance_bp)
         app.register_blueprint(admin_bp)
         app.register_blueprint(user_settings_bp)
+        app.register_blueprint(tareas_bp)  # Sistema de Tareas Personal (Fase 11.2)
+        app.register_blueprint(asistente_bp)  # Jordy IA - Asistente con Gemini
 
         logger.info("✅ Todos los blueprints han sido registrados exitosamente.")
-        logger.info("✅ Módulos cargados: Auth, RPA (automation_bp), Marketing, Finance, Admin, User Settings")
+        logger.info("✅ Módulos cargados: Auth, RPA (automation_bp), Marketing, Finance, Admin, User Settings, Tareas, Jordy IA")
         logger.info("✅ Sistema Montero completamente inicializado y listo para producción.")
         
     except Exception as e:

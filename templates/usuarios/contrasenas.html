@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
     <link rel="stylesheet" href="/assets/fonts/material.css" />
     <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
 
     <style>
       /* --- CSS CORREGIDO PARA CENTRADO EXPLÍCITO --- */
@@ -310,7 +312,9 @@
                     const err = await response.json();
                     throw new Error(err.error || 'Error al cargar credenciales');
                 }
-                const data = await response.json();
+                const rawData = await response.json();
+                // Soporte para respuesta paginada o array directo
+                const data = rawData.items ? rawData.items : (Array.isArray(rawData) ? rawData : []);
                 renderTable(data);
             } catch (error) {
                 console.error('Error en loadCredentials:', error);

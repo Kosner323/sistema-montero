@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="/assets/fonts/fontawesome.css" />
   <link rel="stylesheet" href="/assets/fonts/material.css" />
   <link rel="stylesheet" href="/assets/css/style.css" id="main-style-link" />
+    <!-- ✅ REDISEÑO CORPORATIVO ENTERPRISE -->
+    <link rel="stylesheet" href="/assets/css/corporate-redesign.css" />
   
   <!-- SweetAlert2 para alertas visuales -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
@@ -74,7 +76,7 @@
     
     /* Header del simulador */
     .simulador-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0056b3 0%, #3b82f6 100%);
       color: white;
       padding: 2rem;
       border-radius: 8px 8px 0 0;
@@ -119,8 +121,8 @@
     }
 
     .form-control:focus, .form-select:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      border-color: #0056b3;
+      box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
     }
 
     /* Switches personalizados */
@@ -145,8 +147,8 @@
     }
 
     .form-switch .form-check-input:checked {
-      background-color: #667eea;
-      border-color: #667eea;
+      background-color: #0056b3;
+      border-color: #0056b3;
     }
 
     .switch-label {
@@ -164,22 +166,22 @@
 
     /* Botón calcular */
     .btn-calcular {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #0056b3 0%, #3b82f6 100%);
       border: none;
       color: white;
       padding: 1rem 3rem;
       font-size: 1.1rem;
       font-weight: 600;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 86, 179, 0.4);
       transition: all 0.3s ease;
       width: 100%;
     }
 
     .btn-calcular:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
-      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      box-shadow: 0 6px 16px rgba(0, 86, 179, 0.5);
+      background: linear-gradient(135deg, #3b82f6 0%, #0056b3 100%);
     }
 
     .btn-calcular:active {
@@ -454,7 +456,58 @@
       <div class="form-card">
         <form id="formSimulador">
           <div class="row">
-            
+
+            <!-- ========== BUSCADOR UNIVERSAL DE USUARIOS ========== -->
+            <div class="col-12 mb-4">
+              <div class="alert alert-info" role="alert">
+                <i class="ti ti-search me-2"></i>
+                <strong>Búsqueda Rápida:</strong> Si el usuario ya está registrado, busca por cédula para autocompletar datos.
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <label for="tipoDocBusqueda" class="form-label">
+                    <i class="ti ti-id"></i> Tipo de Documento
+                  </label>
+                  <select class="form-select" id="tipoDocBusqueda">
+                    <option value="">Selecciona...</option>
+                    <option value="CC">Cédula de Ciudadanía (CC)</option>
+                    <option value="CE">Cédula de Extranjería (CE)</option>
+                    <option value="NIT">NIT</option>
+                    <option value="PAS">Pasaporte</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="numeroDocBusqueda" class="form-label">
+                    <i class="ti ti-hash"></i> Número de Documento
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="numeroDocBusqueda"
+                    placeholder="Ej: 1234567890"
+                    pattern="[0-9]+"
+                  />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="button" class="btn btn-outline-primary w-100" id="btnBuscarUsuario">
+                    <i class="ti ti-search"></i> Buscar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- ========== FIN BUSCADOR UNIVERSAL ========== -->
+
+            <!-- Agregar fila de búsqueda al inicio del formulario -->
+            <div class="row mb-4 bg-light p-3 rounded">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">🔍 Búsqueda Rápida de Usuario</label>
+                    <input type="text" id="searchUsuarioSimulador" class="form-control" placeholder="Escribe identificación o nombre del usuario...">
+                    <small class="text-muted">CEO Rule: Tipo ID + Número + Enter</small>
+                </div>
+            </div>
+
+            <div class="col-12"><hr class="my-3"></div>
+
             <!-- Salario Base -->
             <div class="col-md-6 mb-4">
               <label for="salarioBase" class="form-label">
@@ -642,6 +695,9 @@
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  <!-- Universal Search Module -->
+  <script src="/assets/js/universal-search.js"></script>
+
   <!-- Script del Simulador PILA -->
   <script src="/assets/js/simulador-pila.js"></script>
 
@@ -663,6 +719,28 @@
       }
     });
   </script>
+
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchSimulador = new UniversalSearch({
+        inputId: 'searchUsuarioSimulador',
+        mapping: {
+            'ibc': '#salarioBase',
+            'claseRiesgoARL': '#nivelRiesgo'
+        },
+        callback: function(usuario) {
+            // Lógica extra: activar salario integral si aplica
+            if (usuario.tipo_contrato === 'Integral') {
+                const switchIntegral = document.getElementById('salarioIntegral');
+                if (switchIntegral) {
+                    switchIntegral.checked = true;
+                    switchIntegral.dispatchEvent(new Event('change'));
+                }
+            }
+        }
+    });
+});
+</script>
 
 </body>
 </html>
