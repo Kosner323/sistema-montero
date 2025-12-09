@@ -50,9 +50,34 @@ class Empresa(db.Model):
     rep_legal_nombre = Column(Text, nullable=True)
     rep_legal_tipo_id = Column(Text, nullable=True)
     rep_legal_numero_id = Column(Text, nullable=True)
+    rep_legal_telefono = Column(Text, nullable=True)
+    rep_legal_correo = Column(Text, nullable=True)
+
+    # Información bancaria (fix_db_empresas_full.py)
+    banco = Column(Text, nullable=True)
+    tipo_cuenta = Column(Text, nullable=True)
+    numero_cuenta = Column(Text, nullable=True)
+
+    # Información operativa (fix_db_full.py)
+    sector_economico = Column(Text, nullable=True)
+    num_empleados = Column(Integer, nullable=True)
+    tipo_empresa = Column(Text, nullable=True)
+    fecha_constitucion = Column(Text, nullable=True)
+
+    # Rutas de archivos (fix_db.py)
+    ruta_carpeta = Column(Text, nullable=True)
+    ruta_firma = Column(Text, nullable=True)
+    ruta_logo = Column(Text, nullable=True)
+    ruta_rut = Column(Text, nullable=True)
+    ruta_camara_comercio = Column(Text, nullable=True)
+    ruta_cedula_representante = Column(Text, nullable=True)
+    ruta_arl = Column(Text, nullable=True)
+    ruta_cuenta_bancaria = Column(Text, nullable=True)
+    ruta_carta_autorizacion = Column(Text, nullable=True)
 
     # Auditoría
     created_at = Column(Text, nullable=True, default=datetime.utcnow)
+    updated_at = Column(Text, nullable=True, default=datetime.utcnow)
 
     # Relaciones (1:N)
     usuarios = relationship('Usuario', back_populates='empresa', lazy='dynamic')
@@ -83,7 +108,17 @@ class Empresa(db.Model):
             'rep_legal_nombre': self.rep_legal_nombre,
             'rep_legal_tipo_id': self.rep_legal_tipo_id,
             'rep_legal_numero_id': self.rep_legal_numero_id,
-            'created_at': self.created_at
+            'rep_legal_telefono': self.rep_legal_telefono,
+            'rep_legal_correo': self.rep_legal_correo,
+            'banco': self.banco,
+            'tipo_cuenta': self.tipo_cuenta,
+            'numero_cuenta': self.numero_cuenta,
+            'sector_economico': self.sector_economico,
+            'num_empleados': self.num_empleados,
+            'tipo_empresa': self.tipo_empresa,
+            'fecha_constitucion': self.fecha_constitucion,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
         }
 
     # ✅ Índices para optimización de búsquedas (10k+ usuarios)
@@ -144,9 +179,28 @@ class Usuario(db.Model):
     ibc = Column(Float, nullable=True)
     claseRiesgoARL = Column(Text, nullable=True)
     fechaIngreso = Column(Text, nullable=True)
+    cargo = Column(Text, nullable=True)
+    tipo_contrato = Column(Text, nullable=True)
+
+    # Ubicación de residencia (diferente a nacimiento)
+    municipioResidencia = Column(Text, nullable=True)
+    departamentoResidencia = Column(Text, nullable=True)
+    paisResidencia = Column(Text, nullable=True)
+
+    # Autenticación y autorización (fix_db_auth.py)
+    password_hash = Column(Text, nullable=True)
+    estado = Column(Text, nullable=True, default='activo')
+    role = Column(Text, nullable=True, default='empleado')
+    username = Column(Text, nullable=True, unique=True)
+
+    # Rutas de archivos (fix_db.py)
+    ruta_carpeta = Column(Text, nullable=True)
+    ruta_firma = Column(Text, nullable=True)
+    documento_url = Column(Text, nullable=True)
 
     # Auditoría
     created_at = Column(Text, nullable=True, default=datetime.utcnow)
+    updated_at = Column(Text, nullable=True, default=datetime.utcnow)
 
     # Relaciones
     empresa = relationship('Empresa', back_populates='usuarios')
@@ -197,6 +251,55 @@ class Usuario(db.Model):
             'ibc': self.ibc,
             'claseRiesgoARL': self.claseRiesgoARL,
             'fechaIngreso': self.fechaIngreso,
+            'cargo': self.cargo,
+            'tipo_contrato': self.tipo_contrato,
+            'estado': self.estado,
+            'role': self.role,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+
+
+# =============================================================================
+# MÓDULO: AFILIACIONES (fix_db_afiliaciones.py)
+# =============================================================================
+
+class Afiliacion(db.Model):
+    """
+    Modelo ORM para la tabla 'afiliaciones'
+    Controla el estado de las afiliaciones de empleados (EPS, ARL, PENSIÓN, CAJA)
+    """
+    __tablename__ = 'afiliaciones'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    usuario_id = Column(Integer, ForeignKey('usuarios.id'), nullable=False)
+    tipo_entidad = Column(Text, nullable=False)  # EPS, ARL, PENSION, CAJA
+    estado = Column(Text, nullable=True, default='PENDIENTE')  # PENDIENTE, COMPLETADO
+    ruta_archivo = Column(Text, nullable=True)
+    fecha_actualizacion = Column(Text, nullable=True, default=datetime.utcnow)
+    created_at = Column(Text, nullable=True, default=datetime.utcnow)
+
+    # Relaciones
+    usuario = relationship('Usuario', backref='afiliaciones')
+
+    # Índices
+    __table_args__ = (
+        Index('idx_afiliaciones_usuario', 'usuario_id'),
+        Index('idx_afiliaciones_estado', 'estado'),
+        Index('idx_afiliaciones_tipo', 'tipo_entidad'),
+    )
+
+    def __repr__(self):
+        return f"<Afiliacion {self.tipo_entidad} - Usuario {self.usuario_id} - {self.estado}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'usuario_id': self.usuario_id,
+            'tipo_entidad': self.tipo_entidad,
+            'estado': self.estado,
+            'ruta_archivo': self.ruta_archivo,
+            'fecha_actualizacion': self.fecha_actualizacion,
             'created_at': self.created_at
         }
 
