@@ -24,6 +24,23 @@ formularios_pdf/
 celerybeat-schedule
 celerybeat-schedule-shm
 celerybeat-schedule-wal
+
+# Archivos temporales y de prueba
 nul
+*.coverage
+coverage.xml
+test_output.*
+*.pdf
+htmlcov/
+
+# Backups y archivos grandes
 backups/
 _archived/
+
+# Carpeta instance de Flask
+instance/
+
+# IDE y editores
+.idea/
+*.swp
+*.swo
