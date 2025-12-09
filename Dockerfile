@@ -64,8 +64,24 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copiar el código de la aplicación
-COPY --chown=appuser:appuser . .
+# Copiar estructura de la aplicación (orden optimizado para cache de Docker)
+# Primero archivos de configuración que cambian menos
+COPY --chown=appuser:appuser alembic.ini .
+COPY --chown=appuser:appuser celery_config.py .
+COPY --chown=appuser:appuser celery_tasks.py .
+COPY --chown=appuser:appuser extensions.py .
+COPY --chown=appuser:appuser logger.py .
+COPY --chown=appuser:appuser email_utils.py .
+COPY --chown=appuser:appuser encryption.py .
+COPY --chown=appuser:appuser app.py .
+
+# Copiar carpetas principales
+COPY --chown=appuser:appuser models/ ./models/
+COPY --chown=appuser:appuser routes/ ./routes/
+COPY --chown=appuser:appuser templates/ ./templates/
+COPY --chown=appuser:appuser static/ ./static/
+COPY --chown=appuser:appuser migrations/ ./migrations/
+COPY --chown=appuser:appuser scripts/ ./scripts/
 
 # Copiar script de entrypoint
 COPY --chown=appuser:appuser entrypoint.sh /entrypoint.sh

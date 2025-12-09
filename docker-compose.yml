@@ -17,31 +17,15 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
-      # Flask Configuration
-      - FLASK_APP=app.py
-      - FLASK_ENV=${FLASK_ENV:-production}
-      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
-
-      # Database Configuration
-      - DATABASE_URL=sqlite:///data/mi_sistema.db
-
-      # Email Configuration (SMTP)
-      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
-      - MAIL_PORT=${MAIL_PORT:-587}
-      - MAIL_USE_TLS=${MAIL_USE_TLS:-True}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
-
-      # Rate Limiting
+      # Overrides para Docker
+      - DATABASE_PATH=/app/data/mi_sistema.db
       - RATELIMIT_STORAGE_URL=redis://redis:6379/0
-
-      # Logging
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - LOG_FILE=/app/logs/app.log
-
-      # Timezone
       - TZ=America/Bogota
 
     volumes:
@@ -94,12 +78,12 @@ services:
       dockerfile: Dockerfile
     container_name: montero-celery-worker
     restart: unless-stopped
-    command: celery -A celery_config:celery_app worker --loglevel=info
+    command: celery -A celery_config:celery_app worker --loglevel=info --concurrency=2
+    env_file:
+      - .env
     environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=${FLASK_ENV:-production}
-      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
-      - DATABASE_URL=sqlite:///data/mi_sistema.db
+      # Overrides para Docker
+      - DATABASE_PATH=/app/data/mi_sistema.db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - TZ=America/Bogota
@@ -122,11 +106,11 @@ services:
     container_name: montero-celery-beat
     restart: unless-stopped
     command: celery -A celery_config:celery_app beat --loglevel=info
+    env_file:
+      - .env
     environment:
-      - FLASK_APP=app.py
-      - FLASK_ENV=${FLASK_ENV:-production}
-      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
-      - DATABASE_URL=sqlite:///data/mi_sistema.db
+      # Overrides para Docker
+      - DATABASE_PATH=/app/data/mi_sistema.db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - TZ=America/Bogota

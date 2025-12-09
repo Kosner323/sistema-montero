@@ -46,10 +46,13 @@ fi
 echo "[INFO] Verificando base de datos..."
 if [ ! -f "/app/data/mi_sistema.db" ]; then
     echo "[INFO] Base de datos no encontrada. Creando..."
-    python -c "from models.database import init_db; init_db()"
+    python scripts/mantenimiento/init_db_consolidado.py
     echo "[OK] Base de datos creada"
 else
     echo "[OK] Base de datos existente encontrada"
+    echo "[INFO] Sincronizando estructura de BD con modelos ORM..."
+    python scripts/mantenimiento/init_db_consolidado.py
+    echo "[OK] Estructura de BD sincronizada"
 fi
 
 # =====================================================================
